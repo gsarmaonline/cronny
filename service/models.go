@@ -57,7 +57,7 @@ type (
 	}
 
 	Trigger struct {
-		StartAt time.Time `json:"start_at" gorm:index`
+		StartAt time.Time `json:"start_at" gorm:"index"`
 
 		Schedule   Schedule `json:"schedule"`
 		ScheduleID uint     `json:"schedule_id"`
