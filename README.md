@@ -15,6 +15,11 @@ When the user defines a point in time when an action should be triggered, it is 
     - After every 5 minutes
     - After every 1 hour 20 minutes
 
+#### Schedule States
+- Pending - When the Schedule doesn't have the relevant Triggers created as per the Schedule Interval
+- Scheduled - When the equivalent schedule has been picked up for processing, i.e Trigger creation
+- Processed - When there are no more Triggers required for the Schedule
+
 ### Trigger
 Each Schedule can be expanded into different points in time where an Action should be taken. These points in time are called the Trigger. Whenever the Trigger fires, the Action should be performed.
 Triggers are going to be the main units of scale for the infrastructure.
