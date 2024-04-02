@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -87,8 +88,10 @@ func SetupModels(db *gorm.DB) (err error) {
 	return
 }
 
+// ==========================================================
+// Schedules
 func (schedule *Schedule) UpdateStatusWithLocks(db *gorm.DB, status ScheduleStatusT) (err error) {
-	schedule.ScheduleStatus = ProcessingScheduleStatus
+	schedule.ScheduleStatus = status
 	if db := db.Save(schedule); db.Error != nil {
 		err = db.Error
 		return
@@ -97,7 +100,7 @@ func (schedule *Schedule) UpdateStatusWithLocks(db *gorm.DB, status ScheduleStat
 }
 
 func (schedule Schedule) GetSchedules(db *gorm.DB, status ScheduleStatusT) (schedules []*Schedule, err error) {
-	if db = db.Where("status in ?", PendingScheduleStatus).Find(schedules); db.Error != nil {
+	if db = db.Where("schedule_status in ?", PendingScheduleStatus).Find(schedules); db.Error != nil {
 		err = db.Error
 		return
 	}
@@ -129,5 +132,49 @@ func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
 	default:
 		err = errors.New("ScheduleUnit not supported")
 	}
+	return
+}
+
+func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err error) {
+	var (
+		execTime time.Time
+	)
+	if execTime, err = schedule.GetExecutionTime(); err != nil {
+		return
+	}
+	trigger = &Trigger{
+		StartAt:       execTime,
+		Schedule:      *schedule,
+		ScheduleID:    schedule.ID,
+		TriggerStatus: ScheduledTriggerStatus,
+	}
+	if db = db.Create(trigger); db.Error != nil {
+		err = db.Error
+		return
+	}
+	return
+}
+
+// ==========================================================
+// Triggers
+func (trigger Trigger) GetTriggers(db *gorm.DB, status TriggerStatusT) (triggers []*Trigger, err error) {
+	if db = db.Where("trigger_status in ?", ScheduledTriggerStatus).Find(triggers); db.Error != nil {
+		err = db.Error
+		return
+	}
+	return
+}
+
+func (trigger *Trigger) UpdateStatusWithLocks(db *gorm.DB, status TriggerStatusT) (err error) {
+	trigger.TriggerStatus = status
+	if db := db.Save(trigger); db.Error != nil {
+		err = db.Error
+		return
+	}
+	return
+}
+
+func (trigger *Trigger) Execute(db *gorm.DB) (err error) {
+	fmt.Println("Executing Trigger for Schedule", trigger.Schedule.Name)
 	return
 }

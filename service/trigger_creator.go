@@ -20,22 +20,8 @@ func NewTriggerCreator(db *gorm.DB) (tc *TriggerCreator, err error) {
 	return
 }
 
-func (tc *TriggerCreator) ProcessSchedule(schedule *Schedule) (err error) {
-	var (
-		execTime time.Time
-		trigger  *Trigger
-	)
-	if execTime, err = schedule.GetExecutionTime(); err != nil {
-		return
-	}
-	trigger = &Trigger{
-		StartAt:       execTime,
-		Schedule:      *schedule,
-		ScheduleID:    schedule.ID,
-		TriggerStatus: ScheduledTriggerStatus,
-	}
-	if db := tc.db.Create(trigger); db.Error != nil {
-		err = db.Error
+func (tc *TriggerCreator) ProcessSchedule(schedule *Schedule) (trigger *Trigger, err error) {
+	if trigger, err = schedule.CreateTrigger(tc.db); err != nil {
 		return
 	}
 	if err = schedule.UpdateStatusWithLocks(tc.db, ProcessingScheduleStatus); err != nil {
@@ -53,7 +39,7 @@ func (tc *TriggerCreator) RunOneIter() (schedProcessCount int, err error) {
 		return
 	}
 	for _, schedule := range schedules {
-		if err = tc.ProcessSchedule(schedule); err != nil {
+		if _, err = tc.ProcessSchedule(schedule); err != nil {
 			return
 		}
 	}
