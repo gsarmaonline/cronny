@@ -51,6 +51,7 @@ func (tc *TriggerCreator) Run() (err error) {
 		schedProcessCount := 0
 		if schedProcessCount, err = tc.RunOneIter(); err != nil {
 			log.Println("Error in RunOneIter", err, schedProcessCount)
+			continue
 		}
 		if schedProcessCount == 0 {
 			time.Sleep(1 * time.Second)

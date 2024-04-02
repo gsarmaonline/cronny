@@ -52,31 +52,39 @@ type (
 
 		ScheduleStatus ScheduleStatusT `json:"schedule_status" gorm:"index"`
 
-		ActionID uint   `json:"action_id"`
-		Action   Action `json:"action"`
+		ActionID uint `json:"action_id"`
 	}
 
 	Trigger struct {
+		gorm.Model
+
 		StartAt time.Time `json:"start_at" gorm:"index"`
 
-		Schedule   Schedule `json:"schedule"`
-		ScheduleID uint     `json:"schedule_id"`
+		Schedule   *Schedule `json:"schedule"`
+		ScheduleID uint      `json:"schedule_id"`
 
 		TriggerStatus TriggerStatusT `json:"trigger_status" gorm:"index"`
 	}
 
 	Action struct {
-		Name   string  `json:"name"`
-		Stages []Stage `json:"stages"`
+		gorm.Model
+
+		Name string `json:"name"`
+
+		Schedule   *Schedule `json:"schedule"`
+		ScheduleID uint      `json:"schedule_id"`
+
+		Stages []*Stage `json:"stages"`
 	}
 
 	Stage struct {
+		gorm.Model
+
 		Name      string       `json:"name"`
 		StageType StageTypeT   `json:"stage_type"`
 		Output    StageOutputT `json:"output"`
 
-		ActionID uint   `json:"action_id"`
-		Action   Action `json:"action"`
+		ActionID uint `json:"action_id"`
 	}
 )
 
@@ -100,7 +108,7 @@ func (schedule *Schedule) UpdateStatusWithLocks(db *gorm.DB, status ScheduleStat
 }
 
 func (schedule Schedule) GetSchedules(db *gorm.DB, status ScheduleStatusT) (schedules []*Schedule, err error) {
-	if db = db.Where("schedule_status IN ?", PendingScheduleStatus).Find(schedules); db.Error != nil {
+	if db = db.Where("schedule_status = ?", PendingScheduleStatus).Find(&schedules); db.Error != nil {
 		err = db.Error
 		return
 	}
@@ -116,7 +124,7 @@ func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
 		return
 	}
 	currTime := time.Now().UTC()
-	if timeInterval, err = strconv.Atoi(schedule.ScheduleUnit); err != nil {
+	if timeInterval, err = strconv.Atoi(schedule.ScheduleValue); err != nil {
 		return
 	}
 
@@ -144,7 +152,7 @@ func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err erro
 	}
 	trigger = &Trigger{
 		StartAt:       execTime,
-		Schedule:      *schedule,
+		Schedule:      schedule,
 		ScheduleID:    schedule.ID,
 		TriggerStatus: ScheduledTriggerStatus,
 	}
@@ -158,11 +166,11 @@ func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err erro
 // ==========================================================
 // Triggers
 func (trigger Trigger) GetTriggersForTime(db *gorm.DB, status TriggerStatusT) (triggers []*Trigger, err error) {
-	if db = db.Where(
-		"trigger_status IN ? AND start_time > ?",
+	if db = db.Preload("Schedule").Where(
+		"trigger_status = ? AND start_at < ?",
 		ScheduledTriggerStatus,
 		time.Now().UTC(),
-	).Find(triggers); db.Error != nil {
+	).Find(&triggers); db.Error != nil {
 
 		err = db.Error
 		return

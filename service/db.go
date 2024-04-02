@@ -24,7 +24,7 @@ func GetDefaultDbConfig() (cfg *DbConfig) {
 		Port:     "3306",
 		Username: "root",
 		Password: "",
-		DbName:   "cronny",
+		DbName:   "cronny_dev",
 	}
 	return
 }
