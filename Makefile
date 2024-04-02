@@ -3,6 +3,8 @@ run:
 	go run cmd/trigger.go
 
 seed:
+	mysql -uroot -e "DROP DATABASE cronny_dev;" 
+	mysql -uroot -e "DROP DATABASE cronny_test;" 
 	make setup
 	go run cmd/seed/seed.go
 

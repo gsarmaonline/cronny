@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+
+	"github.com/cronny/actions"
 )
 
 const (
@@ -33,12 +35,17 @@ const (
 	DayScheduleUnit    = "day"
 )
 
+var (
+	StageMaps = map[string]actions.ActionExecutor{
+		"http": &actions.HttpAction{},
+	}
+)
+
 type (
 	ScheduleTypeT   int
 	ScheduleStatusT int
 	TriggerStatusT  int
 
-	StageTypeT   int
 	StageOutputT string
 
 	Schedule struct {
@@ -52,7 +59,8 @@ type (
 
 		ScheduleStatus ScheduleStatusT `json:"schedule_status" gorm:"index"`
 
-		ActionID uint `json:"action_id"`
+		Action   *Action `json:"action"`
+		ActionID uint    `json:"action_id"`
 	}
 
 	Trigger struct {
@@ -69,11 +77,7 @@ type (
 	Action struct {
 		gorm.Model
 
-		Name string `json:"name"`
-
-		Schedule   *Schedule `json:"schedule"`
-		ScheduleID uint      `json:"schedule_id"`
-
+		Name   string   `json:"name"`
 		Stages []*Stage `json:"stages"`
 	}
 
@@ -81,10 +85,11 @@ type (
 		gorm.Model
 
 		Name      string       `json:"name"`
-		StageType StageTypeT   `json:"stage_type"`
+		StageType string       `json:"stage_type"`
 		Output    StageOutputT `json:"output"`
 
-		ActionID uint `json:"action_id"`
+		ActionID uint    `json:"action_id"`
+		Action   *Action `json:"action"`
 	}
 )
 
@@ -166,7 +171,7 @@ func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err erro
 // ==========================================================
 // Triggers
 func (trigger Trigger) GetTriggersForTime(db *gorm.DB, status TriggerStatusT) (triggers []*Trigger, err error) {
-	if db = db.Preload("Schedule").Where(
+	if db = db.Preload("Schedule.Action").Where(
 		"trigger_status = ? AND start_at < ?",
 		ScheduledTriggerStatus,
 		time.Now().UTC(),
@@ -189,5 +194,40 @@ func (trigger *Trigger) UpdateStatusWithLocks(db *gorm.DB, status TriggerStatusT
 
 func (trigger *Trigger) Execute(db *gorm.DB) (err error) {
 	fmt.Println("Executing Trigger for Schedule", trigger.Schedule.Name)
+	if err = trigger.Schedule.Action.Execute(db); err != nil {
+		return
+	}
+	return
+}
+
+// ==========================================================
+// Actions
+func (action *Action) Execute(db *gorm.DB) (err error) {
+	stages := []*Stage{}
+	db.Model(action).Association("Stages").Find(&stages)
+	for _, stage := range stages {
+		fmt.Println("Executing Stage ", stage.Name, "for action", action.Name)
+		if err = stage.Execute(db); err != nil {
+			return
+		}
+	}
+	return
+}
+
+// ==========================================================
+// Stage
+func (stage *Stage) Execute(db *gorm.DB) (err error) {
+	var (
+		isPresent      bool
+		actionExecutor actions.ActionExecutor
+		inp            actions.Input
+	)
+	if actionExecutor, isPresent = StageMaps[stage.StageType]; !isPresent {
+		err = errors.New(fmt.Sprintf("StageType %s not defined", stage.StageType))
+		return
+	}
+	if _, err = actionExecutor.Execute(inp); err != nil {
+		return
+	}
 	return
 }
