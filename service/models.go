@@ -57,7 +57,7 @@ type (
 	}
 
 	Trigger struct {
-		StartAt time.Time `json:"start_at"`
+		StartAt time.Time `json:"start_at" gorm:index`
 
 		Schedule   Schedule `json:"schedule"`
 		ScheduleID uint     `json:"schedule_id"`
@@ -100,7 +100,7 @@ func (schedule *Schedule) UpdateStatusWithLocks(db *gorm.DB, status ScheduleStat
 }
 
 func (schedule Schedule) GetSchedules(db *gorm.DB, status ScheduleStatusT) (schedules []*Schedule, err error) {
-	if db = db.Where("schedule_status in ?", PendingScheduleStatus).Find(schedules); db.Error != nil {
+	if db = db.Where("schedule_status IN ?", PendingScheduleStatus).Find(schedules); db.Error != nil {
 		err = db.Error
 		return
 	}
@@ -157,8 +157,13 @@ func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err erro
 
 // ==========================================================
 // Triggers
-func (trigger Trigger) GetTriggers(db *gorm.DB, status TriggerStatusT) (triggers []*Trigger, err error) {
-	if db = db.Where("trigger_status in ?", ScheduledTriggerStatus).Find(triggers); db.Error != nil {
+func (trigger Trigger) GetTriggersForTime(db *gorm.DB, status TriggerStatusT) (triggers []*Trigger, err error) {
+	if db = db.Where(
+		"trigger_status IN ? AND start_time > ?",
+		ScheduledTriggerStatus,
+		time.Now().UTC(),
+	).Find(triggers); db.Error != nil {
+
 		err = db.Error
 		return
 	}

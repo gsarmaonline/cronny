@@ -46,7 +46,7 @@ func (te *TriggerExecutor) RunOneIter() (triggersProcessedCount int, err error) 
 		triggers []*Trigger
 		sTrig    Trigger
 	)
-	if triggers, err = sTrig.GetTriggers(te.db, ScheduledTriggerStatus); err != nil {
+	if triggers, err = sTrig.GetTriggersForTime(te.db, ScheduledTriggerStatus); err != nil {
 		return
 	}
 	for _, trigger := range triggers {
