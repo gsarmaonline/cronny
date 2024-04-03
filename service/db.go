@@ -23,7 +23,7 @@ func GetDefaultDbConfig() (cfg *DbConfig) {
 		Host:     "127.0.0.1",
 		Port:     "3306",
 		Username: "root",
-		Password: "password",
+		Password: "",
 		DbName:   "cronny_dev",
 	}
 	return
