@@ -1,5 +1,14 @@
 # Cronny
 
+## Seeding and running the app
+```bash
+# Seed the DB
+make seed
+
+# Run the Trigger app
+make run
+```
+
 ## Introduction
 Cronly is a service which allows users to define different types of actions which can be triggered at different intervals. The intervals can be an absolute date, or a relative time.
 

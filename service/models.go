@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -33,11 +34,15 @@ const (
 	MinuteScheduleUnit = "minute"
 	HourScheduleUnit   = "hour"
 	DayScheduleUnit    = "day"
+
+	// Stage Inputs
+	StaticJsonInput    = StageInputT("static_input")
+	StageOutputAsInput = StageInputT("stage_output_as_input")
 )
 
 var (
 	StageMaps = map[string]actions.ActionExecutor{
-		"http": &actions.HttpAction{},
+		"http": actions.HttpAction{},
 	}
 )
 
@@ -46,6 +51,7 @@ type (
 	ScheduleStatusT int
 	TriggerStatusT  int
 
+	StageInputT  string
 	StageOutputT string
 
 	Schedule struct {
@@ -87,6 +93,9 @@ type (
 		Name      string       `json:"name"`
 		StageType string       `json:"stage_type"`
 		Output    StageOutputT `json:"output"`
+
+		StageInputType  StageInputT `json:"stage_input_type"`
+		StageInputValue string      `json:"stage_input_value"`
 
 		ActionID uint    `json:"action_id"`
 		Action   *Action `json:"action"`
@@ -216,12 +225,30 @@ func (action *Action) Execute(db *gorm.DB) (err error) {
 
 // ==========================================================
 // Stage
+func (stage *Stage) GetInput() (input actions.Input, err error) {
+	input = make(actions.Input)
+
+	switch stage.StageInputType {
+	case StaticJsonInput:
+		if err = json.Unmarshal([]byte(stage.StageInputValue), &input); err != nil {
+			return
+		}
+	default:
+		err = fmt.Errorf("No StageInputType matched for %s", stage.StageInputType)
+		return
+	}
+	return
+}
+
 func (stage *Stage) Execute(db *gorm.DB) (err error) {
 	var (
 		isPresent      bool
 		actionExecutor actions.ActionExecutor
 		inp            actions.Input
 	)
+	if inp, err = stage.GetInput(); err != nil {
+		return
+	}
 	if actionExecutor, isPresent = StageMaps[stage.StageType]; !isPresent {
 		err = errors.New(fmt.Sprintf("StageType %s not defined", stage.StageType))
 		return

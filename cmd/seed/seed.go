@@ -12,8 +12,10 @@ func main() {
 		Name: "http-action",
 		Stages: []*service.Stage{
 			&service.Stage{
-				Name:      "http",
-				StageType: "http",
+				Name:            "stage-1",
+				StageType:       "http",
+				StageInputType:  service.StaticJsonInput,
+				StageInputValue: "{\"method\": \"GET\", \"url\": \"http://127.0.0.1:8090/api\"}",
 			},
 		},
 	}
