@@ -5,6 +5,6 @@ type (
 		Execute(Input) (Output, error)
 	}
 
-	Input  map[string]interface{}
-	Output map[string]interface{}
+	Input  map[string]string
+	Output map[string]string
 )

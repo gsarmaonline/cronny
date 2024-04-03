@@ -245,6 +245,8 @@ func (stage *Stage) Execute(db *gorm.DB) (err error) {
 		isPresent      bool
 		actionExecutor actions.ActionExecutor
 		inp            actions.Input
+		output         actions.Output
+		outputB        []byte
 	)
 	if inp, err = stage.GetInput(); err != nil {
 		return
@@ -253,8 +255,15 @@ func (stage *Stage) Execute(db *gorm.DB) (err error) {
 		err = errors.New(fmt.Sprintf("StageType %s not defined", stage.StageType))
 		return
 	}
-	if _, err = actionExecutor.Execute(inp); err != nil {
+	if output, err = actionExecutor.Execute(inp); err != nil {
 		return
 	}
+	if outputB, err = json.Marshal(output); err != nil {
+		return
+	}
+
+	stage.Output = StageOutputT(string(outputB))
+	db.Save(stage)
+
 	return
 }

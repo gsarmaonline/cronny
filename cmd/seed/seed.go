@@ -15,7 +15,7 @@ func main() {
 				Name:            "stage-1",
 				StageType:       "http",
 				StageInputType:  service.StaticJsonInput,
-				StageInputValue: "{\"method\": \"GET\", \"url\": \"http://127.0.0.1:8090/api\"}",
+				StageInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
 			},
 		},
 	}
@@ -26,7 +26,7 @@ func main() {
 			Name: fmt.Sprintf("sched-%d", idx),
 
 			ScheduleType:  service.RelativeScheduleType,
-			ScheduleValue: "100",
+			ScheduleValue: "10",
 			ScheduleUnit:  service.SecondScheduleUnit,
 
 			ScheduleStatus: service.PendingScheduleStatus,
