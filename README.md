@@ -114,4 +114,10 @@ A Connector should be able to direct the output to a corresponding Stage dependi
 - All pods should be stateless with the ability to focus on a certain subset of resources
 - Pods for all services should be easily scaled up and down without loss in efficiency
 
-
+### Pending Items
+- Convert the Trigger services into Dockerfiles
+- Integrate with github workflow to create required docker images on pushing to master branch
+- Create secret manager
+- Create k8s deployment files for the individual services
+- Support for different deployments
+- Feedback loop on the number of Triggers available to scale in/out resources
