@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/cronny/service"
+	"gorm.io/gorm"
 )
 
-func main() {
-	db, _ := service.NewDb(nil)
-	action := &service.Action{
+func getAction(db *gorm.DB) (action *service.Action) {
+	action = &service.Action{
 		Name: "http-action",
 		Stages: []*service.Stage{
 			&service.Stage{
@@ -20,6 +20,12 @@ func main() {
 		},
 	}
 	db.Save(action)
+	return
+}
+
+func main() {
+	db, _ := service.NewDb(nil)
+	action := getAction(db)
 
 	for idx := 0; idx < 10; idx++ {
 		sched := &service.Schedule{

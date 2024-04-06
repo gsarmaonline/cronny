@@ -99,6 +99,10 @@ type (
 
 		ActionID uint    `json:"action_id"`
 		Action   *Action `json:"action"`
+
+		Condition string `json:"condition"`
+
+		ProceedCondition string `json:"proceed_condition"`
 	}
 )
 
@@ -265,5 +269,9 @@ func (stage *Stage) Execute(db *gorm.DB) (err error) {
 	stage.Output = StageOutputT(string(outputB))
 	db.Save(stage)
 
+	return
+}
+
+func (stage *Stage) ShouldProceed(db *gorm.DB) (err error) {
 	return
 }
