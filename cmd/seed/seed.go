@@ -15,10 +15,10 @@ func getConditionForStageOne(stageId uint) (conditionS string) {
 				StageID: stageId,
 				Filters: []*service.Filter{
 					&service.Filter{
-						Name:           "id",
+						Name:           "userId",
 						ComparisonType: service.EqualityComparison,
 						ShouldMatch:    true,
-						Value:          "2",
+						Value:          "1",
 					},
 				},
 			},

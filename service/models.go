@@ -105,6 +105,9 @@ type (
 		IsRootStage bool   `json:"is_root_stage"`
 
 		ProceedCondition string `json:"proceed_condition"`
+
+		ExecutionStartTime time.Time `json:"execution_start_time" gorm:"type:TIMESTAMP;null;default:null"`
+		ExecutionStopTime  time.Time `json:"execution_stop_time" gorm:"type:TIMESTAMP;null;default:null"`
 	}
 )
 
@@ -256,6 +259,8 @@ func (stage *Stage) Execute(db *gorm.DB) (err error) {
 		nextStage      *Stage
 	)
 	log.Println("Executing Stage ", stage.Name)
+	stage.ExecutionStartTime = time.Now().UTC()
+
 	if inp, err = stage.GetInput(); err != nil {
 		return
 	}
@@ -271,6 +276,8 @@ func (stage *Stage) Execute(db *gorm.DB) (err error) {
 	}
 
 	stage.Output = StageOutputT(string(outputB))
+	stage.ExecutionStopTime = time.Now().UTC()
+
 	if ex := db.Save(stage); ex.Error != nil {
 		err = ex.Error
 		return

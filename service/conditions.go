@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/cronny/actions"
 )
@@ -54,7 +53,6 @@ func (condition *Condition) DoesInputMatch(filters []*Filter) (matches bool) {
 	matches = false
 	for _, filter := range filters {
 		if err := filter.Compare(condition.input); err != nil {
-			log.Println(err)
 			return
 		}
 	}
