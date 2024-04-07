@@ -2,6 +2,10 @@ run:
 	make setup
 	go run cmd/trigger.go
 
+runapi:
+	make setup
+	go run cmd/api/api.go
+
 seed:
 	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_dev;" 
 	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_test;" 
