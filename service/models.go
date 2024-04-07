@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -100,7 +101,8 @@ type (
 		ActionID uint    `json:"action_id"`
 		Action   *Action `json:"action"`
 
-		Condition string `json:"condition"`
+		Condition   string `json:"condition"`
+		IsRootStage bool   `json:"is_root_stage"`
 
 		ProceedCondition string `json:"proceed_condition"`
 	}
@@ -118,16 +120,16 @@ func SetupModels(db *gorm.DB) (err error) {
 // Schedules
 func (schedule *Schedule) UpdateStatusWithLocks(db *gorm.DB, status ScheduleStatusT) (err error) {
 	schedule.ScheduleStatus = status
-	if db := db.Save(schedule); db.Error != nil {
-		err = db.Error
+	if ex := db.Save(schedule); ex.Error != nil {
+		err = ex.Error
 		return
 	}
 	return
 }
 
 func (schedule Schedule) GetSchedules(db *gorm.DB, status ScheduleStatusT) (schedules []*Schedule, err error) {
-	if db = db.Where("schedule_status = ?", PendingScheduleStatus).Find(&schedules); db.Error != nil {
-		err = db.Error
+	if ex := db.Where("schedule_status = ?", PendingScheduleStatus).Find(&schedules); ex.Error != nil {
+		err = ex.Error
 		return
 	}
 	return
@@ -216,13 +218,13 @@ func (trigger *Trigger) Execute(db *gorm.DB) (err error) {
 // ==========================================================
 // Actions
 func (action *Action) Execute(db *gorm.DB) (err error) {
-	stages := []*Stage{}
-	db.Model(action).Association("Stages").Find(&stages)
-	for _, stage := range stages {
-		fmt.Println("Executing Stage ", stage.Name, "for action", action.Name)
-		if err = stage.Execute(db); err != nil {
-			return
-		}
+	stage := &Stage{}
+	if ex := db.Where("is_root_stage = ? AND action_id = ?", true, action.ID).First(stage); ex.Error != nil {
+		err = ex.Error
+		return
+	}
+	if err = stage.Execute(db); err != nil {
+		return
 	}
 	return
 }
@@ -251,7 +253,9 @@ func (stage *Stage) Execute(db *gorm.DB) (err error) {
 		inp            actions.Input
 		output         actions.Output
 		outputB        []byte
+		nextStage      *Stage
 	)
+	log.Println("Executing Stage ", stage.Name)
 	if inp, err = stage.GetInput(); err != nil {
 		return
 	}
@@ -267,11 +271,44 @@ func (stage *Stage) Execute(db *gorm.DB) (err error) {
 	}
 
 	stage.Output = StageOutputT(string(outputB))
-	db.Save(stage)
+	if ex := db.Save(stage); ex.Error != nil {
+		err = ex.Error
+		return
+	}
 
+	if nextStage, err = stage.Next(db); err != nil {
+		return
+	}
+
+	if err = nextStage.Execute(db); err != nil {
+		return
+	}
 	return
 }
 
-func (stage *Stage) ShouldProceed(db *gorm.DB) (err error) {
+func (stage *Stage) Next(db *gorm.DB) (nextStage *Stage, err error) {
+	var (
+		condition   *Condition
+		nextStageID uint
+		input       actions.Input
+	)
+	condition = &Condition{}
+	nextStage = &Stage{}
+	input = make(actions.Input)
+
+	if err = json.Unmarshal([]byte(stage.Condition), condition); err != nil {
+		return
+	}
+	if err = json.Unmarshal([]byte(stage.Output), &input); err != nil {
+		return
+	}
+	if nextStageID, err = condition.GetNextStageID(input); err != nil {
+		return
+	}
+	if ex := db.Where("id = ?", nextStageID).First(nextStage); ex.Error != nil {
+		err = ex.Error
+		return
+	}
+
 	return
 }

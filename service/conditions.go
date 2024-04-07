@@ -33,7 +33,7 @@ type (
 		Name           string      `json:"name"`
 		ShouldMatch    bool        `json:"should_match"`
 		ComparisonType ComparisonT `json:"comparison_type"`
-		Value          interface{} `json:"value"`
+		Value          string      `json:"value"`
 	}
 )
 
@@ -43,7 +43,10 @@ func (condition *Condition) GetNextStageID(input actions.Input) (stageId uint, e
 		if inputMatches := condition.DoesInputMatch(rule.Filters); !inputMatches {
 			continue
 		}
+		stageId = rule.StageID
+		return
 	}
+	err = fmt.Errorf("No stage found for input %v", input)
 	return
 }
 
@@ -65,19 +68,19 @@ func (filter *Filter) Compare(input actions.Input) (err error) {
 		isPresent bool
 	)
 	if inpVal, isPresent = input[filter.Name]; !isPresent {
-		err = fmt.Errorf("Filter Key %s not present in input", filter.Name)
+		err = fmt.Errorf("Filter Key %s not present in input", filter.Name, input)
 		return
 	}
 	switch filter.ComparisonType {
 	case EqualityComparison:
 		switch filter.ShouldMatch {
 		case true:
-			if inpVal != filter.Value.(string) {
+			if inpVal != filter.Value {
 				err = fmt.Errorf("Filter Value %s doesn't match with input %s", filter.Value, inpVal)
 				return
 			}
 		case false:
-			if inpVal == filter.Value.(string) {
+			if inpVal == filter.Value {
 				err = fmt.Errorf("Filter Value %s matches with input %s", filter.Value, inpVal)
 				return
 			}

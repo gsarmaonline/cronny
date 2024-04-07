@@ -3,10 +3,9 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"reflect"
 	"strconv"
 )
 
@@ -45,7 +44,6 @@ func (httpAction HttpAction) Execute(input Input) (output Output, err error) {
 		resp   *http.Response
 
 		reqBody  io.Reader
-		respBody []byte
 		payloadB []byte
 
 		httpReq *HttpActionReq
@@ -53,7 +51,6 @@ func (httpAction HttpAction) Execute(input Input) (output Output, err error) {
 	if httpReq, err = httpAction.Validate(input); err != nil {
 		return
 	}
-	log.Println(httpReq)
 
 	client = &http.Client{}
 	if payloadB, err = json.Marshal(httpReq.RequestBody); err != nil {
@@ -66,14 +63,37 @@ func (httpAction HttpAction) Execute(input Input) (output Output, err error) {
 	if resp, err = client.Do(req); err != nil {
 		return
 	}
+	if output, err = httpAction.convertResp(resp); err != nil {
+		return
+	}
+	return
+}
+
+func (httpAction HttpAction) convertResp(resp *http.Response) (output Output, err error) {
+	var (
+		respMap  map[string]interface{}
+		respBody []byte
+	)
 	if respBody, err = io.ReadAll(resp.Body); err != nil {
+		return
+	}
+	respMap = make(map[string]interface{})
+	if err = json.Unmarshal(respBody, &respMap); err != nil {
 		return
 	}
 	output = make(Output)
 	output["status"] = strconv.Itoa(resp.StatusCode)
-	output["response_body"] = string(respBody)
-
-	fmt.Println(output)
+	for mKey, mVal := range respMap {
+		valType := reflect.TypeOf(mVal).Kind()
+		switch valType {
+		case reflect.String:
+			output[mKey] = mVal.(string)
+		case reflect.Int:
+			output[mKey] = strconv.Itoa(mVal.(int))
+		case reflect.Float64:
+			output[mKey] = strconv.Itoa(int(mVal.(float64)))
+		}
+	}
 
 	return
 }
