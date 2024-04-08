@@ -24,6 +24,31 @@ func (handler *Handler) ActionIndexHandler(c *gin.Context) {
 	return
 }
 
+func (handler *Handler) ActionShowHandler(c *gin.Context) {
+	var (
+		action   *service.Action
+		actionId int
+		err      error
+	)
+	if actionId, err = strconv.Atoi(c.Param("id")); err != nil {
+		c.JSON(400, gin.H{
+			"message": "Improper ID format",
+		})
+		return
+	}
+	if ex := handler.db.Preload("Stages").Where("id = ?", actionId).First(&action); ex.Error != nil {
+		c.JSON(500, gin.H{
+			"message": ex.Error.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"action":  action,
+		"message": "success",
+	})
+	return
+}
+
 func (handler *Handler) ActionCreateHandler(c *gin.Context) {
 	var (
 		action *service.Action
@@ -78,6 +103,31 @@ func (handler *Handler) ActionUpdateHandler(c *gin.Context) {
 		return
 	}
 	if ex := handler.db.Model(action).Updates(updatedAction); ex.Error != nil {
+		c.JSON(500, gin.H{
+			"message": ex.Error.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"action":  action,
+		"message": "success",
+	})
+	return
+}
+
+func (handler *Handler) ActionDeleteHandler(c *gin.Context) {
+	var (
+		action   *service.Action
+		actionId int
+		err      error
+	)
+	if actionId, err = strconv.Atoi(c.Param("id")); err != nil {
+		c.JSON(400, gin.H{
+			"message": "Improper ID format",
+		})
+		return
+	}
+	if ex := handler.db.Delete(&service.Action{}, actionId); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})

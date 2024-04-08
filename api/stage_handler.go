@@ -72,3 +72,28 @@ func (handler *Handler) StageUpdateHandler(c *gin.Context) {
 	})
 	return
 }
+
+func (handler *Handler) StageDeleteHandler(c *gin.Context) {
+	var (
+		stage   *service.Stage
+		stageId int
+		err     error
+	)
+	if stageId, err = strconv.Atoi(c.Param("id")); err != nil {
+		c.JSON(400, gin.H{
+			"message": "Improper ID format",
+		})
+		return
+	}
+	if ex := handler.db.Delete(&service.Stage{}, stageId); ex.Error != nil {
+		c.JSON(500, gin.H{
+			"message": ex.Error.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"stage":   stage,
+		"message": "success",
+	})
+	return
+}
