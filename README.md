@@ -7,6 +7,9 @@ make seed
 
 # Run the Trigger app
 make run
+
+# Run the API server
+make runapi
 ```
 
 ## Introduction
