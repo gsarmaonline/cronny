@@ -12,6 +12,11 @@ make run
 make runapi
 ```
 
+## Deploying on fly.io
+```bash
+curl -L https://fly.io/install.sh | sh
+```
+
 ## Introduction
 Cronly is a service which allows users to define different types of actions which can be triggered at different intervals. The intervals can be an absolute date, or a relative time.
 
