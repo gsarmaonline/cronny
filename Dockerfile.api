@@ -1,0 +1,16 @@
+FROM golang:1.19
+
+WORKDIR /app
+
+# Copy the source code from the host machine to the container
+COPY . .
+
+WORKDIR /app/src/cmd/api
+
+# Build the executable
+RUN go build -o /app/cronnyapi
+
+WORKDIR /app/src/
+
+# Set the command to run the executable
+CMD ["/app/cronnyapi"]

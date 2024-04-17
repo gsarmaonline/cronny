@@ -36,13 +36,13 @@ const (
 	HourScheduleUnit   = "hour"
 	DayScheduleUnit    = "day"
 
-	// Stage Inputs
-	StaticJsonInput    = StageInputT("static_input")
-	StageOutputAsInput = StageInputT("stage_output_as_input")
+	// Job Inputs
+	StaticJsonInput  = JobInputT("static_input")
+	JobOutputAsInput = JobInputT("job_output_as_input")
 )
 
 var (
-	StageMaps = map[string]actions.ActionExecutor{
+	JobMaps = map[string]actions.ActionExecutor{
 		"http": actions.HttpAction{},
 	}
 )
@@ -52,8 +52,8 @@ type (
 	ScheduleStatusT int
 	TriggerStatusT  int
 
-	StageInputT  string
-	StageOutputT string
+	JobInputT  string
+	JobOutputT string
 
 	Schedule struct {
 		gorm.Model
@@ -84,25 +84,25 @@ type (
 	Action struct {
 		gorm.Model
 
-		Name   string   `json:"name"`
-		Stages []*Stage `json:"stages"`
+		Name string `json:"name"`
+		Jobs []*Job `json:"jobs"`
 	}
 
-	Stage struct {
+	Job struct {
 		gorm.Model
 
-		Name      string       `json:"name"`
-		StageType string       `json:"stage_type"`
-		Output    StageOutputT `json:"output"`
+		Name    string     `json:"name"`
+		JobType string     `json:"job_type"`
+		Output  JobOutputT `json:"output"`
 
-		StageInputType  StageInputT `json:"stage_input_type"`
-		StageInputValue string      `json:"stage_input_value"`
+		JobInputType  JobInputT `json:"job_input_type"`
+		JobInputValue string    `json:"job_input_value"`
 
 		ActionID uint    `json:"action_id"`
 		Action   *Action `json:"action"`
 
-		Condition   string `json:"condition"`
-		IsRootStage bool   `json:"is_root_stage"`
+		Condition string `json:"condition"`
+		IsRootJob bool   `json:"is_root_job"`
 
 		ProceedCondition string `json:"proceed_condition"`
 
@@ -115,7 +115,7 @@ func SetupModels(db *gorm.DB) (err error) {
 	db.AutoMigrate(&Schedule{})
 	db.AutoMigrate(&Trigger{})
 	db.AutoMigrate(&Action{})
-	db.AutoMigrate(&Stage{})
+	db.AutoMigrate(&Job{})
 	return
 }
 
@@ -221,51 +221,51 @@ func (trigger *Trigger) Execute(db *gorm.DB) (err error) {
 // ==========================================================
 // Actions
 func (action *Action) Execute(db *gorm.DB) (err error) {
-	stage := &Stage{}
-	if ex := db.Where("is_root_stage = ? AND action_id = ?", true, action.ID).First(stage); ex.Error != nil {
+	job := &Job{}
+	if ex := db.Where("is_root_job = ? AND action_id = ?", true, action.ID).First(job); ex.Error != nil {
 		err = ex.Error
 		return
 	}
-	if err = stage.Execute(db); err != nil {
+	if err = job.Execute(db); err != nil {
 		return
 	}
 	return
 }
 
 // ==========================================================
-// Stage
-func (stage *Stage) GetInput() (input actions.Input, err error) {
+// Job
+func (job *Job) GetInput() (input actions.Input, err error) {
 	input = make(actions.Input)
 
-	switch stage.StageInputType {
+	switch job.JobInputType {
 	case StaticJsonInput:
-		if err = json.Unmarshal([]byte(stage.StageInputValue), &input); err != nil {
+		if err = json.Unmarshal([]byte(job.JobInputValue), &input); err != nil {
 			return
 		}
 	default:
-		err = fmt.Errorf("No StageInputType matched for %s", stage.StageInputType)
+		err = fmt.Errorf("No JobInputType matched for %s", job.JobInputType)
 		return
 	}
 	return
 }
 
-func (stage *Stage) Execute(db *gorm.DB) (err error) {
+func (job *Job) Execute(db *gorm.DB) (err error) {
 	var (
 		isPresent      bool
 		actionExecutor actions.ActionExecutor
 		inp            actions.Input
 		output         actions.Output
 		outputB        []byte
-		nextStage      *Stage
+		nextJob        *Job
 	)
-	log.Println("Executing Stage ", stage.Name)
-	stage.ExecutionStartTime = time.Now().UTC()
+	log.Println("Executing Job ", job.Name)
+	job.ExecutionStartTime = time.Now().UTC()
 
-	if inp, err = stage.GetInput(); err != nil {
+	if inp, err = job.GetInput(); err != nil {
 		return
 	}
-	if actionExecutor, isPresent = StageMaps[stage.StageType]; !isPresent {
-		err = errors.New(fmt.Sprintf("StageType %s not defined", stage.StageType))
+	if actionExecutor, isPresent = JobMaps[job.JobType]; !isPresent {
+		err = errors.New(fmt.Sprintf("JobType %s not defined", job.JobType))
 		return
 	}
 	if output, err = actionExecutor.Execute(inp); err != nil {
@@ -275,44 +275,44 @@ func (stage *Stage) Execute(db *gorm.DB) (err error) {
 		return
 	}
 
-	stage.Output = StageOutputT(string(outputB))
-	stage.ExecutionStopTime = time.Now().UTC()
+	job.Output = JobOutputT(string(outputB))
+	job.ExecutionStopTime = time.Now().UTC()
 
-	if ex := db.Save(stage); ex.Error != nil {
+	if ex := db.Save(job); ex.Error != nil {
 		err = ex.Error
 		return
 	}
 
-	if nextStage, err = stage.Next(db); err != nil {
+	if nextJob, err = job.Next(db); err != nil {
 		return
 	}
 
-	if err = nextStage.Execute(db); err != nil {
+	if err = nextJob.Execute(db); err != nil {
 		return
 	}
 	return
 }
 
-func (stage *Stage) Next(db *gorm.DB) (nextStage *Stage, err error) {
+func (job *Job) Next(db *gorm.DB) (nextJob *Job, err error) {
 	var (
-		condition   *Condition
-		nextStageID uint
-		input       actions.Input
+		condition *Condition
+		nextJobID uint
+		input     actions.Input
 	)
 	condition = &Condition{}
-	nextStage = &Stage{}
+	nextJob = &Job{}
 	input = make(actions.Input)
 
-	if err = json.Unmarshal([]byte(stage.Condition), condition); err != nil {
+	if err = json.Unmarshal([]byte(job.Condition), condition); err != nil {
 		return
 	}
-	if err = json.Unmarshal([]byte(stage.Output), &input); err != nil {
+	if err = json.Unmarshal([]byte(job.Output), &input); err != nil {
 		return
 	}
-	if nextStageID, err = condition.GetNextStageID(input); err != nil {
+	if nextJobID, err = condition.GetNextJobID(input); err != nil {
 		return
 	}
-	if ex := db.Where("id = ?", nextStageID).First(nextStage); ex.Error != nil {
+	if ex := db.Where("id = ?", nextJobID).First(nextJob); ex.Error != nil {
 		err = ex.Error
 		return
 	}

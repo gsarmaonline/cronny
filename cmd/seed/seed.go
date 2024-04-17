@@ -8,11 +8,11 @@ import (
 	"gorm.io/gorm"
 )
 
-func getConditionForStageOne(stageId uint) (conditionS string) {
+func getConditionForJobOne(jobId uint) (conditionS string) {
 	condition := service.Condition{
 		Rules: []*service.ConditionRule{
 			&service.ConditionRule{
-				StageID: stageId,
+				JobID: jobId,
 				Filters: []*service.Filter{
 					&service.Filter{
 						Name:           "userId",
@@ -34,32 +34,32 @@ func getAction(db *gorm.DB) (action *service.Action) {
 		Name: "http-action",
 	}
 	db.Save(action)
-	stageThree := &service.Stage{
-		Name:            "stage-3",
-		StageType:       "http",
-		StageInputType:  service.StaticJsonInput,
-		StageInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/3\"}",
-		ActionID:        action.ID,
+	jobThree := &service.Job{
+		Name:          "job-3",
+		JobType:       "http",
+		JobInputType:  service.StaticJsonInput,
+		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/3\"}",
+		ActionID:      action.ID,
 	}
-	db.Save(stageThree)
-	stageTwo := &service.Stage{
-		Name:            "stage-2",
-		StageType:       "http",
-		StageInputType:  service.StaticJsonInput,
-		StageInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/2\"}",
-		ActionID:        action.ID,
+	db.Save(jobThree)
+	jobTwo := &service.Job{
+		Name:          "job-2",
+		JobType:       "http",
+		JobInputType:  service.StaticJsonInput,
+		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/2\"}",
+		ActionID:      action.ID,
 	}
-	db.Save(stageTwo)
-	stageOne := &service.Stage{
-		Name:            "stage-1",
-		StageType:       "http",
-		StageInputType:  service.StaticJsonInput,
-		StageInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
-		Condition:       getConditionForStageOne(stageTwo.ID),
-		IsRootStage:     true,
-		ActionID:        action.ID,
+	db.Save(jobTwo)
+	jobOne := &service.Job{
+		Name:          "job-1",
+		JobType:       "http",
+		JobInputType:  service.StaticJsonInput,
+		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
+		Condition:     getConditionForJobOne(jobTwo.ID),
+		IsRootJob:     true,
+		ActionID:      action.ID,
 	}
-	db.Save(stageOne)
+	db.Save(jobOne)
 	return
 }
 

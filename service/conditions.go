@@ -24,9 +24,9 @@ type (
 	ConditionRule struct {
 		// If no filters are set, it becomes a wildcard rule.
 		// ie. no conditions will be checked before proceeding
-		// to the next stage
+		// to the next job
 		Filters []*Filter `json:"filters"`
-		StageID uint      `json:"stage_id"`
+		JobID   uint      `json:"job_id"`
 	}
 	Filter struct {
 		Name           string      `json:"name"`
@@ -36,16 +36,16 @@ type (
 	}
 )
 
-func (condition *Condition) GetNextStageID(input actions.Input) (stageId uint, err error) {
+func (condition *Condition) GetNextJobID(input actions.Input) (jobId uint, err error) {
 	condition.input = input
 	for _, rule := range condition.Rules {
 		if inputMatches := condition.DoesInputMatch(rule.Filters); !inputMatches {
 			continue
 		}
-		stageId = rule.StageID
+		jobId = rule.JobID
 		return
 	}
-	err = fmt.Errorf("No stage found for input %v", input)
+	err = fmt.Errorf("No job found for input %v", input)
 	return
 }
 
