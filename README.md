@@ -10,6 +10,9 @@ make run
 
 # Run the API server
 make runapi
+
+# Building the docker images
+sudo docker build -t cronnyapi -f Dockerfile.api .
 ```
 
 ## Deploying on fly.io
