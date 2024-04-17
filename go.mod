@@ -3,6 +3,7 @@ module github.com/cronny
 go 1.20
 
 require (
+	github.com/aws/aws-lambda-go v1.46.0
 	github.com/aws/aws-sdk-go v1.51.21
 	github.com/gin-gonic/gin v1.9.1
 	gorm.io/driver/mysql v1.5.6
