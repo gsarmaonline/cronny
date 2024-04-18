@@ -11,7 +11,7 @@ func (handler *Handler) ActionIndexHandler(c *gin.Context) {
 	var (
 		actions []*service.Action
 	)
-	if ex := handler.db.Preload("Stages").Find(&actions); ex.Error != nil {
+	if ex := handler.db.Preload("Jobs").Find(&actions); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
@@ -36,7 +36,7 @@ func (handler *Handler) ActionShowHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Preload("Stages").Where("id = ?", actionId).First(&action); ex.Error != nil {
+	if ex := handler.db.Preload("Jobs").Where("id = ?", actionId).First(&action); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})

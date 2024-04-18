@@ -99,16 +99,16 @@ An action is the activity which is called by the service when the trigger is rai
 
 Different types of Action definitions
 - Run a docker container
-- Pick UI stage
+- Pick UI job
 - Write code directly for the action
 
-Each action can be a collection of complex stages. However, few common patterns emerge when we talk about different stages of actions.
+Each action can be a collection of complex jobs. However, few common patterns emerge when we talk about different jobs of actions.
 
 Examples of Actions
 - Make an API call, check the status of the API call. If the status call is anything apart from 200, then create a slack entry
 - Make an API call, enter the data into a database
 
-#### Default Action Stages
+#### Default Action Jobs
 - Slack
 - PagerDuty
 - HTTP
@@ -121,9 +121,9 @@ Examples of Actions
 
 ### Connectors
 
-Connectors define the connection of all the stages in an Action. Each Stage can take in the output of another Stage as an input and then create its own output.
+Connectors define the connection of all the jobs in an Action. Each Job can take in the output of another Job as an input and then create its own output.
 
-A Connector should be able to direct the output to a corresponding Stage depending on the output. This will require the definition of conditionals and ESR functions.
+A Connector should be able to direct the output to a corresponding Job depending on the output. This will require the definition of conditionals and ESR functions.
 
 
 ## Infrastructure

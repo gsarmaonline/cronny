@@ -1,24 +1,24 @@
 #!/bin/bash
 
-## Stage create
-#curl -XPOST http://127.0.0.1:8009/api/cronny/v1/stages -H 'Content-Type: application/json' --data @- << EOF
+## Job create
+#curl -XPOST http://127.0.0.1:8009/api/cronny/v1/jobs -H 'Content-Type: application/json' --data @- << EOF
 #{
-#    "name": "stage-1",
+#    "name": "job-1",
 #    "action_id": 1,
-#    "stage_type": "http",
-#    "stage_input_type": "static_input",
-#    "stage_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}"
+#    "job_type": "http",
+#    "job_input_type": "static_input",
+#    "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}"
 #}
 #EOF
 
-## Stage update
-#curl -XPUT http://127.0.0.1:8009/api/cronny/v1/stages/5 -H 'Content-Type: application/json' --data @- << EOF
+## Job update
+#curl -XPUT http://127.0.0.1:8009/api/cronny/v1/jobs/5 -H 'Content-Type: application/json' --data @- << EOF
 #{
-#    "name": "stage-5",
+#    "name": "job-5",
 #    "action_id": 1,
-#    "stage_type": "http",
-#    "stage_input_type": "static_input",
-#    "stage_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}"
+#    "job_type": "http",
+#    "job_input_type": "static_input",
+#    "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}"
 #}
 #EOF
 
@@ -32,11 +32,11 @@
 ## Action update
 #curl -XPUT http://127.0.0.1:8009/api/cronny/v1/actions/5 -H 'Content-Type: application/json' --data @- << EOF
 #{
-#    "name": "stage-5",
+#    "name": "job-5",
 #    "action_id": 1,
-#    "stage_type": "http",
-#    "stage_input_type": "static_input",
-#    "stage_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}"
+#    "job_type": "http",
+#    "job_input_type": "static_input",
+#    "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}"
 #}
 #EOF
 

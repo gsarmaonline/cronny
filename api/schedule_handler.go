@@ -11,7 +11,7 @@ func (handler *Handler) ScheduleIndexHandler(c *gin.Context) {
 	var (
 		schedules []*service.Schedule
 	)
-	if ex := handler.db.Preload("Stages").Find(&schedules); ex.Error != nil {
+	if ex := handler.db.Preload("Jobs").Find(&schedules); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
