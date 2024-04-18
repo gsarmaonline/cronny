@@ -27,7 +27,7 @@ type (
 
 func DefaultApiServerConfig() (config *ApiServerConfig) {
 	config = &ApiServerConfig{
-		Host: "127.0.0.1",
+		Host: "0.0.0.0",
 		Port: "8009",
 	}
 	return
