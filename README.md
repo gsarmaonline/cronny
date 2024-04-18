@@ -19,6 +19,9 @@ sudo docker build -t cronnyapi -f Dockerfile.api .
 ```bash
 curl -L https://fly.io/install.sh | sh
 
+# Create fly token
+fly tokens create deploy -x 999999h
+
 # Launch the app
 fly launch --image gauravsarma1992/cronnyapi:latest
 ```
