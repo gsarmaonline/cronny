@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/cronny/service"
 	"github.com/gin-gonic/gin"
@@ -40,7 +41,7 @@ func NewServer(config *ApiServerConfig) (apiServer *ApiServer, err error) {
 		engine: gin.Default(),
 	}
 	if apiServer.db, err = service.NewDb(nil); err != nil {
-		return
+		log.Println("DB not set")
 	}
 	if apiServer.handler, err = NewHandler(apiServer.db); err != nil {
 		return
@@ -52,7 +53,9 @@ func NewServer(config *ApiServerConfig) (apiServer *ApiServer, err error) {
 }
 
 func (apiServer *ApiServer) Setup() (err error) {
-	apiServer.engine.GET("/api/cronny/v1/schedules", apiServer.handler.rootHandler)
+	apiServer.engine.GET("/", apiServer.handler.rootHandler)
+
+	apiServer.engine.GET("/api/cronny/v1/schedules", apiServer.handler.ScheduleIndexHandler)
 	apiServer.engine.POST("/api/cronny/v1/schedules", apiServer.handler.ScheduleCreateHandler)
 	apiServer.engine.PUT("/api/cronny/v1/schedules/:id", apiServer.handler.ScheduleUpdateHandler)
 	apiServer.engine.DELETE("/api/cronny/v1/schedules/:id", apiServer.handler.ScheduleDeleteHandler)
