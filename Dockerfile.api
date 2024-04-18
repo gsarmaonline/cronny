@@ -12,5 +12,7 @@ RUN go build -o /app/cronnyapi
 
 WORKDIR /app/src/
 
+ENV USE_PG="yes"
+
 # Set the command to run the executable
 CMD ["/app/cronnyapi"]

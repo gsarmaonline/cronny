@@ -22,10 +22,10 @@ type (
 
 func GetDefaultPgDbConfig() (cfg *DbConfig) {
 	cfg = &DbConfig{
-		Host:     "db",
+		Host:     "pg-cronny.flycast",
 		Port:     "5432",
 		Username: "postgres",
-		Password: "postgres",
+		Password: "msmcuS2ZbHUJizs",
 		DbName:   "cronny_dev",
 	}
 	return
