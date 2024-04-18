@@ -7,7 +7,7 @@ app = 'cronnyapi'
 primary_region = 'sin'
 
 [build]
-  image = 'gauravsarma1992/cronnyapi:latest'
+  dockerfile = "Dockerfile.api"
 
 [http_service]
   internal_port = 8009
