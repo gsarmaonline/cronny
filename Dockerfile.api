@@ -15,4 +15,4 @@ WORKDIR /app/src/
 ENV USE_PG="yes"
 
 # Set the command to run the executable
-CMD ["/app/cronnyapi"]
+CMD ["USE_PG=YES", "/app/cronnyapi"]
