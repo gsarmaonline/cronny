@@ -14,6 +14,10 @@ import (
 )
 
 const (
+	// Schedule Execution Type
+	InternalExecType = ExecTypeT(1)
+	AwsExecType      = ExecTypeT(2)
+
 	// Schedule Types
 	AbsoluteScheduleType  = ScheduleTypeT(1)
 	RecurringScheduleType = ScheduleTypeT(2)
@@ -48,6 +52,7 @@ var (
 )
 
 type (
+	ExecTypeT       int
 	ScheduleTypeT   int
 	ScheduleStatusT int
 	TriggerStatusT  int
@@ -59,6 +64,9 @@ type (
 		gorm.Model
 
 		Name string `json:"name"`
+
+		ScheduleExecType ExecTypeT `json:"schedule_exec_type"`
+		ScheduleExecLink string    `json:"string"`
 
 		ScheduleType  ScheduleTypeT `json:"schedule_type" gorm:"index"`
 		ScheduleValue string        `json:"schedule_value"`
@@ -101,6 +109,9 @@ type (
 		ActionID uint    `json:"action_id"`
 		Action   *Action `json:"action"`
 
+		JobTemplateID uint         `json:"job_template_id"`
+		JobTemplate   *JobTemplate `json:"job_template"`
+
 		Condition string `json:"condition"`
 		IsRootJob bool   `json:"is_root_job"`
 
@@ -108,6 +119,15 @@ type (
 
 		ExecutionStartTime time.Time `json:"execution_start_time" gorm:"type:TIMESTAMP;null;default:null"`
 		ExecutionStopTime  time.Time `json:"execution_stop_time" gorm:"type:TIMESTAMP;null;default:null"`
+	}
+
+	JobTemplate struct {
+		gorm.Model
+
+		Name string `json:"job_template"`
+
+		ExecType ExecTypeT `json:"exec_type"`
+		ExecLink string    `json:"exec_link"`
 	}
 )
 
