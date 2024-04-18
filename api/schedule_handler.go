@@ -36,7 +36,7 @@ func (handler *Handler) ScheduleCreateHandler(c *gin.Context) {
 		})
 		return
 	}
-	schedule.ScheduleExecType = service.AwsScheduleExecType
+	schedule.ScheduleExecType = service.AwsExecType
 
 	if ex := handler.db.Save(schedule); ex.Error != nil {
 		c.JSON(500, gin.H{
@@ -60,8 +60,8 @@ func (handler *Handler) ScheduleUpdateHandler(c *gin.Context) {
 	)
 	schedule = &service.Schedule{}
 	updatedSchedule = &service.Schedule{}
-	schedule.ScheduleExecType = service.AwsScheduleExecType
-	updatedSchedule.ScheduleExecType = service.AwsScheduleExecType
+	schedule.ScheduleExecType = service.AwsExecType
+	updatedSchedule.ScheduleExecType = service.AwsExecType
 
 	if scheduleId, err = strconv.Atoi(c.Param("id")); err != nil {
 		c.JSON(400, gin.H{

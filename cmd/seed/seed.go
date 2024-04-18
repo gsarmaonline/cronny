@@ -8,6 +8,14 @@ import (
 	"gorm.io/gorm"
 )
 
+func getJobTemplate() (jobTemplate *service.JobTemplate) {
+	jobTemplate = &service.JobTemplate{
+		Name:     "http",
+		ExecType: service.AwsExecType,
+	}
+	return
+}
+
 func getConditionForJobOne(jobId uint) (conditionS string) {
 	condition := service.Condition{
 		Rules: []*service.ConditionRule{
@@ -34,12 +42,16 @@ func getAction(db *gorm.DB) (action *service.Action) {
 		Name: "http-action",
 	}
 	db.Save(action)
+	jobTemplate := getJobTemplate()
+	db.Save(jobTemplate)
+
 	jobThree := &service.Job{
 		Name:          "job-3",
 		JobType:       "http",
 		JobInputType:  service.StaticJsonInput,
 		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/3\"}",
 		ActionID:      action.ID,
+		JobTemplateID: jobTemplate.ID,
 	}
 	db.Save(jobThree)
 	jobTwo := &service.Job{
@@ -48,6 +60,7 @@ func getAction(db *gorm.DB) (action *service.Action) {
 		JobInputType:  service.StaticJsonInput,
 		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/2\"}",
 		ActionID:      action.ID,
+		JobTemplateID: jobTemplate.ID,
 	}
 	db.Save(jobTwo)
 	jobOne := &service.Job{
@@ -58,6 +71,7 @@ func getAction(db *gorm.DB) (action *service.Action) {
 		Condition:     getConditionForJobOne(jobTwo.ID),
 		IsRootJob:     true,
 		ActionID:      action.ID,
+		JobTemplateID: jobTemplate.ID,
 	}
 	db.Save(jobOne)
 	return

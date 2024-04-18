@@ -128,6 +128,10 @@ type (
 
 		ExecType ExecTypeT `json:"exec_type"`
 		ExecLink string    `json:"exec_link"`
+
+		Code string `json:"code"`
+
+		Jobs []*Job `json:"jobs"`
 	}
 )
 
