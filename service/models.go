@@ -117,8 +117,7 @@ type (
 
 		ProceedCondition string `json:"proceed_condition"`
 
-		ExecutionStartTime time.Time `json:"execution_start_time" gorm:"type:TIMESTAMP;null;default:null"`
-		ExecutionStopTime  time.Time `json:"execution_stop_time" gorm:"type:TIMESTAMP;null;default:null"`
+		JobExecutions []*JobExecution `json:"job_executions"`
 	}
 
 	JobTemplate struct {
@@ -133,6 +132,18 @@ type (
 
 		Jobs []*Job `json:"jobs"`
 	}
+
+	JobExecution struct {
+		gorm.Model
+
+		JobID uint `json:"job_id"`
+		Job   *Job `json:"job"`
+
+		Output JobOutputT `json:"output"`
+
+		ExecutionStartTime time.Time `json:"execution_start_time" gorm:"type:TIMESTAMP;null;default:null"`
+		ExecutionStopTime  time.Time `json:"execution_stop_time" gorm:"type:TIMESTAMP;null;default:null"`
+	}
 )
 
 func SetupModels(db *gorm.DB) (err error) {
@@ -140,6 +151,8 @@ func SetupModels(db *gorm.DB) (err error) {
 	db.AutoMigrate(&Trigger{})
 	db.AutoMigrate(&Action{})
 	db.AutoMigrate(&Job{})
+	db.AutoMigrate(&JobTemplate{})
+	db.AutoMigrate(&JobExecution{})
 	return
 }
 
@@ -273,18 +286,28 @@ func (job *Job) GetInput() (input actions.Input, err error) {
 	return
 }
 
-func (job *Job) Execute(db *gorm.DB) (err error) {
+func (job *Job) CreateJobExecution(db *gorm.DB, startTime, stopTime time.Time, output JobOutputT) (err error) {
+	jobExecution := &JobExecution{
+		JobID:              job.ID,
+		ExecutionStartTime: startTime,
+		ExecutionStopTime:  stopTime,
+		Output:             output,
+	}
+	if ex := db.Save(jobExecution); ex.Error != nil {
+		err = ex.Error
+		return
+	}
+	return
+}
+
+func (job *Job) ExecuteJobTemplate() (output JobOutputT, err error) {
 	var (
 		isPresent      bool
 		actionExecutor actions.ActionExecutor
 		inp            actions.Input
-		output         actions.Output
+		outputMap      actions.Output
 		outputB        []byte
-		nextJob        *Job
 	)
-	log.Println("Executing Job ", job.Name)
-	job.ExecutionStartTime = time.Now().UTC()
-
 	if inp, err = job.GetInput(); err != nil {
 		return
 	}
@@ -292,18 +315,32 @@ func (job *Job) Execute(db *gorm.DB) (err error) {
 		err = errors.New(fmt.Sprintf("JobType %s not defined", job.JobType))
 		return
 	}
-	if output, err = actionExecutor.Execute(inp); err != nil {
+	if outputMap, err = actionExecutor.Execute(inp); err != nil {
 		return
 	}
-	if outputB, err = json.Marshal(output); err != nil {
+	if outputB, err = json.Marshal(outputMap); err != nil {
 		return
 	}
+	output = JobOutputT(string(outputB))
+	return
+}
 
-	job.Output = JobOutputT(string(outputB))
-	job.ExecutionStopTime = time.Now().UTC()
+func (job *Job) Execute(db *gorm.DB) (err error) {
+	var (
+		nextJob *Job
+		output  JobOutputT
 
-	if ex := db.Save(job); ex.Error != nil {
-		err = ex.Error
+		startTime, stopTime time.Time
+	)
+	log.Println("Executing Job ", job.Name)
+
+	startTime = time.Now().UTC()
+	if output, err = job.ExecuteJobTemplate(); err != nil {
+		return
+	}
+	stopTime = time.Now().UTC()
+
+	if err = job.CreateJobExecution(db, startTime, stopTime, output); err != nil {
 		return
 	}
 
