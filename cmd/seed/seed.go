@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/cronny/service"
 	"gorm.io/gorm"
@@ -56,9 +57,7 @@ func getAction(db *gorm.DB) (action *service.Action) {
 	db.Save(jobThree)
 	jobTwo := &service.Job{
 		Name:          "job-2",
-		JobType:       "http",
-		JobInputType:  service.StaticJsonInput,
-		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/2\"}",
+		JobType:       "logger",
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
@@ -74,6 +73,11 @@ func getAction(db *gorm.DB) (action *service.Action) {
 		JobTemplateID: jobTemplate.ID,
 	}
 	db.Save(jobOne)
+
+	// Update jobTwo's input value with jobOne's ID
+	jobTwo.JobInputType = service.JobOutputAsInput
+	jobTwo.JobInputValue = strconv.Itoa(int(jobOne.ID))
+	db.Save(jobTwo)
 	return
 }
 
