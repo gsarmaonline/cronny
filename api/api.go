@@ -66,9 +66,13 @@ func (apiServer *ApiServer) Setup() (err error) {
 	apiServer.engine.PUT("/api/cronny/v1/actions/:id", apiServer.handler.ActionUpdateHandler)
 	apiServer.engine.DELETE("/api/cronny/v1/actions/:id", apiServer.handler.ActionDeleteHandler)
 
+	apiServer.engine.GET("/api/cronny/v1/jobs/:id", apiServer.handler.JobShowHandler)
 	apiServer.engine.POST("/api/cronny/v1/jobs", apiServer.handler.JobCreateHandler)
 	apiServer.engine.PUT("/api/cronny/v1/jobs/:id", apiServer.handler.JobUpdateHandler)
 	apiServer.engine.DELETE("/api/cronny/v1/jobs/:id", apiServer.handler.JobDeleteHandler)
+
+	apiServer.engine.GET("/api/cronny/v1/job_templates", apiServer.handler.JobTemplateIndexHandler)
+
 	return
 }
 

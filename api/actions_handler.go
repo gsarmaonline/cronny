@@ -11,7 +11,7 @@ func (handler *Handler) ActionIndexHandler(c *gin.Context) {
 	var (
 		actions []*service.Action
 	)
-	if ex := handler.db.Preload("Jobs").Find(&actions); ex.Error != nil {
+	if ex := handler.db.Find(&actions); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
