@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -112,14 +113,10 @@ func (schedule Schedule) GetSchedules(db *gorm.DB, status ScheduleStatusT) (sche
 	return
 }
 
-func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
+func (schedule *Schedule) GetRelativeExecutionTime() (execTime time.Time, err error) {
 	var (
 		timeInterval int
 	)
-	if schedule.ScheduleType != RelativeScheduleType {
-		err = errors.New("ScheduleType not supported")
-		return
-	}
 	currTime := time.Now().UTC()
 	if timeInterval, err = strconv.Atoi(schedule.ScheduleValue); err != nil {
 		return
@@ -136,6 +133,18 @@ func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
 		execTime = currTime.Add(time.Duration(timeInterval) * time.Hour * 24)
 	default:
 		err = errors.New("ScheduleUnit not supported")
+	}
+	return
+}
+
+func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
+	switch schedule.ScheduleType {
+	case RelativeScheduleType:
+		execTime, err = schedule.GetRelativeExecutionTime()
+		return
+	default:
+		err = fmt.Errorf("ScheduleType not supported. Received ScheduleType %s", schedule.ScheduleType)
+		return
 	}
 	return
 }
@@ -185,7 +194,7 @@ func (trigger *Trigger) UpdateStatusWithLocks(db *gorm.DB, status TriggerStatusT
 }
 
 func (trigger *Trigger) Execute(db *gorm.DB) (err error) {
-	fmt.Println("Executing Trigger for Schedule", trigger.Schedule.Name)
+	log.Println("Executing Trigger for Schedule", trigger.Schedule.Name, "with ID", trigger.ScheduleID)
 	if err = trigger.Schedule.Action.Execute(db); err != nil {
 		return
 	}

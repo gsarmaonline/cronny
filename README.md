@@ -37,6 +37,7 @@ When the user defines a point in time when an action should be triggered, it is 
     - (01/23/2025)
 - Recurring interval
     - Every week on Monday
+    - Every day at 2pm
 - Relative interval
     - After every 5 minutes
     - After every 1 hour 20 minutes
