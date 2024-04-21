@@ -137,11 +137,21 @@ func (schedule *Schedule) GetRelativeExecutionTime() (execTime time.Time, err er
 	return
 }
 
+func (schedule *Schedule) GetAbsoluteExecutionTime() (execTime time.Time, err error) {
+	if execTime, err = time.Parse(time.RFC3339, schedule.ScheduleValue); err != nil {
+		log.Println(err)
+		return
+	}
+	return
+}
+
 func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
 	switch schedule.ScheduleType {
 	case RelativeScheduleType:
 		execTime, err = schedule.GetRelativeExecutionTime()
 		return
+	case AbsoluteScheduleType:
+		execTime, err = schedule.GetAbsoluteExecutionTime()
 	default:
 		err = fmt.Errorf("ScheduleType not supported. Received ScheduleType %s", schedule.ScheduleType)
 		return
