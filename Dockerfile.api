@@ -5,7 +5,7 @@ WORKDIR /app
 # Copy the source code from the host machine to the container
 COPY . .
 
-WORKDIR /app/cmd/api
+WORKDIR /app/cmd/all
 
 # Build the executable
 RUN go build -o /app/cronnyapi

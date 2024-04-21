@@ -2,6 +2,10 @@ run:
 	make setup
 	go run cmd/trigger.go
 
+runall:
+	make setup
+	go run cmd/all/all.go
+
 runapi:
 	make setup
 	go run cmd/api/api.go
