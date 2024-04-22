@@ -60,7 +60,7 @@ func NewServer(config *ApiServerConfig) (apiServer *ApiServer, err error) {
 }
 
 func (apiServer *ApiServer) Setup() (err error) {
-	cronnyApiPrefix := "/api/v1/cronny/v1"
+	cronnyApiPrefix := "/api/cronny/v1"
 	apiServer.engine.GET("/", apiServer.handler.rootHandler)
 
 	apiServer.engine.GET(cronnyApiPrefix+"/schedules", apiServer.handler.ScheduleIndexHandler)
