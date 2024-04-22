@@ -24,6 +24,9 @@ const (
 	PendingScheduleStatus    = ScheduleStatusT(1)
 	ProcessingScheduleStatus = ScheduleStatusT(2)
 	ProcessedScheduleStatus  = ScheduleStatusT(3)
+	// This state will be used to check whether the configuration
+	// of the entire Schedule is Valid
+	InactiveScheduleStatus = ScheduleStatusT(4)
 
 	// Trigger Status
 	ScheduledTriggerStatus = TriggerStatusT(1)

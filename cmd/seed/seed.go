@@ -12,7 +12,7 @@ import (
 func getJobTemplate() (jobTemplate *service.JobTemplate) {
 	jobTemplate = &service.JobTemplate{
 		Name:     "http",
-		ExecType: service.AwsExecType,
+		ExecType: service.InternalExecType,
 	}
 	return
 }
@@ -48,16 +48,17 @@ func getAction(db *gorm.DB) (action *service.Action) {
 
 	jobThree := &service.Job{
 		Name:          "job-3",
-		JobType:       "http",
+		JobType:       "slack",
 		JobInputType:  service.StaticJsonInput,
-		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/3\"}",
+		JobInputValue: "{\"slack_api_token\": \"xoxb-6411969666804-7020910569552-v8882wCVsSy6gwqV4KeF1f1e\", \"channel_id\": \"C06VC3RAKNE\", \"message\": \"hello from cronny\"}",
+
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
 	db.Save(jobThree)
 	jobTwo := &service.Job{
 		Name:          "job-2",
-		JobType:       "logger",
+		JobType:       "slack",
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}

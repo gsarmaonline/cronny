@@ -29,7 +29,6 @@ func (handler *Handler) ScheduleCreateHandler(c *gin.Context) {
 		schedule *service.Schedule
 		err      error
 	)
-	schedule = &service.Schedule{}
 	if err = c.ShouldBindJSON(schedule); err != nil {
 		c.JSON(400, gin.H{
 			"message": err.Error(),
@@ -37,6 +36,7 @@ func (handler *Handler) ScheduleCreateHandler(c *gin.Context) {
 		return
 	}
 	schedule.ScheduleExecType = service.AwsExecType
+	schedule.ScheduleType = service.ScheduleTypeT(service.InactiveScheduleStatus)
 
 	if ex := handler.db.Save(schedule); ex.Error != nil {
 		c.JSON(500, gin.H{

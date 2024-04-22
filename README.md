@@ -139,3 +139,10 @@ A Connector should be able to direct the output to a corresponding Job depending
 - Create k8s deployment files for the individual services
 - Support for different deployments
 - Feedback loop on the number of Triggers available to scale in/out resources
+
+## Benchmarking
+
+### Possible points of failure
+- Trigger creation
+- Job execution resources
+- Frequent jobs with lower thresholds
