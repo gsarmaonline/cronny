@@ -58,7 +58,7 @@ func getAction(db *gorm.DB) (action *service.Action) {
 	db.Save(jobThree)
 	jobTwo := &service.Job{
 		Name:          "job-2",
-		JobType:       "slack",
+		JobType:       "logger",
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
@@ -76,8 +76,9 @@ func getAction(db *gorm.DB) (action *service.Action) {
 	db.Save(jobOne)
 
 	// Update jobTwo's input value with jobOne's ID
-	jobTwo.JobInputType = service.JobOutputAsInput
+	jobTwo.JobInputType = service.JobInputAsTemplate
 	jobTwo.JobInputValue = strconv.Itoa(int(jobOne.ID))
+	jobTwo.JobInputValue = "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\", \"output\": \"{{ job__job-1__output }}\""
 	db.Save(jobTwo)
 	return
 }

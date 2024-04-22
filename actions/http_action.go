@@ -28,10 +28,15 @@ type (
 	}
 )
 
-func (HttpAction HttpAction) Validate(input Input) (httpReq *HttpActionReq, err error) {
+func (httpAction HttpAction) RequiredKeys() (keys []string) {
+	keys = []string{"url", "method"}
+	return
+}
+
+func (httpAction HttpAction) Validate(input Input) (httpReq *HttpActionReq, err error) {
 	httpReq = &HttpActionReq{
-		Url:         input["url"],
-		Method:      HttpMethodT(input["method"]),
+		Url:         input["url"].(string),
+		Method:      HttpMethodT(input["method"].(string)),
 		RequestBody: input["request_body"],
 	}
 	return

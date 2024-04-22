@@ -65,7 +65,7 @@ func (filter *Filter) Compare(input actions.Input) (err error) {
 		inpVal    string
 		isPresent bool
 	)
-	if inpVal, isPresent = input[filter.Name]; !isPresent {
+	if inpVal, isPresent = input[filter.Name].(string); !isPresent {
 		err = fmt.Errorf("Filter Key %s not present in input", filter.Name)
 		return
 	}

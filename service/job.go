@@ -15,8 +15,9 @@ import (
 
 const (
 	// Job Inputs
-	StaticJsonInput  = JobInputT("static_input")
-	JobOutputAsInput = JobInputT("job_output_as_input")
+	StaticJsonInput    = JobInputT("static_input")
+	JobOutputAsInput   = JobInputT("job_output_as_input")
+	JobInputAsTemplate = JobInputT("job_input_as_template")
 )
 
 var (
@@ -123,6 +124,21 @@ func (job *Job) GetInput(db *gorm.DB) (input actions.Input, err error) {
 			err = fmt.Errorf("[GetInput] Failed to Unmarshal previous job's output %s - %s", string(prevJobExecution.Output), err)
 			return
 		}
+	case JobInputAsTemplate:
+		var (
+			jobInpTemplate *JobInputTemplate
+			parsedTemplate string
+		)
+		if jobInpTemplate, err = NewJobInputTemplate(db, job, job.JobInputValue); err != nil {
+			return
+		}
+		if parsedTemplate, err = jobInpTemplate.Parse(); err != nil {
+			return
+		}
+		if err = json.Unmarshal([]byte(parsedTemplate), &input); err != nil {
+			log.Println(parsedTemplate, err)
+			return
+		}
 	default:
 		err = fmt.Errorf("No JobInputType matched for %s", job.JobInputType)
 		return
@@ -151,6 +167,7 @@ func (job *Job) ExecuteJobTemplate(db *gorm.DB) (output JobOutputT, err error) {
 		inp            actions.Input
 		outputMap      actions.Output
 		outputB        []byte
+		baseAction     actions.BaseAction
 	)
 	if inp, err = job.GetInput(db); err != nil {
 		return
@@ -159,7 +176,7 @@ func (job *Job) ExecuteJobTemplate(db *gorm.DB) (output JobOutputT, err error) {
 		err = errors.New(fmt.Sprintf("JobType %s not defined", job.JobType))
 		return
 	}
-	if outputMap, err = actionExecutor.Execute(inp); err != nil {
+	if outputMap, err = baseAction.Execute(actionExecutor, inp); err != nil {
 		return
 	}
 	if outputB, err = json.Marshal(outputMap); err != nil {
