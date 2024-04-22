@@ -3,10 +3,13 @@ package api
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/cronny/service"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+
+	cronnyConfig "github.com/cronny/config"
 )
 
 type (
@@ -26,8 +29,12 @@ type (
 )
 
 func DefaultApiServerConfig() (config *ApiServerConfig) {
+	bindHost := "0.0.0.0"
+	if os.Getenv(cronnyConfig.CronnyEnvVar) == cronnyConfig.DevelopmentEnv {
+		bindHost = "127.0.0.1"
+	}
 	config = &ApiServerConfig{
-		Host: "0.0.0.0",
+		Host: bindHost,
 		Port: "8009",
 	}
 	return
@@ -53,25 +60,26 @@ func NewServer(config *ApiServerConfig) (apiServer *ApiServer, err error) {
 }
 
 func (apiServer *ApiServer) Setup() (err error) {
+	cronnyApiPrefix := "/api/v1/cronny/v1"
 	apiServer.engine.GET("/", apiServer.handler.rootHandler)
 
-	apiServer.engine.GET("/api/cronny/v1/schedules", apiServer.handler.ScheduleIndexHandler)
-	apiServer.engine.POST("/api/cronny/v1/schedules", apiServer.handler.ScheduleCreateHandler)
-	apiServer.engine.PUT("/api/cronny/v1/schedules/:id", apiServer.handler.ScheduleUpdateHandler)
-	apiServer.engine.DELETE("/api/cronny/v1/schedules/:id", apiServer.handler.ScheduleDeleteHandler)
+	apiServer.engine.GET(cronnyApiPrefix+"/schedules", apiServer.handler.ScheduleIndexHandler)
+	apiServer.engine.POST(cronnyApiPrefix+"/schedules", apiServer.handler.ScheduleCreateHandler)
+	apiServer.engine.PUT(cronnyApiPrefix+"/schedules/:id", apiServer.handler.ScheduleUpdateHandler)
+	apiServer.engine.DELETE(cronnyApiPrefix+"/schedules/:id", apiServer.handler.ScheduleDeleteHandler)
 
-	apiServer.engine.GET("/api/cronny/v1/actions", apiServer.handler.ActionIndexHandler)
-	apiServer.engine.GET("/api/cronny/v1/actions/:id", apiServer.handler.ActionShowHandler)
-	apiServer.engine.POST("/api/cronny/v1/actions", apiServer.handler.ActionCreateHandler)
-	apiServer.engine.PUT("/api/cronny/v1/actions/:id", apiServer.handler.ActionUpdateHandler)
-	apiServer.engine.DELETE("/api/cronny/v1/actions/:id", apiServer.handler.ActionDeleteHandler)
+	apiServer.engine.GET(cronnyApiPrefix+"/actions", apiServer.handler.ActionIndexHandler)
+	apiServer.engine.GET(cronnyApiPrefix+"/actions/:id", apiServer.handler.ActionShowHandler)
+	apiServer.engine.POST(cronnyApiPrefix+"/actions", apiServer.handler.ActionCreateHandler)
+	apiServer.engine.PUT(cronnyApiPrefix+"/actions/:id", apiServer.handler.ActionUpdateHandler)
+	apiServer.engine.DELETE(cronnyApiPrefix+"/actions/:id", apiServer.handler.ActionDeleteHandler)
 
-	apiServer.engine.GET("/api/cronny/v1/jobs/:id", apiServer.handler.JobShowHandler)
-	apiServer.engine.POST("/api/cronny/v1/jobs", apiServer.handler.JobCreateHandler)
-	apiServer.engine.PUT("/api/cronny/v1/jobs/:id", apiServer.handler.JobUpdateHandler)
-	apiServer.engine.DELETE("/api/cronny/v1/jobs/:id", apiServer.handler.JobDeleteHandler)
+	apiServer.engine.GET(cronnyApiPrefix+"/jobs/:id", apiServer.handler.JobShowHandler)
+	apiServer.engine.POST(cronnyApiPrefix+"/jobs", apiServer.handler.JobCreateHandler)
+	apiServer.engine.PUT(cronnyApiPrefix+"/jobs/:id", apiServer.handler.JobUpdateHandler)
+	apiServer.engine.DELETE(cronnyApiPrefix+"/jobs/:id", apiServer.handler.JobDeleteHandler)
 
-	apiServer.engine.GET("/api/cronny/v1/job_templates", apiServer.handler.JobTemplateIndexHandler)
+	apiServer.engine.GET(cronnyApiPrefix+"/job_templates", apiServer.handler.JobTemplateIndexHandler)
 
 	return
 }

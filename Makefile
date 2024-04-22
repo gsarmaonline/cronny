@@ -1,20 +1,20 @@
 run:
 	make setup
-	go run cmd/trigger.go
+	CRONNY_ENV=development go run cmd/trigger.go
 
 runall:
 	make setup
-	go run cmd/all/all.go
+	CRONNY_ENV=development go run cmd/all/all.go
 
 runapi:
 	make setup
-	go run cmd/api/api.go
+	CRONNY_ENV=development go run cmd/api/api.go
 
 seed:
 	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_dev;" 
 	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_test;" 
 	make setup
-	go run cmd/seed/seed.go
+	CRONNY_ENV=development go run cmd/seed/seed.go
 
 setup:
 	mysql -uroot -e "CREATE DATABASE IF NOT EXISTS cronny_dev;" 
