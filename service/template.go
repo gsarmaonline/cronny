@@ -1,11 +1,12 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 
+	"github.com/cronny/actions"
 	"gorm.io/gorm"
 )
 
@@ -34,7 +35,7 @@ func NewJobInputTemplate(db *gorm.DB, job *Job, searchPool string) (inpTemplate 
 }
 
 func (inpTemplate *JobInputTemplate) findMatchingIndexes() (matches [][]int, err error) {
-	re := regexp.MustCompile(`{{([^}]+)}}`)
+	re := regexp.MustCompile(`<<([^>]+)>>`)
 	matches = re.FindAllStringSubmatchIndex(inpTemplate.SearchPool, -1)
 	return
 }
@@ -44,7 +45,7 @@ func (inpTemplate *JobInputTemplate) findMatchingIndexes() (matches [][]int, err
 // attribute of the output
 func (inpTemplate *JobInputTemplate) validateElem(matchedStr string) (err error) {
 	matchedSp := strings.Split(matchedStr, KeywordDelimiter)
-	if len(matchedSp) < 2 {
+	if len(matchedSp) < 3 {
 		err = fmt.Errorf("Not enough elements for matched string %s", matchedStr)
 		return
 	}
@@ -62,9 +63,10 @@ func (inpTemplate *JobInputTemplate) validateElem(matchedStr string) (err error)
 func (inpTemplate *JobInputTemplate) findElem(matchedElem []int) (elemStr string, err error) {
 	var (
 		latestJobExec *JobExecution
+		jobOutput     actions.Output
 	)
-	log.Println(inpTemplate.SearchPool, matchedElem)
-	matchedStr := inpTemplate.SearchPool[matchedElem[2]:matchedElem[3]]
+	jobOutput = make(actions.Output)
+	matchedStr := inpTemplate.SearchPool[matchedElem[2]+1 : matchedElem[3]-1]
 	if inpTemplate.validateElem(matchedStr); err != nil {
 		return
 	}
@@ -79,13 +81,17 @@ func (inpTemplate *JobInputTemplate) findElem(matchedElem []int) (elemStr string
 	if latestJobExec, err = referredJob.GetLatestJobExecution(inpTemplate.db); err != nil {
 		return
 	}
-	elemStr = string(latestJobExec.Output)
+	if err = json.Unmarshal([]byte(string(latestJobExec.Output)), &jobOutput); err != nil {
+		return
+	}
+	fmt.Println("yoyoyoy", jobOutput, matchedSp)
+	elemStr = jobOutput[strings.TrimSpace(matchedSp[3])].(string)
 	return
 }
 
 func (inpTemplate *JobInputTemplate) replaceStrWithElem(matchedElem []int, toReplaceWith string) (err error) {
-	inpTemplate.Result += inpTemplate.SearchPool[inpTemplate.lastModifiedIndex:(matchedElem[0]-1)] + toReplaceWith
-	inpTemplate.lastModifiedIndex = matchedElem[3] + 1
+	inpTemplate.Result += inpTemplate.SearchPool[inpTemplate.lastModifiedIndex:(matchedElem[0])] + toReplaceWith
+	inpTemplate.lastModifiedIndex = matchedElem[1]
 	return
 }
 
@@ -107,7 +113,7 @@ func (inpTemplate *JobInputTemplate) Parse() (parsedTemplate string, err error) 
 			return
 		}
 	}
-	inpTemplate.Result += inpTemplate.SearchPool[inpTemplate.lastModifiedIndex:(len(inpTemplate.SearchPool) - 1)]
+	inpTemplate.Result += inpTemplate.SearchPool[inpTemplate.lastModifiedIndex:(len(inpTemplate.SearchPool))]
 	parsedTemplate = inpTemplate.Result
 	return
 }
