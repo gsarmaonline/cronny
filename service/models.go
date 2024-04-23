@@ -155,8 +155,9 @@ func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
 		return
 	case AbsoluteScheduleType:
 		execTime, err = schedule.GetAbsoluteExecutionTime()
+		return
 	default:
-		err = fmt.Errorf("ScheduleType not supported. Received ScheduleType %s", schedule.ScheduleType)
+		err = fmt.Errorf("ScheduleType not supported. Received ScheduleType %d", schedule.ScheduleType)
 		return
 	}
 	return

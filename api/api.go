@@ -80,6 +80,7 @@ func (apiServer *ApiServer) Setup() (err error) {
 	apiServer.engine.DELETE(cronnyApiPrefix+"/jobs/:id", apiServer.handler.JobDeleteHandler)
 
 	apiServer.engine.GET(cronnyApiPrefix+"/job_templates", apiServer.handler.JobTemplateIndexHandler)
+	apiServer.engine.POST(cronnyApiPrefix+"/job_templates", apiServer.handler.jobTemplateCreateHandler)
 
 	return
 }

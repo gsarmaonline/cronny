@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/cronny/service"
@@ -29,14 +30,16 @@ func (handler *Handler) ScheduleCreateHandler(c *gin.Context) {
 		schedule *service.Schedule
 		err      error
 	)
+	schedule = &service.Schedule{}
 	if err = c.ShouldBindJSON(schedule); err != nil {
+		log.Println(schedule, err)
 		c.JSON(400, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 	schedule.ScheduleExecType = service.AwsExecType
-	schedule.ScheduleType = service.ScheduleTypeT(service.InactiveScheduleStatus)
+	schedule.ScheduleStatus = service.ScheduleStatusT(service.InactiveScheduleStatus)
 
 	if ex := handler.db.Save(schedule); ex.Error != nil {
 		c.JSON(500, gin.H{

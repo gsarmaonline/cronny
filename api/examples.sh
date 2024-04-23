@@ -1,52 +1,58 @@
 #!/bin/bash
+#
 
-## Job create
-#curl -XPOST http://127.0.0.1:8009/api/cronny/v1/jobs -H 'Content-Type: application/json' --data @- << EOF
-#{
-#    "name": "job-1",
-#    "action_id": 1,
-#    "job_type": "http",
-#    "job_input_type": "static_input",
-#    "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}"
-#}
-#EOF
+make setup
 
-## Job update
-#curl -XPUT http://127.0.0.1:8009/api/cronny/v1/jobs/5 -H 'Content-Type: application/json' --data @- << EOF
-#{
-#    "name": "job-5",
-#    "action_id": 1,
-#    "job_type": "http",
-#    "job_input_type": "static_input",
-#    "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}"
-#}
-#EOF
+URL="http://127.0.0.1:8009"
 
-## Action create
-#curl -XPOST http://127.0.0.1:8009/api/cronny/v1/actions -H 'Content-Type: application/json' --data @- << EOF
-#{
-#    "name": "action-2"
-#}
-#EOF
+# Job Template create
+curl -XPOST $URL/api/cronny/v1/job_templates -H 'Content-Type: application/json' --data @- << EOF
+{
+    "name": "http"
+}
+EOF
 
-## Action update
-#curl -XPUT http://127.0.0.1:8009/api/cronny/v1/actions/5 -H 'Content-Type: application/json' --data @- << EOF
-#{
-#    "name": "job-5",
-#    "action_id": 1,
-#    "job_type": "http",
-#    "job_input_type": "static_input",
-#    "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}"
-#}
-#EOF
+# Job Template create
+curl -XPOST $URL/api/cronny/v1/job_templates -H 'Content-Type: application/json' --data @- << EOF
+{
+    "name": "slack"
+}
+EOF
+
+# Action create
+curl -XPOST $URL/api/cronny/v1/actions -H 'Content-Type: application/json' --data @- << EOF
+{
+    "name": "action-1"
+}
+EOF
+
+# Job create
+curl -XPOST http://127.0.0.1:8009/api/cronny/v1/jobs -H 'Content-Type: application/json' --data @- << EOF
+{
+    "name": "job-1",
+    "action_id": 1,
+    "job_type": "http",
+    "job_input_type": "static_input",
+    "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
+    "is_root_job": true,
+    "job_template_id": 1
+}
+EOF
 
 # Schedule create
 curl -XPOST http://127.0.0.1:8009/api/cronny/v1/schedules -H 'Content-Type: application/json' --data @- << EOF
 {
-    "name": "schedule-2",
+    "name": "schedule-1",
     "schedule_type": 3,
     "schedule_value": "10",
     "schedule_unit": "second",
-    "action_id": 2
+    "action_id": 1
+}
+EOF
+
+# Schedule update
+curl -XPUT http://127.0.0.1:8009/api/cronny/v1/schedules/1 -H 'Content-Type: application/json' --data @- << EOF
+{
+    "schedule_status": 1
 }
 EOF

@@ -19,3 +19,8 @@ seed:
 setup:
 	mysql -uroot -e "CREATE DATABASE IF NOT EXISTS cronny_dev;" 
 	mysql -uroot -e "CREATE DATABASE IF NOT EXISTS cronny_test;" 
+
+clean:
+	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_dev;" 
+	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_test;" 
+	make setup
