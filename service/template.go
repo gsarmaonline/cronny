@@ -84,7 +84,6 @@ func (inpTemplate *JobInputTemplate) findElem(matchedElem []int) (elemStr string
 	if err = json.Unmarshal([]byte(string(latestJobExec.Output)), &jobOutput); err != nil {
 		return
 	}
-	fmt.Println("yoyoyoy", jobOutput, matchedSp)
 	elemStr = jobOutput[strings.TrimSpace(matchedSp[3])].(string)
 	return
 }

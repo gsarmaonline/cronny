@@ -1,9 +1,7 @@
 #!/bin/bash
 #
 
-make setup
-
-URL="http://127.0.0.1:8009"
+URL="https://cronnyapi.fly.dev"
 
 # Job Template create
 curl -XPOST $URL/api/cronny/v1/job_templates -H 'Content-Type: application/json' --data @- << EOF
@@ -27,7 +25,7 @@ curl -XPOST $URL/api/cronny/v1/actions -H 'Content-Type: application/json' --dat
 EOF
 
 # Job create
-curl -XPOST http://127.0.0.1:8009/api/cronny/v1/jobs -H 'Content-Type: application/json' --data @- << EOF
+curl -XPOST $URL/api/cronny/v1/jobs -H 'Content-Type: application/json' --data @- << EOF
 {
     "name": "job-1",
     "action_id": 1,
@@ -40,18 +38,18 @@ curl -XPOST http://127.0.0.1:8009/api/cronny/v1/jobs -H 'Content-Type: applicati
 EOF
 
 # Schedule create
-curl -XPOST http://127.0.0.1:8009/api/cronny/v1/schedules -H 'Content-Type: application/json' --data @- << EOF
+curl -XPOST $URL/api/cronny/v1/schedules -H 'Content-Type: application/json' --data @- << EOF
 {
     "name": "schedule-1",
     "schedule_type": 3,
     "schedule_value": "10",
-    "schedule_unit": "second",
+    "schedule_unit": "minute",
     "action_id": 1
 }
 EOF
 
 # Schedule update
-curl -XPUT http://127.0.0.1:8009/api/cronny/v1/schedules/1 -H 'Content-Type: application/json' --data @- << EOF
+curl -XPUT $URL/api/cronny/v1/schedules/1 -H 'Content-Type: application/json' --data @- << EOF
 {
     "schedule_status": 1
 }

@@ -85,7 +85,21 @@ func (apiServer *ApiServer) Setup() (err error) {
 	return
 }
 
+func (apiServer *ApiServer) runCleanerJobs() (err error) {
+	var (
+		execCleaner *service.JobExecutionCleaner
+	)
+	if execCleaner, err = service.NewJobExecutionCleaner(apiServer.db); err != nil {
+		return
+	}
+	go execCleaner.Run()
+	return
+}
+
 func (apiServer *ApiServer) Run() (err error) {
+	if err = apiServer.runCleanerJobs(); err != nil {
+		return
+	}
 	if err = apiServer.engine.Run(fmt.Sprintf(
 		"%s:%s",
 		apiServer.config.Host,

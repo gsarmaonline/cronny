@@ -58,7 +58,7 @@ func getAction(db *gorm.DB) (action *service.Action) {
 	db.Save(jobThree)
 	jobTwo := &service.Job{
 		Name:          "job-2",
-		JobType:       "slack",
+		JobType:       "logger",
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
@@ -78,7 +78,7 @@ func getAction(db *gorm.DB) (action *service.Action) {
 	// Update jobTwo's input value with jobOne's ID
 	jobTwo.JobInputType = service.JobInputAsTemplate
 	jobTwo.JobInputValue = strconv.Itoa(int(jobOne.ID))
-	jobTwo.JobInputValue = "{\"slack_api_token\": \"xoxb-6411969666804-7020910569552-v8882wCVsSy6gwqV4KeF1f1e\", \"channel_id\": \"C06VC3RAKNE\", \"message\": \"<< job__job-1__output__title >> message from job-1: << job__job-1__output__title >>\"}"
+	jobTwo.JobInputValue = "{\"message\": \"hello from cronny: << job__job-1__output__title >> \"}"
 	db.Save(jobTwo)
 	return
 }
