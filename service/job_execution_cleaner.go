@@ -31,7 +31,7 @@ func (execCleaner *JobExecutionCleaner) runIter() (totalCleaned uint32, err erro
 	}
 	for _, job := range jobs {
 		jobExecutions := []*JobExecution{}
-		if ex := execCleaner.db.Where("job_id = ?", job.ID).Find(&jobExecutions); ex.Error != nil {
+		if ex := execCleaner.db.Where("job_id = ?", job.ID).Order("execution_stop_time").Find(&jobExecutions); ex.Error != nil {
 			err = ex.Error
 			return
 		}
