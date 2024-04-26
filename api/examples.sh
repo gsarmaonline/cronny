@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-URL="https://cronnyapi.fly.dev"
+URL="http://127.0.0.1:8009"
 
 # Job Template create
 curl -XPOST $URL/api/cronny/v1/job_templates -H 'Content-Type: application/json' --data @- << EOF

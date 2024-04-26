@@ -24,3 +24,6 @@ clean:
 	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_dev;" 
 	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_test;" 
 	make setup
+
+runexamples:
+	bash api/examples.sh

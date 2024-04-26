@@ -87,7 +87,7 @@ func main() {
 	db, _ := service.NewDb(nil)
 	action := getAction(db)
 
-	for idx := 0; idx < 10; idx++ {
+	for idx := 0; idx < 1; idx++ {
 		sched := &service.Schedule{
 			Name: fmt.Sprintf("sched-%d", idx),
 
