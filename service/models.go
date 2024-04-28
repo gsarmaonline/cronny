@@ -64,6 +64,8 @@ type (
 
 		ScheduleStatus ScheduleStatusT `json:"schedule_status" gorm:"index"`
 
+		EndsAt string `json:"ends_at"`
+
 		Action   *Action `json:"action"`
 		ActionID uint    `json:"action_id"`
 	}
