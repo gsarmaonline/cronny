@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/cronny/service"
 	"gorm.io/gorm"
@@ -94,6 +95,8 @@ func main() {
 			ScheduleType:  service.RelativeScheduleType,
 			ScheduleValue: "10",
 			ScheduleUnit:  service.SecondScheduleUnit,
+
+			EndsAt: time.Now().UTC().Add(2 * time.Minute).Format(time.RFC3339),
 
 			ScheduleStatus: service.PendingScheduleStatus,
 

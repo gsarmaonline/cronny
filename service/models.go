@@ -165,10 +165,46 @@ func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
 	return
 }
 
+func (schedule *Schedule) ShouldEnd(db *gorm.DB) (shouldEnd bool) {
+	var (
+		endsAt time.Time
+		err    error
+	)
+	shouldEnd = false
+	if schedule.EndsAt == "" {
+		return
+	}
+	if endsAt, err = time.Parse(time.RFC3339, schedule.EndsAt); err != nil {
+		return
+	}
+	if time.Now().UTC().After(endsAt) {
+		shouldEnd = true
+		return
+	}
+	return
+}
+
+func (schedule *Schedule) End(db *gorm.DB) (err error) {
+	schedule.ScheduleStatus = ProcessedScheduleStatus
+	if ex := db.Save(schedule); ex.Error != nil {
+		err = ex.Error
+		return
+	}
+	return
+}
+
 func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err error) {
 	var (
 		execTime time.Time
 	)
+	// If the schedule is supposed to end, then don't create
+	// the next trigger
+	if schedule.ShouldEnd(db) {
+		if schedule.End(db); err != nil {
+			return
+		}
+		return
+	}
 	if execTime, err = schedule.GetExecutionTime(); err != nil {
 		return
 	}
