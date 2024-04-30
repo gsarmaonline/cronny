@@ -63,24 +63,28 @@ func (apiServer *ApiServer) Setup() (err error) {
 	cronnyApiPrefix := "/api/cronny/v1"
 	apiServer.engine.GET("/", apiServer.handler.rootHandler)
 
-	apiServer.engine.GET(cronnyApiPrefix+"/schedules", apiServer.handler.ScheduleIndexHandler)
-	apiServer.engine.POST(cronnyApiPrefix+"/schedules", apiServer.handler.ScheduleCreateHandler)
-	apiServer.engine.PUT(cronnyApiPrefix+"/schedules/:id", apiServer.handler.ScheduleUpdateHandler)
-	apiServer.engine.DELETE(cronnyApiPrefix+"/schedules/:id", apiServer.handler.ScheduleDeleteHandler)
+	authorized := apiServer.engine.Group(cronnyApiPrefix)
+	authorized.Use(AuthMiddleware())
+	{
+		authorized.GET("/schedules", apiServer.handler.ScheduleIndexHandler)
+		authorized.POST("/schedules", apiServer.handler.ScheduleCreateHandler)
+		authorized.PUT("/schedules/:id", apiServer.handler.ScheduleUpdateHandler)
+		authorized.DELETE("/schedules/:id", apiServer.handler.ScheduleDeleteHandler)
 
-	apiServer.engine.GET(cronnyApiPrefix+"/actions", apiServer.handler.ActionIndexHandler)
-	apiServer.engine.GET(cronnyApiPrefix+"/actions/:id", apiServer.handler.ActionShowHandler)
-	apiServer.engine.POST(cronnyApiPrefix+"/actions", apiServer.handler.ActionCreateHandler)
-	apiServer.engine.PUT(cronnyApiPrefix+"/actions/:id", apiServer.handler.ActionUpdateHandler)
-	apiServer.engine.DELETE(cronnyApiPrefix+"/actions/:id", apiServer.handler.ActionDeleteHandler)
+		authorized.GET("/actions", apiServer.handler.ActionIndexHandler)
+		authorized.GET("/actions/:id", apiServer.handler.ActionShowHandler)
+		authorized.POST("/actions", apiServer.handler.ActionCreateHandler)
+		authorized.PUT("/actions/:id", apiServer.handler.ActionUpdateHandler)
+		authorized.DELETE("/actions/:id", apiServer.handler.ActionDeleteHandler)
 
-	apiServer.engine.GET(cronnyApiPrefix+"/jobs/:id", apiServer.handler.JobShowHandler)
-	apiServer.engine.POST(cronnyApiPrefix+"/jobs", apiServer.handler.JobCreateHandler)
-	apiServer.engine.PUT(cronnyApiPrefix+"/jobs/:id", apiServer.handler.JobUpdateHandler)
-	apiServer.engine.DELETE(cronnyApiPrefix+"/jobs/:id", apiServer.handler.JobDeleteHandler)
+		authorized.GET("/jobs/:id", apiServer.handler.JobShowHandler)
+		authorized.POST("/jobs", apiServer.handler.JobCreateHandler)
+		authorized.PUT("/jobs/:id", apiServer.handler.JobUpdateHandler)
+		authorized.DELETE("/jobs/:id", apiServer.handler.JobDeleteHandler)
 
-	apiServer.engine.GET(cronnyApiPrefix+"/job_templates", apiServer.handler.JobTemplateIndexHandler)
-	apiServer.engine.POST(cronnyApiPrefix+"/job_templates", apiServer.handler.jobTemplateCreateHandler)
+		authorized.GET("/job_templates", apiServer.handler.JobTemplateIndexHandler)
+		authorized.POST("/job_templates", apiServer.handler.jobTemplateCreateHandler)
+	}
 
 	return
 }
