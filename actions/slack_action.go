@@ -11,8 +11,12 @@ type (
 	SlackMessageAction struct{}
 )
 
-func (slackMsgAction SlackMessageAction) RequiredKeys() (keys []string) {
-	keys = []string{"slack_api_token", "channel_id", "message"}
+func (slackMsgAction SlackMessageAction) RequiredKeys() (keys []ActionKey) {
+	keys = []ActionKey{
+		ActionKey{"slack_api_token", StringActionKeyType},
+		ActionKey{"channel_id", StringActionKeyType},
+		ActionKey{"message", StringActionKeyType},
+	}
 	return
 }
 

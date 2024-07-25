@@ -64,6 +64,7 @@ func (apiServer *ApiServer) Setup() (err error) {
 	apiServer.engine.GET("/", apiServer.handler.rootHandler)
 
 	authorized := apiServer.engine.Group(cronnyApiPrefix)
+	// TODO: AuthMiddleware not implemented
 	authorized.Use(AuthMiddleware())
 	{
 		authorized.GET("/schedules", apiServer.handler.ScheduleIndexHandler)

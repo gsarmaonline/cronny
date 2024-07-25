@@ -28,8 +28,8 @@ type (
 	}
 )
 
-func (httpAction HttpAction) RequiredKeys() (keys []string) {
-	keys = []string{"url", "method"}
+func (httpAction HttpAction) RequiredKeys() (keys []ActionKey) {
+	keys = []ActionKey{ActionKey{"url", StringActionKeyType}, ActionKey{"method", StringActionKeyType}}
 	return
 }
 

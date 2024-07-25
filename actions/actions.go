@@ -2,22 +2,34 @@ package actions
 
 import "fmt"
 
+const (
+	NumberActionKeyType = ActionKeyT(0)
+	StringActionKeyType = ActionKeyT(1)
+	FloatActionKeyType  = ActionKeyT(2)
+)
+
 type (
+	ActionKeyT     uint8
 	ActionExecutor interface {
-		RequiredKeys() []string
+		RequiredKeys() []ActionKey
 		Execute(Input) (Output, error)
 	}
 
 	Input  map[string]interface{}
 	Output map[string]interface{}
 
+	ActionKey struct {
+		Name    string
+		KeyType ActionKeyT
+	}
+
 	BaseAction struct{}
 )
 
 func (baseAction BaseAction) Validate(action ActionExecutor, input Input) (err error) {
-	for _, keyName := range action.RequiredKeys() {
-		if _, isPresent := input[keyName]; !isPresent {
-			err = fmt.Errorf("Key %s not present in the input", keyName)
+	for _, actionKey := range action.RequiredKeys() {
+		if _, isPresent := input[actionKey.Name]; !isPresent {
+			err = fmt.Errorf("Key %s not present in the input", actionKey.Name)
 			return
 		}
 	}

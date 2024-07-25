@@ -7,7 +7,7 @@ type (
 	}
 )
 
-func (loggerAction LoggerAction) RequiredKeys() (keys []string) {
+func (loggerAction LoggerAction) RequiredKeys() (keys []ActionKey) {
 	return
 }
 

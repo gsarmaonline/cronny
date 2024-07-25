@@ -25,6 +25,7 @@ var (
 		"http":   actions.HttpAction{},
 		"logger": actions.LoggerAction{},
 		"slack":  actions.SlackMessageAction{},
+		"docker": actions.DockerAction{},
 	}
 )
 
