@@ -106,7 +106,7 @@ func (dockerAction DockerAction) Execute(input Input) (output Output, err error)
 	if dockerExecutor, err = NewDockerExecutor(input["image"].(string)); err != nil {
 		return
 	}
-	if err = dockerExecutor.Execute(); err != nil {
+	if _, err = dockerExecutor.Execute(); err != nil {
 		return
 	}
 	return
