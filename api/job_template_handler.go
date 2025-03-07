@@ -1,13 +1,13 @@
 package api
 
 import (
-	"github.com/cronny/service"
+	"github.com/cronny/models"
 	"github.com/gin-gonic/gin"
 )
 
 func (handler *Handler) JobTemplateIndexHandler(c *gin.Context) {
 	var (
-		jobTemplates []*service.JobTemplate
+		jobTemplates []*models.JobTemplate
 	)
 	if ex := handler.db.Find(&jobTemplates); ex.Error != nil {
 		c.JSON(500, gin.H{
@@ -23,10 +23,10 @@ func (handler *Handler) JobTemplateIndexHandler(c *gin.Context) {
 }
 func (handler *Handler) jobTemplateCreateHandler(c *gin.Context) {
 	var (
-		jobTemplate *service.JobTemplate
+		jobTemplate *models.JobTemplate
 		err         error
 	)
-	jobTemplate = &service.JobTemplate{}
+	jobTemplate = &models.JobTemplate{}
 	if err = c.ShouldBindJSON(jobTemplate); err != nil {
 		c.JSON(400, gin.H{
 			"message": err.Error(),

@@ -1,4 +1,4 @@
-package service
+package models
 
 import (
 	"fmt"
@@ -94,5 +94,15 @@ func NewPostgresDb(cfg *DbConfig) (db *gorm.DB, err error) {
 	if db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{}); err != nil {
 		return
 	}
+	return
+}
+
+func SetupModels(db *gorm.DB) (err error) {
+	db.AutoMigrate(&Schedule{})
+	db.AutoMigrate(&Trigger{})
+	db.AutoMigrate(&Action{})
+	db.AutoMigrate(&Job{})
+	db.AutoMigrate(&JobTemplate{})
+	db.AutoMigrate(&JobExecution{})
 	return
 }

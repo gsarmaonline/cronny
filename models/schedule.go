@@ -1,4 +1,4 @@
-package service
+package models
 
 import (
 	"errors"
@@ -11,9 +11,6 @@ import (
 )
 
 const (
-	// Schedule Execution Type
-	InternalExecType = ExecTypeT(1)
-	AwsExecType      = ExecTypeT(2)
 
 	// Schedule Types
 	AbsoluteScheduleType  = ScheduleTypeT(1)
@@ -28,12 +25,6 @@ const (
 	// of the entire Schedule is Valid
 	InactiveScheduleStatus = ScheduleStatusT(4)
 
-	// Trigger Status
-	ScheduledTriggerStatus = TriggerStatusT(1)
-	ExecutingTriggerStatus = TriggerStatusT(2)
-	CompletedTriggerStatus = TriggerStatusT(3)
-	FailedTriggerStatus    = TriggerStatusT(4)
-
 	// Schedule Units
 	SecondScheduleUnit = "second"
 	MinuteScheduleUnit = "minute"
@@ -42,13 +33,9 @@ const (
 )
 
 type (
-	ExecTypeT       int
+
 	ScheduleTypeT   int
 	ScheduleStatusT int
-	TriggerStatusT  int
-
-	JobInputT  string
-	JobOutputT string
 
 	Schedule struct {
 		gorm.Model
@@ -69,35 +56,7 @@ type (
 		Action   *Action `json:"action"`
 		ActionID uint    `json:"action_id"`
 	}
-
-	Trigger struct {
-		gorm.Model
-
-		StartAt time.Time `json:"start_at" gorm:"index"`
-
-		Schedule   *Schedule `json:"schedule"`
-		ScheduleID uint      `json:"schedule_id"`
-
-		TriggerStatus TriggerStatusT `json:"trigger_status" gorm:"index"`
-	}
-
-	Action struct {
-		gorm.Model
-
-		Name string `json:"name"`
-		Jobs []*Job `json:"jobs"`
-	}
 )
-
-func SetupModels(db *gorm.DB) (err error) {
-	db.AutoMigrate(&Schedule{})
-	db.AutoMigrate(&Trigger{})
-	db.AutoMigrate(&Action{})
-	db.AutoMigrate(&Job{})
-	db.AutoMigrate(&JobTemplate{})
-	db.AutoMigrate(&JobExecution{})
-	return
-}
 
 // ==========================================================
 // Schedules
@@ -200,7 +159,7 @@ func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err erro
 	// If the schedule is supposed to end, then don't create
 	// the next trigger
 	if schedule.ShouldEnd(db) {
-		if schedule.End(db); err != nil {
+		if err = schedule.End(db); err != nil {
 			return
 		}
 		return
@@ -216,52 +175,6 @@ func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err erro
 	}
 	if db = db.Create(trigger); db.Error != nil {
 		err = db.Error
-		return
-	}
-	return
-}
-
-// ==========================================================
-// Triggers
-func (trigger Trigger) GetTriggersForTime(db *gorm.DB, status TriggerStatusT) (triggers []*Trigger, err error) {
-	if db = db.Preload("Schedule.Action").Where(
-		"trigger_status = ? AND start_at < ?",
-		ScheduledTriggerStatus,
-		time.Now().UTC(),
-	).Find(&triggers); db.Error != nil {
-
-		err = db.Error
-		return
-	}
-	return
-}
-
-func (trigger *Trigger) UpdateStatusWithLocks(db *gorm.DB, status TriggerStatusT) (err error) {
-	trigger.TriggerStatus = status
-	if db := db.Save(trigger); db.Error != nil {
-		err = db.Error
-		return
-	}
-	return
-}
-
-func (trigger *Trigger) Execute(db *gorm.DB) (err error) {
-	log.Println("Executing Trigger for Schedule", trigger.Schedule.Name, "with ID", trigger.ScheduleID)
-	if err = trigger.Schedule.Action.Execute(db); err != nil {
-		return
-	}
-	return
-}
-
-// ==========================================================
-// Actions
-func (action *Action) Execute(db *gorm.DB) (err error) {
-	job := &Job{}
-	if ex := db.Where("is_root_job = ? AND action_id = ?", true, action.ID).First(job); ex.Error != nil {
-		err = ex.Error
-		return
-	}
-	if err = job.Execute(db); err != nil {
 		return
 	}
 	return

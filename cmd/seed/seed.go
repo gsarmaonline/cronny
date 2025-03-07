@@ -6,27 +6,27 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cronny/service"
+	"github.com/cronny/models"
 	"gorm.io/gorm"
 )
 
-func getJobTemplate() (jobTemplate *service.JobTemplate) {
-	jobTemplate = &service.JobTemplate{
+func getJobTemplate() (jobTemplate *models.JobTemplate) {
+	jobTemplate = &models.JobTemplate{
 		Name:     "http",
-		ExecType: service.InternalExecType,
+		ExecType: models.InternalExecType,
 	}
 	return
 }
 
 func getConditionForJobOne(jobId uint) (conditionS string) {
-	condition := service.Condition{
-		Rules: []*service.ConditionRule{
-			&service.ConditionRule{
+	condition := models.Condition{
+		Rules: []*models.ConditionRule{
+			&models.ConditionRule{
 				JobID: jobId,
-				Filters: []*service.Filter{
-					&service.Filter{
+				Filters: []*models.Filter{
+					&models.Filter{
 						Name:           "userId",
-						ComparisonType: service.EqualityComparison,
+						ComparisonType: models.EqualityComparison,
 						ShouldMatch:    true,
 						Value:          "1",
 					},
@@ -39,35 +39,35 @@ func getConditionForJobOne(jobId uint) (conditionS string) {
 	return
 }
 
-func getAction(db *gorm.DB) (action *service.Action) {
-	action = &service.Action{
+func getAction(db *gorm.DB) (action *models.Action) {
+	action = &models.Action{
 		Name: "http-action",
 	}
 	db.Save(action)
 	jobTemplate := getJobTemplate()
 	db.Save(jobTemplate)
 
-	jobThree := &service.Job{
+	jobThree := &models.Job{
 		Name:          "job-3",
 		JobType:       "slack",
-		JobInputType:  service.StaticJsonInput,
+		JobInputType:  models.StaticJsonInput,
 		JobInputValue: "{\"slack_api_token\": \"xoxb-6411969666804-7020910569552-v8882wCVsSy6gwqV4KeF1f1e\", \"channel_id\": \"C06VC3RAKNE\", \"message\": \"hello from cronny\"}",
 
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
 	db.Save(jobThree)
-	jobTwo := &service.Job{
+	jobTwo := &models.Job{
 		Name:          "job-2",
 		JobType:       "logger",
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
 	db.Save(jobTwo)
-	jobOne := &service.Job{
+	jobOne := &models.Job{
 		Name:          "job-1",
 		JobType:       "http",
-		JobInputType:  service.StaticJsonInput,
+		JobInputType:  models.StaticJsonInput,
 		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
 		Condition:     getConditionForJobOne(jobTwo.ID),
 		IsRootJob:     true,
@@ -77,7 +77,7 @@ func getAction(db *gorm.DB) (action *service.Action) {
 	db.Save(jobOne)
 
 	// Update jobTwo's input value with jobOne's ID
-	jobTwo.JobInputType = service.JobInputAsTemplate
+	jobTwo.JobInputType = models.JobInputAsTemplate
 	jobTwo.JobInputValue = strconv.Itoa(int(jobOne.ID))
 	jobTwo.JobInputValue = "{\"message\": \"hello from cronny: << job__job-1__output__title >> \"}"
 	db.Save(jobTwo)
@@ -85,20 +85,20 @@ func getAction(db *gorm.DB) (action *service.Action) {
 }
 
 func main() {
-	db, _ := service.NewDb(nil)
+	db, _ := models.NewDb(nil)
 	action := getAction(db)
 
 	for idx := 0; idx < 10; idx++ {
-		sched := &service.Schedule{
+		sched := &models.Schedule{
 			Name: fmt.Sprintf("sched-%d", idx),
 
-			ScheduleType:  service.RelativeScheduleType,
+			ScheduleType:  models.RelativeScheduleType,
 			ScheduleValue: "10",
-			ScheduleUnit:  service.SecondScheduleUnit,
+			ScheduleUnit:  models.SecondScheduleUnit,
 
 			EndsAt: time.Now().UTC().Add(2 * time.Minute).Format(time.RFC3339),
 
-			ScheduleStatus: service.PendingScheduleStatus,
+			ScheduleStatus: models.PendingScheduleStatus,
 
 			Action: action,
 		}

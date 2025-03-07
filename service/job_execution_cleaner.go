@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/cronny/models"
 	"gorm.io/gorm"
 )
 
@@ -24,13 +25,13 @@ func NewJobExecutionCleaner(db *gorm.DB) (execCleaner *JobExecutionCleaner, err 
 }
 
 func (execCleaner *JobExecutionCleaner) runIter() (totalCleaned uint32, err error) {
-	jobs := []*Job{}
+	jobs := []*models.Job{}
 	if ex := execCleaner.db.Find(&jobs); ex.Error != nil {
 		err = ex.Error
 		return
 	}
 	for _, job := range jobs {
-		jobExecutions := []*JobExecution{}
+		jobExecutions := []*models.JobExecution{}
 		if ex := execCleaner.db.Where("job_id = ?", job.ID).Order("execution_stop_time").Find(&jobExecutions); ex.Error != nil {
 			err = ex.Error
 			return
@@ -40,7 +41,7 @@ func (execCleaner *JobExecutionCleaner) runIter() (totalCleaned uint32, err erro
 			jobExecutions = jobExecutions[0:toCleanIdx]
 		}
 		for _, jobExecution := range jobExecutions {
-			if ex := execCleaner.db.Delete(&JobExecution{}, jobExecution.ID); ex.Error != nil {
+			if ex := execCleaner.db.Delete(&models.JobExecution{}, jobExecution.ID); ex.Error != nil {
 				err = ex.Error
 				return
 			}

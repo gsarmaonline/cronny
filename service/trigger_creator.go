@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/cronny/models"
 	"gorm.io/gorm"
 )
 
@@ -20,11 +21,11 @@ func NewTriggerCreator(db *gorm.DB) (tc *TriggerCreator, err error) {
 	return
 }
 
-func (tc *TriggerCreator) ProcessSchedule(schedule *Schedule) (trigger *Trigger, err error) {
+func (tc *TriggerCreator) ProcessSchedule(schedule *models.Schedule) (trigger *models.Trigger, err error) {
 	if trigger, err = schedule.CreateTrigger(tc.db); err != nil {
 		return
 	}
-	if err = schedule.UpdateStatusWithLocks(tc.db, ProcessingScheduleStatus); err != nil {
+	if err = schedule.UpdateStatusWithLocks(tc.db, models.ProcessingScheduleStatus); err != nil {
 		return
 	}
 	return
@@ -32,10 +33,10 @@ func (tc *TriggerCreator) ProcessSchedule(schedule *Schedule) (trigger *Trigger,
 
 func (tc *TriggerCreator) RunOneIter() (schedProcessCount int, err error) {
 	var (
-		schedules []*Schedule
-		sSched    Schedule
+		schedules []*models.Schedule
+		sSched    models.Schedule
 	)
-	if schedules, err = sSched.GetSchedules(tc.db, PendingScheduleStatus); err != nil {
+	if schedules, err = sSched.GetSchedules(tc.db, models.PendingScheduleStatus); err != nil {
 		return
 	}
 	for _, schedule := range schedules {

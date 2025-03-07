@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/cronny/models"
 	"github.com/cronny/service"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -47,7 +48,7 @@ func NewServer(config *ApiServerConfig) (apiServer *ApiServer, err error) {
 		config: config,
 		engine: gin.Default(),
 	}
-	if apiServer.db, err = service.NewDb(nil); err != nil {
+	if apiServer.db, err = models.NewDb(nil); err != nil {
 		log.Println("DB not set")
 	}
 	if apiServer.handler, err = NewHandler(apiServer.db); err != nil {

@@ -3,13 +3,13 @@ package api
 import (
 	"strconv"
 
-	"github.com/cronny/service"
+	"github.com/cronny/models"
 	"github.com/gin-gonic/gin"
 )
 
 func (handler *Handler) JobShowHandler(c *gin.Context) {
 	var (
-		job   *service.Job
+		job   *models.Job
 		jobId int
 		err   error
 	)
@@ -34,10 +34,10 @@ func (handler *Handler) JobShowHandler(c *gin.Context) {
 
 func (handler *Handler) JobCreateHandler(c *gin.Context) {
 	var (
-		job *service.Job
+		job *models.Job
 		err error
 	)
-	job = &service.Job{}
+	job = &models.Job{}
 	if err = c.ShouldBindJSON(job); err != nil {
 		c.JSON(400, gin.H{
 			"message": err.Error(),
@@ -59,13 +59,13 @@ func (handler *Handler) JobCreateHandler(c *gin.Context) {
 
 func (handler *Handler) JobUpdateHandler(c *gin.Context) {
 	var (
-		job        *service.Job
-		updatedJob *service.Job
+		job        *models.Job
+		updatedJob *models.Job
 		jobId      int
 		err        error
 	)
-	job = &service.Job{}
-	updatedJob = &service.Job{}
+	job = &models.Job{}
+	updatedJob = &models.Job{}
 
 	if jobId, err = strconv.Atoi(c.Param("id")); err != nil {
 		c.JSON(400, gin.H{
@@ -100,7 +100,7 @@ func (handler *Handler) JobUpdateHandler(c *gin.Context) {
 
 func (handler *Handler) JobDeleteHandler(c *gin.Context) {
 	var (
-		job   *service.Job
+		job   *models.Job
 		jobId int
 		err   error
 	)
@@ -110,7 +110,7 @@ func (handler *Handler) JobDeleteHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Delete(&service.Job{}, jobId); ex.Error != nil {
+	if ex := handler.db.Delete(&models.Job{}, jobId); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})

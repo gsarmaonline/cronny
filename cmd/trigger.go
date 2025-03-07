@@ -3,13 +3,14 @@ package main
 import (
 	"log"
 
+	"github.com/cronny/models"
 	"github.com/cronny/service"
 	"gorm.io/gorm"
 )
 
 func getDb() (db *gorm.DB, err error) {
 	// TODO: Add config file here
-	if db, err = service.NewDb(nil); err != nil {
+	if db, err = models.NewDb(nil); err != nil {
 		return
 	}
 	return

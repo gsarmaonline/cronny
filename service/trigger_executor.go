@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/cronny/models"
 	"gorm.io/gorm"
 )
 
@@ -14,22 +15,22 @@ const (
 type (
 	TriggerExecutor struct {
 		db        *gorm.DB
-		triggerCh chan *Trigger
+		triggerCh chan *models.Trigger
 	}
 )
 
 func NewTriggerExecutor(db *gorm.DB) (te *TriggerExecutor, err error) {
 	te = &TriggerExecutor{
 		db:        db,
-		triggerCh: make(chan *Trigger, 1024),
+		triggerCh: make(chan *models.Trigger, 1024),
 	}
 	return
 }
 
-func (te *TriggerExecutor) ProcessOne(trigger *Trigger) (err error) {
-	triggerExecStatus := CompletedTriggerStatus
+func (te *TriggerExecutor) ProcessOne(trigger *models.Trigger) (err error) {
+	triggerExecStatus := models.CompletedTriggerStatus
 	// Update the Trigger's status
-	if err = trigger.UpdateStatusWithLocks(te.db, ExecutingTriggerStatus); err != nil {
+	if err = trigger.UpdateStatusWithLocks(te.db, models.ExecutingTriggerStatus); err != nil {
 		return
 	}
 	// Create the next Trigger
@@ -38,7 +39,7 @@ func (te *TriggerExecutor) ProcessOne(trigger *Trigger) (err error) {
 	}
 	// Execute the trigger
 	if err = trigger.Execute(te.db); err != nil {
-		triggerExecStatus = FailedTriggerStatus
+		triggerExecStatus = models.FailedTriggerStatus
 	}
 	// Update the trigger's executed status
 	if err = trigger.UpdateStatusWithLocks(te.db, triggerExecStatus); err != nil {
@@ -49,10 +50,10 @@ func (te *TriggerExecutor) ProcessOne(trigger *Trigger) (err error) {
 
 func (te *TriggerExecutor) RunOneIter() (triggersProcessedCount int, err error) {
 	var (
-		triggers []*Trigger
-		sTrig    Trigger
+		triggers []*models.Trigger
+		sTrig    models.Trigger
 	)
-	if triggers, err = sTrig.GetTriggersForTime(te.db, ScheduledTriggerStatus); err != nil {
+	if triggers, err = sTrig.GetTriggersForTime(te.db, models.ScheduledTriggerStatus); err != nil {
 		return
 	}
 	for _, trigger := range triggers {

@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/cronny/api"
+	"github.com/cronny/models"
 	"github.com/cronny/service"
 	"gorm.io/gorm"
 )
@@ -21,7 +22,7 @@ func main() {
 	exitCh = make(chan bool)
 	log.Println("Starting Trigger services")
 
-	if db, err = service.NewDb(nil); err != nil {
+	if db, err = models.NewDb(nil); err != nil {
 		log.Fatal(err)
 	}
 	if tc, err = service.NewTriggerCreator(db); err != nil {
