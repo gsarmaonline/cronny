@@ -3,13 +3,13 @@ package api
 import (
 	"strconv"
 
-	"github.com/cronny/service"
+	"github.com/cronny/models"
 	"github.com/gin-gonic/gin"
 )
 
 func (handler *Handler) ActionIndexHandler(c *gin.Context) {
 	var (
-		actions []*service.Action
+		actions []*models.Action
 	)
 	if ex := handler.db.Find(&actions); ex.Error != nil {
 		c.JSON(500, gin.H{
@@ -26,7 +26,7 @@ func (handler *Handler) ActionIndexHandler(c *gin.Context) {
 
 func (handler *Handler) ActionShowHandler(c *gin.Context) {
 	var (
-		action   *service.Action
+		action   *models.Action
 		actionId int
 		err      error
 	)
@@ -51,10 +51,10 @@ func (handler *Handler) ActionShowHandler(c *gin.Context) {
 
 func (handler *Handler) ActionCreateHandler(c *gin.Context) {
 	var (
-		action *service.Action
+		action *models.Action
 		err    error
 	)
-	action = &service.Action{}
+	action = &models.Action{}
 	if err = c.ShouldBindJSON(action); err != nil {
 		c.JSON(400, gin.H{
 			"message": err.Error(),
@@ -76,13 +76,13 @@ func (handler *Handler) ActionCreateHandler(c *gin.Context) {
 
 func (handler *Handler) ActionUpdateHandler(c *gin.Context) {
 	var (
-		action        *service.Action
-		updatedAction *service.Action
+		action        *models.Action
+		updatedAction *models.Action
 		actionId      int
 		err           error
 	)
-	action = &service.Action{}
-	updatedAction = &service.Action{}
+	action = &models.Action{}
+	updatedAction = &models.Action{}
 
 	if actionId, err = strconv.Atoi(c.Param("id")); err != nil {
 		c.JSON(400, gin.H{
@@ -117,7 +117,7 @@ func (handler *Handler) ActionUpdateHandler(c *gin.Context) {
 
 func (handler *Handler) ActionDeleteHandler(c *gin.Context) {
 	var (
-		action   *service.Action
+		action   *models.Action
 		actionId int
 		err      error
 	)
@@ -127,7 +127,7 @@ func (handler *Handler) ActionDeleteHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Delete(&service.Action{}, actionId); ex.Error != nil {
+	if ex := handler.db.Delete(&models.Action{}, actionId); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
