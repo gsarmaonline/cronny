@@ -3,11 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/cronny/models"
 	"gorm.io/gorm"
+)
+
+var (
+	SlackToken = os.Getenv("SLACK_TOKEN")
 )
 
 func getJobTemplate() (jobTemplate *models.JobTemplate) {

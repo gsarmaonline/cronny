@@ -31,6 +31,17 @@ func NewDockerExecutor(image string) (dockerExecutor *DockerExecutor, err error)
 	return
 }
 
+func (dockerAction DockerAction) RequiredKeys() (keys []ActionKey) {
+	keys = []ActionKey{
+		{"image", StringActionKeyType},
+	}
+	return
+}
+
+func (dockerAction DockerAction) Validate(input Input) (err error) {
+	return
+}
+
 func (dockerExecutor *DockerExecutor) Prepare() (resp container.CreateResponse, err error) {
 	if _, err = dockerExecutor.client.ImagePull(dockerExecutor.ctx, dockerExecutor.Image, image.PullOptions{}); err != nil {
 		return
@@ -80,17 +91,6 @@ func (dockerExecutor *DockerExecutor) Execute() (output string, err error) {
 		return
 	}
 
-	return
-}
-
-func (dockerAction DockerAction) RequiredKeys() (keys []ActionKey) {
-	keys = []ActionKey{
-		ActionKey{"image", StringActionKeyType},
-	}
-	return
-}
-
-func (dockerAction DockerAction) Validate(input Input) (err error) {
 	return
 }
 
