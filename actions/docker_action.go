@@ -85,9 +85,7 @@ func (dockerExecutor *DockerExecutor) Execute() (output string, err error) {
 
 func (dockerAction DockerAction) RequiredKeys() (keys []ActionKey) {
 	keys = []ActionKey{
-		ActionKey{"slack_api_token", StringActionKeyType},
-		ActionKey{"channel_id", StringActionKeyType},
-		ActionKey{"message", StringActionKeyType},
+		ActionKey{"image", StringActionKeyType},
 	}
 	return
 }

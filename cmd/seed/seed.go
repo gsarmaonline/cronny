@@ -51,7 +51,7 @@ func getAction(db *gorm.DB) (action *models.Action) {
 		Name:          "job-3",
 		JobType:       "slack",
 		JobInputType:  models.StaticJsonInput,
-		JobInputValue: "{\"slack_api_token\": \"xoxb-6411969666804-7020910569552-v8882wCVsSy6gwqV4KeF1f1e\", \"channel_id\": \"C06VC3RAKNE\", \"message\": \"hello from cronny\"}",
+		JobInputValue: "{\"slack_api_token\": \"xba-644241awbaw\", \"channel_id\": \"channel_1\", \"message\": \"hello from cronny\"}",
 
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
