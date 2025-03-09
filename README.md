@@ -1,6 +1,6 @@
 # Cronny
 
-## Deploying and running Cronny
+## Quickstart
 
 ### Locally
 
