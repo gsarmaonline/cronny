@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/cronny/actions"
+	"github.com/cronny/config"
 )
 
 const (
@@ -52,6 +53,9 @@ type (
 
 		ProceedCondition string `json:"proceed_condition"`
 
+		// Job Configuration controls
+		JobTimeoutInSecs int `json:"job_timeout_in_secs"`
+
 		JobExecutions []*JobExecution `json:"job_executions"`
 	}
 
@@ -83,6 +87,20 @@ type (
 
 // ==========================================================
 // Job
+
+func (job *Job) setDefaultValues() (err error) {
+	if job.JobTimeoutInSecs == 0 {
+		job.JobTimeoutInSecs = config.DefaultJobTimeoutInSecs
+	}
+	return
+}
+
+func (job *Job) BeforeSave(db *gorm.DB) (err error) {
+	if err = job.setDefaultValues(); err != nil {
+		return
+	}
+	return
+}
 
 func (job *Job) GetLatestJobExecution(db *gorm.DB) (jobExecution *JobExecution, err error) {
 	jobExecution = &JobExecution{}

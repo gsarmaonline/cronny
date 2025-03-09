@@ -8,4 +8,7 @@ var (
 
 	// Environment variables
 	CronnyEnvVar = "CRONNY_ENV"
+
+	// Job Configuration Control
+	DefaultJobTimeoutInSecs = 60
 )
