@@ -1,7 +1,3 @@
-run:
-	make setup
-	CRONNY_ENV=development go run cmd/trigger.go
-
 runall:
 	make setup
 	CRONNY_ENV=development go run cmd/all/all.go

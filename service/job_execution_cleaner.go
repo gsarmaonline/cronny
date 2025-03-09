@@ -19,7 +19,7 @@ type (
 func NewJobExecutionCleaner(db *gorm.DB) (execCleaner *JobExecutionCleaner, err error) {
 	execCleaner = &JobExecutionCleaner{
 		db:                         db,
-		AllowedJobExecutionsPerJob: 30,
+		AllowedJobExecutionsPerJob: 10,
 	}
 	return
 }

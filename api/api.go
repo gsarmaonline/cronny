@@ -79,6 +79,7 @@ func (apiServer *ApiServer) Setup() (err error) {
 		authorized.PUT("/actions/:id", apiServer.handler.ActionUpdateHandler)
 		authorized.DELETE("/actions/:id", apiServer.handler.ActionDeleteHandler)
 
+		authorized.GET("/jobs", apiServer.handler.JobIndexHandler)
 		authorized.GET("/jobs/:id", apiServer.handler.JobShowHandler)
 		authorized.POST("/jobs", apiServer.handler.JobCreateHandler)
 		authorized.PUT("/jobs/:id", apiServer.handler.JobUpdateHandler)

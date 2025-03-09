@@ -33,7 +33,6 @@ const (
 )
 
 type (
-
 	ScheduleTypeT   int
 	ScheduleStatusT int
 
@@ -57,6 +56,36 @@ type (
 		ActionID uint    `json:"action_id"`
 	}
 )
+
+func (schedule *Schedule) validateScheduleType() (err error) {
+	switch schedule.ScheduleType {
+	case AbsoluteScheduleType, RecurringScheduleType, RelativeScheduleType:
+		return
+	default:
+		err = errors.New("ScheduleType not supported")
+	}
+	return
+}
+
+func (schedule *Schedule) validateScheduleUnit() (err error) {
+	switch schedule.ScheduleUnit {
+	case SecondScheduleUnit, MinuteScheduleUnit, HourScheduleUnit, DayScheduleUnit:
+		return
+	default:
+		err = errors.New("ScheduleUnit not supported")
+	}
+	return
+}
+
+func (schedule *Schedule) BeforeSave(tx *gorm.DB) (err error) {
+	if err = schedule.validateScheduleType(); err != nil {
+		return
+	}
+	if err = schedule.validateScheduleUnit(); err != nil {
+		return
+	}
+	return
+}
 
 // ==========================================================
 // Schedules

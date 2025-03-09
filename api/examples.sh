@@ -43,7 +43,7 @@ curl -XPOST $URL/api/cronny/v1/schedules -H 'Content-Type: application/json' --d
     "name": "schedule-1",
     "schedule_type": 3,
     "schedule_value": "10",
-    "schedule_unit": "minute",
+    "schedule_unit": "second",
     "action_id": 1
 }
 EOF

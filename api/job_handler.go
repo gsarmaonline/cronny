@@ -7,6 +7,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (handler *Handler) JobIndexHandler(c *gin.Context) {
+	var (
+		jobs []*models.Job
+	)
+	if ex := handler.db.Preload("JobExecutions").Find(&jobs); ex.Error != nil {
+		c.JSON(500, gin.H{
+			"message": ex.Error.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"jobs":    jobs,
+		"message": "success",
+	})
+	return
+}
+
 func (handler *Handler) JobShowHandler(c *gin.Context) {
 	var (
 		job   *models.Job
