@@ -64,27 +64,41 @@ func (apiServer *ApiServer) Setup() (err error) {
 	cronnyApiPrefix := "/api/cronny/v1"
 	apiServer.engine.GET("/", apiServer.handler.rootHandler)
 
+	// Authentication routes - public
+	auth := apiServer.engine.Group(cronnyApiPrefix)
+	{
+		auth.POST("/auth/login", UserLoginHandler(apiServer.db))
+		auth.POST("/auth/register", UserRegisterHandler(apiServer.db))
+	}
+
+	// Protected routes
 	authorized := apiServer.engine.Group(cronnyApiPrefix)
-	// TODO: AuthMiddleware not implemented
 	authorized.Use(AuthMiddleware())
 	{
+		// User routes
+		authorized.GET("/auth/me", UserMeHandler(apiServer.db))
+
+		// Schedules
 		authorized.GET("/schedules", apiServer.handler.ScheduleIndexHandler)
 		authorized.POST("/schedules", apiServer.handler.ScheduleCreateHandler)
 		authorized.PUT("/schedules/:id", apiServer.handler.ScheduleUpdateHandler)
 		authorized.DELETE("/schedules/:id", apiServer.handler.ScheduleDeleteHandler)
 
+		// Actions
 		authorized.GET("/actions", apiServer.handler.ActionIndexHandler)
 		authorized.GET("/actions/:id", apiServer.handler.ActionShowHandler)
 		authorized.POST("/actions", apiServer.handler.ActionCreateHandler)
 		authorized.PUT("/actions/:id", apiServer.handler.ActionUpdateHandler)
 		authorized.DELETE("/actions/:id", apiServer.handler.ActionDeleteHandler)
 
+		// Jobs
 		authorized.GET("/jobs", apiServer.handler.JobIndexHandler)
 		authorized.GET("/jobs/:id", apiServer.handler.JobShowHandler)
 		authorized.POST("/jobs", apiServer.handler.JobCreateHandler)
 		authorized.PUT("/jobs/:id", apiServer.handler.JobUpdateHandler)
 		authorized.DELETE("/jobs/:id", apiServer.handler.JobDeleteHandler)
 
+		// Job Templates
 		authorized.GET("/job_templates", apiServer.handler.JobTemplateIndexHandler)
 		authorized.POST("/job_templates", apiServer.handler.jobTemplateCreateHandler)
 	}

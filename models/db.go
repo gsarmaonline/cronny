@@ -98,6 +98,7 @@ func NewPostgresDb(cfg *DbConfig) (db *gorm.DB, err error) {
 }
 
 func SetupModels(db *gorm.DB) (err error) {
+	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Schedule{})
 	db.AutoMigrate(&Trigger{})
 	db.AutoMigrate(&Action{})
