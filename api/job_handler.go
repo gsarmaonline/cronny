@@ -11,12 +11,33 @@ func (handler *Handler) JobIndexHandler(c *gin.Context) {
 	var (
 		jobs []*models.Job
 	)
-	if ex := handler.db.Preload("JobExecutions").Find(&jobs); ex.Error != nil {
-		c.JSON(500, gin.H{
-			"message": ex.Error.Error(),
-		})
-		return
+	
+	// Check if action_id query param exists
+	actionIDStr := c.Query("action_id")
+	if actionIDStr != "" {
+		actionID, err := strconv.Atoi(actionIDStr)
+		if err != nil {
+			c.JSON(400, gin.H{
+				"message": "Invalid action_id format",
+			})
+			return
+		}
+		
+		if ex := handler.db.Preload("JobExecutions").Where("action_id = ?", actionID).Find(&jobs); ex.Error != nil {
+			c.JSON(500, gin.H{
+				"message": ex.Error.Error(),
+			})
+			return
+		}
+	} else {
+		if ex := handler.db.Preload("JobExecutions").Find(&jobs); ex.Error != nil {
+			c.JSON(500, gin.H{
+				"message": ex.Error.Error(),
+			})
+			return
+		}
 	}
+	
 	c.JSON(200, gin.H{
 		"jobs":    jobs,
 		"message": "success",

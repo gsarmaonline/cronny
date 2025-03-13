@@ -15,6 +15,7 @@ export interface User {
   id: number;
   username: string;
   email: string;
+  avatar_url?: string;
 }
 
 export interface AuthResponse {
@@ -22,9 +23,22 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface GoogleLoginRequest {
+  id_token: string;
+}
+
 class AuthService {
   async login(credentials: LoginRequest): Promise<User> {
     const response = await api.post<AuthResponse>('/auth/login', credentials);
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response.data.user;
+  }
+
+  async loginWithGoogle(idToken: string): Promise<User> {
+    const response = await api.post<AuthResponse>('/auth/google', { id_token: idToken });
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));

@@ -61,6 +61,21 @@ func NewServer(config *ApiServerConfig) (apiServer *ApiServer, err error) {
 }
 
 func (apiServer *ApiServer) Setup() (err error) {
+	// Add CORS middleware
+	apiServer.engine.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
 	cronnyApiPrefix := "/api/cronny/v1"
 	apiServer.engine.GET("/", apiServer.handler.rootHandler)
 
@@ -69,6 +84,7 @@ func (apiServer *ApiServer) Setup() (err error) {
 	{
 		auth.POST("/auth/login", UserLoginHandler(apiServer.db))
 		auth.POST("/auth/register", UserRegisterHandler(apiServer.db))
+		auth.POST("/auth/google", GoogleLoginHandler(apiServer.db))
 	}
 
 	// Protected routes
@@ -80,6 +96,7 @@ func (apiServer *ApiServer) Setup() (err error) {
 
 		// Schedules
 		authorized.GET("/schedules", apiServer.handler.ScheduleIndexHandler)
+		authorized.GET("/schedules/:id", apiServer.handler.ScheduleShowHandler)
 		authorized.POST("/schedules", apiServer.handler.ScheduleCreateHandler)
 		authorized.PUT("/schedules/:id", apiServer.handler.ScheduleUpdateHandler)
 		authorized.DELETE("/schedules/:id", apiServer.handler.ScheduleDeleteHandler)

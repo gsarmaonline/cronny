@@ -6,6 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   register: (registration: RegisterRequest) => Promise<void>;
   logout: () => void;
 }
@@ -15,6 +16,7 @@ export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   loading: true,
   login: async () => {},
+  loginWithGoogle: async () => {},
   register: async () => {},
   logout: () => {},
 });
@@ -45,6 +47,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (idToken: string) => {
+    try {
+      const loggedInUser = await authService.loginWithGoogle(idToken);
+      setUser(loggedInUser);
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const register = async (registration: RegisterRequest) => {
     try {
       const registeredUser = await authService.register(registration);
@@ -66,6 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isAuthenticated: !!user,
         loading,
         login,
+        loginWithGoogle,
         register,
         logout,
       }}

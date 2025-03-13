@@ -25,6 +25,31 @@ func (handler *Handler) ScheduleIndexHandler(c *gin.Context) {
 	return
 }
 
+func (handler *Handler) ScheduleShowHandler(c *gin.Context) {
+	var (
+		schedule   *models.Schedule
+		scheduleId int
+		err        error
+	)
+	if scheduleId, err = strconv.Atoi(c.Param("id")); err != nil {
+		c.JSON(400, gin.H{
+			"message": "Improper ID format",
+		})
+		return
+	}
+	if ex := handler.db.Preload("Action").Where("id = ?", uint(scheduleId)).First(&schedule); ex.Error != nil {
+		c.JSON(404, gin.H{
+			"message": "Schedule not found",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"schedule": schedule,
+		"message":  "success",
+	})
+	return
+}
+
 func (handler *Handler) ScheduleCreateHandler(c *gin.Context) {
 	var (
 		schedule *models.Schedule

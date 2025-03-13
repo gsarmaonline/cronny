@@ -1,5 +1,16 @@
 import api from './api';
 
+export interface JobExecution {
+  ID: number;
+  CreatedAt: string;
+  UpdatedAt: string;
+  DeletedAt: string | null;
+  job_id: number;
+  output: string;
+  execution_start_time: string;
+  execution_stop_time: string;
+}
+
 export interface Job {
   ID: number;
   CreatedAt: string;
@@ -15,6 +26,7 @@ export interface Job {
   is_root_job: boolean;
   proceed_condition: string;
   job_timeout_in_secs: number;
+  job_executions: JobExecution[];
 }
 
 export interface JobResponse {
@@ -28,8 +40,9 @@ export interface JobsResponse {
 }
 
 class JobService {
-  async getJobs(): Promise<Job[]> {
-    const response = await api.get<JobsResponse>('/jobs');
+  async getJobs(actionId?: number): Promise<Job[]> {
+    const url = actionId ? `/jobs?action_id=${actionId}` : '/jobs';
+    const response = await api.get<JobsResponse>(url);
     return response.data.jobs;
   }
 

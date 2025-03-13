@@ -8,9 +8,11 @@ import (
 type User struct {
 	gorm.Model
 
-	Username string `json:"username" gorm:"type:varchar(100);uniqueIndex"`
-	Email    string `json:"email" gorm:"type:varchar(100);uniqueIndex"`
-	Password string `json:"-" gorm:"type:varchar(255)"` // Password is never returned in JSON
+	Username  string `json:"username" gorm:"type:varchar(100);uniqueIndex"`
+	Email     string `json:"email" gorm:"type:varchar(100);uniqueIndex"`
+	Password  string `json:"-" gorm:"type:varchar(255)"` // Password is never returned in JSON
+	GoogleID  string `json:"-" gorm:"type:varchar(255);uniqueIndex"` // Google ID for OAuth
+	AvatarURL string `json:"avatar_url" gorm:"type:varchar(255)"` // Profile picture URL
 }
 
 // HashPassword hashes the user's password
