@@ -23,11 +23,154 @@ import JobForm from './components/jobs/JobForm';
 // Create a theme
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#1976d2',
+      main: '#ffa726', // Vibrant orange
+      light: '#ffd95b',
+      dark: '#c77800',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#ff9800', // Deep orange
+      light: '#ffc947',
+      dark: '#c66900',
+    },
+    background: {
+      default: '#0a0a0a', // Very dark orange-tinted black
+      paper: '#121212', // Slightly lighter orange-tinted black
+    },
+    text: {
+      primary: '#ffa726', // Vibrant orange
+      secondary: '#ff9800', // Deep orange
+    },
+  },
+  typography: {
+    fontFamily: '"IBM Plex Mono", monospace',
+    h1: {
+      fontWeight: 600,
+      letterSpacing: '0.5px',
+      textShadow: '0 0 8px rgba(255, 167, 38, 0.5)',
+    },
+    h2: {
+      fontWeight: 600,
+      letterSpacing: '0.5px',
+      textShadow: '0 0 8px rgba(255, 167, 38, 0.5)',
+    },
+    h3: {
+      fontWeight: 600,
+      letterSpacing: '0.5px',
+      textShadow: '0 0 8px rgba(255, 167, 38, 0.5)',
+    },
+    h4: {
+      fontWeight: 600,
+      letterSpacing: '0.5px',
+      textShadow: '0 0 8px rgba(255, 167, 38, 0.5)',
+    },
+    h5: {
+      fontWeight: 600,
+      letterSpacing: '0.5px',
+      textShadow: '0 0 8px rgba(255, 167, 38, 0.5)',
+    },
+    h6: {
+      fontWeight: 600,
+      letterSpacing: '0.5px',
+      textShadow: '0 0 8px rgba(255, 167, 38, 0.5)',
+    },
+    body1: {
+      letterSpacing: '0.5px',
+      textShadow: '0 0 4px rgba(255, 167, 38, 0.3)',
+    },
+    body2: {
+      letterSpacing: '0.5px',
+      textShadow: '0 0 4px rgba(255, 167, 38, 0.3)',
+    },
+  },
+  components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          backgroundColor: '#121212',
+          boxShadow: '0 0 20px rgba(255, 167, 38, 0.1)',
+          border: '1px solid rgba(255, 167, 38, 0.1)',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            boxShadow: '0 0 30px rgba(255, 167, 38, 0.15)',
+            border: '1px solid rgba(255, 167, 38, 0.2)',
+          },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          backgroundColor: '#121212',
+          boxShadow: '0 0 20px rgba(255, 167, 38, 0.1)',
+          border: '1px solid rgba(255, 167, 38, 0.1)',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            boxShadow: '0 0 30px rgba(255, 167, 38, 0.15)',
+            border: '1px solid rgba(255, 167, 38, 0.2)',
+          },
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          backgroundColor: '#121212',
+          boxShadow: '0 0 20px rgba(255, 167, 38, 0.1)',
+          borderBottom: '1px solid rgba(255, 167, 38, 0.1)',
+          '& .MuiTypography-root': {
+            fontFamily: '"Montserrat", sans-serif',
+            fontWeight: 300,
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            fontSize: '1.5rem',
+            textShadow: '0 0 8px rgba(255, 167, 38, 0.3)',
+          },
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundImage: 'none',
+          backgroundColor: '#121212',
+          boxShadow: '0 0 20px rgba(255, 167, 38, 0.1)',
+          borderRight: '1px solid rgba(255, 167, 38, 0.1)',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          letterSpacing: '0.5px',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            boxShadow: '0 0 15px rgba(255, 167, 38, 0.3)',
+          },
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            fontFamily: '"IBM Plex Mono", monospace',
+            letterSpacing: '0.5px',
+            transition: 'all 0.3s ease-in-out',
+            '&:hover': {
+              boxShadow: '0 0 15px rgba(255, 167, 38, 0.1)',
+            },
+            '&.Mui-focused': {
+              boxShadow: '0 0 20px rgba(255, 167, 38, 0.2)',
+            },
+          },
+        },
+      },
     },
   },
 });
