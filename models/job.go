@@ -57,6 +57,9 @@ type (
 		JobTimeoutInSecs int `json:"job_timeout_in_secs"`
 
 		JobExecutions []*JobExecution `json:"job_executions"`
+
+		UserID uint  `json:"user_id" gorm:"index"`
+		User   *User `json:"user"`
 	}
 
 	JobTemplate struct {
@@ -70,6 +73,9 @@ type (
 		Code string `json:"code"`
 
 		Jobs []*Job `json:"jobs"`
+
+		UserID uint  `json:"user_id" gorm:"index"`
+		User   *User `json:"user"`
 	}
 
 	JobExecution struct {
@@ -82,6 +88,9 @@ type (
 
 		ExecutionStartTime time.Time `json:"execution_start_time" gorm:"type:TIMESTAMP;null;default:null"`
 		ExecutionStopTime  time.Time `json:"execution_stop_time" gorm:"type:TIMESTAMP;null;default:null"`
+
+		UserID uint  `json:"user_id" gorm:"index"`
+		User   *User `json:"user"`
 	}
 )
 

@@ -14,11 +14,9 @@ const (
 	ExecutingTriggerStatus = TriggerStatusT(2)
 	CompletedTriggerStatus = TriggerStatusT(3)
 	FailedTriggerStatus    = TriggerStatusT(4)
-
 )
 
 type (
-
 	Trigger struct {
 		gorm.Model
 
@@ -28,8 +26,10 @@ type (
 		ScheduleID uint      `json:"schedule_id"`
 
 		TriggerStatus TriggerStatusT `json:"trigger_status" gorm:"index"`
-	}
 
+		UserID uint  `json:"user_id" gorm:"index"`
+		User   *User `json:"user"`
+	}
 )
 
 // ==========================================================

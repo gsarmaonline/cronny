@@ -54,6 +54,9 @@ type (
 
 		Action   *Action `json:"action"`
 		ActionID uint    `json:"action_id"`
+
+		UserID uint `json:"user_id" gorm:"index"`
+		User   *User `json:"user"`
 	}
 )
 

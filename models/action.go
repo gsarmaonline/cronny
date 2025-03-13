@@ -24,6 +24,9 @@ type (
 
 		Name string `json:"name"`
 		Jobs []*Job `json:"jobs"`
+
+		UserID uint `json:"user_id" gorm:"index"`
+		User   *User `json:"user"`
 	}
 )
 
