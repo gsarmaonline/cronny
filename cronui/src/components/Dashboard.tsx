@@ -15,6 +15,7 @@ import {
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import jobService from '../services/job.service';
 import scheduleService from '../services/schedule.service';
+import TypewriterText from './common/TypewriterText';
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -55,9 +56,20 @@ const Dashboard: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
+      <Box sx={{ mb: 4 }}>
+        <TypewriterText
+          text="Welcome to your Cronny dashboard"
+          speed={40}
+          delay={0}
+          prefix="$ "
+        />
+        <TypewriterText
+          text="System status: Online"
+          speed={40}
+          delay={1500}
+          prefix="$ "
+        />
+      </Box>
       
       <Grid container spacing={3}>
         <Grid item xs={12} md={6} lg={4}>
@@ -112,19 +124,34 @@ const Dashboard: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Paper sx={{ p: 3, mt: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Welcome to Cronny
-        </Typography>
-        <Typography variant="body1" paragraph>
-          This is the dashboard for the Cronny job scheduling and management system. You can manage your jobs and schedules by clicking on the cards above or using the navigation menu.
-        </Typography>
+      <Paper 
+        sx={{ 
+          p: 3, 
+          mt: 3,
+          background: 'rgba(18, 18, 18, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 167, 38, 0.1)',
+          boxShadow: '0 0 20px rgba(255, 167, 38, 0.1)',
+        }}
+      >
+        <TypewriterText
+          text="Available commands:"
+          speed={40}
+          delay={2500}
+          prefix="$ "
+        />
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
           <Button 
             variant="contained" 
             component={Link} 
             to="/jobs/create"
             color="primary"
+            sx={{
+              background: '#ffa726',
+              '&:hover': {
+                background: '#ff9800',
+              },
+            }}
           >
             Create New Job
           </Button>
@@ -133,6 +160,12 @@ const Dashboard: React.FC = () => {
             component={Link} 
             to="/schedules/create"
             color="secondary"
+            sx={{
+              background: '#ff9800',
+              '&:hover': {
+                background: '#c66900',
+              },
+            }}
           >
             Create New Schedule
           </Button>

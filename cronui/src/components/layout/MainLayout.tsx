@@ -24,6 +24,7 @@ import {
   Logout as LogoutIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import Logo from '../common/Logo';
 
 const drawerWidth = 240;
 
@@ -49,9 +50,7 @@ const MainLayout: React.FC = () => {
   const drawer = (
     <div>
       <Toolbar sx={{ justifyContent: 'center' }}>
-        <Typography variant="h6" noWrap component="div">
-          Cronny
-        </Typography>
+        <Logo variant="small" />
       </Toolbar>
       <Divider />
       <List>
@@ -114,8 +113,8 @@ const MainLayout: React.FC = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Cronny - Cron Job Manager
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: '#ffa726' }}>
+            Cron Job Manager
           </Typography>
           {user && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
