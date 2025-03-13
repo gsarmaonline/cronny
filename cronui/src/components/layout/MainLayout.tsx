@@ -15,6 +15,7 @@ import {
   Toolbar,
   Typography,
   Button,
+  Avatar,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -22,6 +23,7 @@ import {
   Schedule as ScheduleIcon,
   Work as JobIcon,
   Logout as LogoutIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../common/Logo';
@@ -117,11 +119,32 @@ const MainLayout: React.FC = () => {
             Cron Job Manager
           </Typography>
           {user && (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant="body1" sx={{ mr: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Avatar sx={{ width: 28, height: 28, bgcolor: '#ffa726' }}>
+                <PersonIcon sx={{ fontSize: 16 }} />
+              </Avatar>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  fontSize: '0.875rem',
+                  color: '#ffa726',
+                  textTransform: 'none',
+                  letterSpacing: 'normal',
+                  textShadow: 'none',
+                }}
+              >
                 {user.username}
               </Typography>
-              <Button color="inherit" onClick={handleLogout}>
+              <Button 
+                color="inherit" 
+                onClick={handleLogout} 
+                size="small"
+                sx={{ 
+                  fontSize: '0.875rem',
+                  textTransform: 'none',
+                  letterSpacing: 'normal',
+                }}
+              >
                 Logout
               </Button>
             </Box>

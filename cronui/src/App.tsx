@@ -129,6 +129,12 @@ const theme = createTheme({
             textTransform: 'uppercase',
             fontSize: '1.5rem',
             textShadow: '0 0 8px rgba(255, 167, 38, 0.3)',
+            '&.MuiTypography-body2': {
+              fontSize: '0.875rem',
+              textTransform: 'none',
+              letterSpacing: 'normal',
+              textShadow: 'none',
+            },
           },
         },
       },
