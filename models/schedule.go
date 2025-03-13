@@ -55,7 +55,7 @@ type (
 		Action   *Action `json:"action"`
 		ActionID uint    `json:"action_id"`
 
-		UserID uint `json:"user_id" gorm:"index"`
+		UserID uint  `json:"user_id" gorm:"index"`
 		User   *User `json:"user"`
 	}
 )
@@ -141,6 +141,40 @@ func (schedule *Schedule) GetAbsoluteExecutionTime() (execTime time.Time, err er
 	return
 }
 
+func (schedule *Schedule) addTimeInterval(baseTime time.Time, interval int) time.Time {
+	switch schedule.ScheduleUnit {
+	case SecondScheduleUnit:
+		return baseTime.Add(time.Duration(interval) * time.Second)
+	case MinuteScheduleUnit:
+		return baseTime.Add(time.Duration(interval) * time.Minute)
+	case HourScheduleUnit:
+		return baseTime.Add(time.Duration(interval) * time.Hour)
+	case DayScheduleUnit:
+		return baseTime.Add(time.Duration(interval) * 24 * time.Hour)
+	default:
+		return baseTime
+	}
+}
+
+func (schedule *Schedule) GetRecurringExecutionTime() (execTime time.Time, err error) {
+	var timeInterval int
+	currTime := time.Now().UTC()
+
+	if timeInterval, err = strconv.Atoi(schedule.ScheduleValue); err != nil {
+		return
+	}
+
+	// Calculate the next occurrence based on current time
+	execTime = schedule.addTimeInterval(currTime, timeInterval)
+
+	// If the calculated time is in the past, adjust it to the next occurrence
+	if execTime.Before(currTime) {
+		execTime = schedule.addTimeInterval(execTime, timeInterval)
+	}
+
+	return
+}
+
 func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
 	switch schedule.ScheduleType {
 	case RelativeScheduleType:
@@ -148,6 +182,9 @@ func (schedule *Schedule) GetExecutionTime() (execTime time.Time, err error) {
 		return
 	case AbsoluteScheduleType:
 		execTime, err = schedule.GetAbsoluteExecutionTime()
+		return
+	case RecurringScheduleType:
+		execTime, err = schedule.GetRecurringExecutionTime()
 		return
 	default:
 		err = fmt.Errorf("ScheduleType not supported. Received ScheduleType %d", schedule.ScheduleType)
