@@ -19,6 +19,7 @@ import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/ico
 import { actionsApi } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Action } from '../../services/action.service';
+import { Link } from 'react-router-dom';
 
 interface ApiResponse<T> {
   actions: T;
@@ -160,7 +161,20 @@ export const Actions: React.FC = () => {
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Box>
-                    <Typography variant="h6">{action.name}</Typography>
+                    <Typography 
+                      variant="h6" 
+                      component={Link} 
+                      to={`/actions/${action.ID}`}
+                      sx={{ 
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        '&:hover': {
+                          textDecoration: 'underline'
+                        }
+                      }}
+                    >
+                      {action.name}
+                    </Typography>
                     {action.description && (
                       <Typography color="textSecondary" variant="body2">
                         {action.description}

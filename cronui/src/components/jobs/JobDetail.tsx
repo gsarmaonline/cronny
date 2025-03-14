@@ -324,57 +324,74 @@ const JobDetail: React.FC = () => {
           </Grid>
         )}
 
-        {job.job_executions && job.job_executions.length > 0 && (
+        {job.job_executions && (
           <Grid item xs={12}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>Executions</Typography>
                 <Divider sx={{ mb: 2 }} />
                 
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Start Time</TableCell>
-                        <TableCell>Stop Time</TableCell>
-                        <TableCell>Duration</TableCell>
-                        <TableCell>Output</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {job.job_executions.map((execution: JobExecution) => {
-                        const startTime = new Date(execution.execution_start_time);
-                        const stopTime = new Date(execution.execution_stop_time);
-                        const durationMs = stopTime.getTime() - startTime.getTime();
-                        const durationSec = Math.round(durationMs / 1000);
-                        
-                        return (
-                          <TableRow key={execution.ID}>
-                            <TableCell>{execution.ID}</TableCell>
-                            <TableCell>{formatDate(execution.execution_start_time)}</TableCell>
-                            <TableCell>{formatDate(execution.execution_stop_time)}</TableCell>
-                            <TableCell>{durationSec} seconds</TableCell>
-                            <TableCell>
-                              <Accordion>
-                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                  <Typography variant="body2">View Output</Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                  <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
-                                    <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                      {prettyPrintJson(execution.output)}
-                                    </pre>
-                                  </Paper>
-                                </AccordionDetails>
-                              </Accordion>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                {job.job_executions.length === 0 ? (
+                  <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'grey.100' }}>
+                    <Typography>No executions found for this job yet.</Typography>
+                  </Paper>
+                ) : (
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>ID</TableCell>
+                          <TableCell>Status</TableCell>
+                          <TableCell>Start Time</TableCell>
+                          <TableCell>Stop Time</TableCell>
+                          <TableCell>Duration</TableCell>
+                          <TableCell>Output</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {[...job.job_executions]
+                          .sort((a, b) => new Date(b.execution_start_time).getTime() - new Date(a.execution_start_time).getTime())
+                          .map((execution: JobExecution) => {
+                            const startTime = new Date(execution.execution_start_time);
+                            const stopTime = new Date(execution.execution_stop_time);
+                            const durationMs = stopTime.getTime() - startTime.getTime();
+                            const durationSec = Math.round(durationMs / 1000);
+                            
+                            return (
+                              <TableRow key={execution.ID}>
+                                <TableCell>{execution.ID}</TableCell>
+                                <TableCell>
+                                  <Chip 
+                                    label="Completed" 
+                                    color="success" 
+                                    size="small"
+                                    sx={{ minWidth: 100 }}
+                                  />
+                                </TableCell>
+                                <TableCell>{formatDate(execution.execution_start_time)}</TableCell>
+                                <TableCell>{formatDate(execution.execution_stop_time)}</TableCell>
+                                <TableCell>{durationSec} seconds</TableCell>
+                                <TableCell>
+                                  <Accordion>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                      <Typography variant="body2">View Output</Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                      <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
+                                        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                          {prettyPrintJson(execution.output)}
+                                        </pre>
+                                      </Paper>
+                                    </AccordionDetails>
+                                  </Accordion>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
               </CardContent>
             </Card>
           </Grid>

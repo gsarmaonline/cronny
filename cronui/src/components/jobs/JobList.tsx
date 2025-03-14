@@ -165,7 +165,21 @@ const JobList: React.FC = () => {
             <TableBody>
               {jobs.map((job) => (
                 <TableRow key={job.ID}>
-                  <TableCell>{job.name}</TableCell>
+                  <TableCell>
+                    <Typography 
+                      component={Link} 
+                      to={`/jobs/${job.ID}`}
+                      sx={{ 
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        '&:hover': {
+                          textDecoration: 'underline'
+                        }
+                      }}
+                    >
+                      {job.name}
+                    </Typography>
+                  </TableCell>
                   <TableCell>{getJobTypeChip(job.job_type)}</TableCell>
                   <TableCell>{job.job_input_type}</TableCell>
                   <TableCell>

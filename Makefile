@@ -1,6 +1,6 @@
-runall:
+runall: install-concurrently
 	make setup
-	CRONNY_ENV=development go run cmd/all/all.go
+	npx concurrently --kill-others "CRONNY_ENV=development go run cmd/all/all.go" "make ui-start"
 
 runapi:
 	make setup

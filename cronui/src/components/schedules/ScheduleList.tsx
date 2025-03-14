@@ -168,7 +168,21 @@ const ScheduleList: React.FC = () => {
             <TableBody>
               {schedules.map((schedule) => (
                 <TableRow key={schedule.ID}>
-                  <TableCell>{schedule.name}</TableCell>
+                  <TableCell>
+                    <Typography 
+                      component={Link} 
+                      to={`/schedules/${schedule.ID}`}
+                      sx={{ 
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        '&:hover': {
+                          textDecoration: 'underline'
+                        }
+                      }}
+                    >
+                      {schedule.name}
+                    </Typography>
+                  </TableCell>
                   <TableCell>{getScheduleTypeText(schedule.schedule_type)}</TableCell>
                   <TableCell>{schedule.schedule_value}</TableCell>
                   <TableCell>{schedule.schedule_unit}</TableCell>
