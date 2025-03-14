@@ -11,32 +11,50 @@ import {
   CardHeader,
   CardActionArea,
   Button,
+  List,
+  ListItem,
+  ListItemText,
+  Chip,
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import jobService from '../services/job.service';
-import scheduleService from '../services/schedule.service';
-import actionService from '../services/action.service';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import TypewriterText from './common/TypewriterText';
 import api from '../services/api';
 
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+interface DashboardStats {
+  total_jobs: number;
+  total_schedules: number;
+  total_actions: number;
+  job_types: {
+    http_jobs: number;
+    slack_jobs: number;
+    other_jobs: number;
+  };
+  schedule_status: {
+    active: number;
+    inactive: number;
+  };
+  recent_activity: Array<{
+    id: number;
+    type: string;
+    name: string;
+    execution_time: string;
+    status: string;
+  }>;
+}
+
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalJobs: 0,
-    totalSchedules: 0,
-    totalActions: 0,
-  });
+  const [stats, setStats] = useState<DashboardStats | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await api.get('/dashboard/stats');
         if (response.data.stats) {
-          setStats({
-            totalJobs: response.data.stats.total_jobs,
-            totalSchedules: response.data.stats.total_schedules,
-            totalActions: response.data.stats.total_actions,
-          });
+          setStats(response.data.stats);
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -48,13 +66,24 @@ const Dashboard: React.FC = () => {
     fetchData();
   }, []);
 
-  if (loading) {
+  if (loading || !stats) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
         <CircularProgress />
       </Box>
     );
   }
+
+  const jobTypeData = [
+    { name: 'HTTP Jobs', value: stats.job_types.http_jobs },
+    { name: 'Slack Jobs', value: stats.job_types.slack_jobs },
+    { name: 'Other Jobs', value: stats.job_types.other_jobs },
+  ];
+
+  const scheduleStatusData = [
+    { name: 'Active', value: stats.schedule_status.active },
+    { name: 'Inactive', value: stats.schedule_status.inactive },
+  ];
 
   return (
     <Box>
@@ -80,7 +109,7 @@ const Dashboard: React.FC = () => {
               <CardHeader title="Jobs" />
               <CardContent>
                 <Typography variant="h3" align="center">
-                  {stats.totalJobs}
+                  {stats.total_jobs}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" align="center">
                   Total Jobs
@@ -105,7 +134,7 @@ const Dashboard: React.FC = () => {
               <CardHeader title="Schedules" />
               <CardContent>
                 <Typography variant="h3" align="center">
-                  {stats.totalSchedules}
+                  {stats.total_schedules}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" align="center">
                   Total Schedules
@@ -130,7 +159,7 @@ const Dashboard: React.FC = () => {
               <CardHeader title="Actions" />
               <CardContent>
                 <Typography variant="h3" align="center">
-                  {stats.totalActions}
+                  {stats.total_actions}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" align="center">
                   Total Actions
@@ -147,6 +176,83 @@ const Dashboard: React.FC = () => {
                 </Box>
               </CardContent>
             </CardActionArea>
+          </Card>
+        </Grid>
+
+        {/* Job Types Chart */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader title="Job Types Distribution" />
+            <CardContent>
+              <Box sx={{ height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={jobTypeData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {jobTypeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Schedule Status Chart */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader title="Schedule Status" />
+            <CardContent>
+              <Box sx={{ height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={scheduleStatusData}>
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Recent Activity */}
+        <Grid item xs={12}>
+          <Card>
+            <CardHeader title="Recent Activity" />
+            <CardContent>
+              <List>
+                {stats?.recent_activity?.map((activity) => (
+                  <ListItem key={activity.id}>
+                    <ListItemText
+                      primary={activity.name}
+                      secondary={new Date(activity.execution_time).toLocaleString()}
+                    />
+                    <Chip 
+                      label={activity.type === 'job' ? 'Job' : 'Schedule'} 
+                      color={activity.type === 'job' ? 'primary' : 'secondary'}
+                      size="small"
+                    />
+                  </ListItem>
+                ))}
+                {(!stats?.recent_activity || stats.recent_activity.length === 0) && (
+                  <ListItem>
+                    <ListItemText primary="No recent activity" />
+                  </ListItem>
+                )}
+              </List>
+            </CardContent>
           </Card>
         </Grid>
       </Grid>
