@@ -24,6 +24,7 @@ import {
   Work as JobIcon,
   Logout as LogoutIcon,
   Person as PersonIcon,
+  PlayArrow as ActionIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../common/Logo';
@@ -49,6 +50,14 @@ const MainLayout: React.FC = () => {
     navigate('/login');
   };
 
+  const menuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'Actions', icon: <ActionIcon />, path: '/actions' },
+    { text: 'Jobs', icon: <JobIcon />, path: '/jobs' },
+    { text: 'Schedules', icon: <ScheduleIcon />, path: '/schedules' },
+    { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
+  ];
+
   const drawer = (
     <div>
       <Toolbar sx={{ justifyContent: 'center' }}>
@@ -56,30 +65,16 @@ const MainLayout: React.FC = () => {
       </Toolbar>
       <Divider />
       <List>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => handleNavigation('/dashboard')}>
-            <ListItemIcon>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => handleNavigation('/schedules')}>
-            <ListItemIcon>
-              <ScheduleIcon />
-            </ListItemIcon>
-            <ListItemText primary="Schedules" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => handleNavigation('/jobs')}>
-            <ListItemIcon>
-              <JobIcon />
-            </ListItemIcon>
-            <ListItemText primary="Jobs" />
-          </ListItemButton>
-        </ListItem>
+        {menuItems.map((item) => (
+          <ListItem disablePadding key={item.text}>
+            <ListItemButton onClick={() => handleNavigation(item.path)}>
+              <ListItemIcon>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
       </List>
       <Divider />
       <List>

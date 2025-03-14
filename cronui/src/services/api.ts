@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Action } from './action.service';
 
 const API_URL = 'http://localhost:8009';
 const API_PREFIX = '/api/cronny/v1';
@@ -40,5 +41,19 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+interface ApiResponse<T> {
+  actions: T;
+  message: string;
+}
+
+// Actions API
+export const actionsApi = {
+  getActions: () => api.get<ApiResponse<Action[]>>('/actions'),
+  getAction: (id: number) => api.get<ApiResponse<Action>>(`/actions/${id}`),
+  createAction: (data: Partial<Action>) => api.post<ApiResponse<Action>>('/actions', data),
+  updateAction: (id: number, data: Partial<Action>) => api.put<ApiResponse<Action>>(`/actions/${id}`, data),
+  deleteAction: (id: number) => api.delete<ApiResponse<void>>(`/actions/${id}`),
+};
 
 export default api;

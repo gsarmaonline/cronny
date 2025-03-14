@@ -20,6 +20,9 @@ import JobList from './components/jobs/JobList';
 import JobDetail from './components/jobs/JobDetail';
 import JobForm from './components/jobs/JobForm';
 
+// Action Components
+import { Actions } from './components/actions/Actions';
+
 // Create a theme
 const theme = createTheme({
   palette: {
@@ -190,26 +193,26 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            
-            <Route element={<ProtectedRoute />}>
-              <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                
-                {/* Schedule Routes */}
-                <Route path="/schedules" element={<ScheduleList />} />
-                <Route path="/schedules/create" element={<ScheduleForm />} />
-                <Route path="/schedules/edit/:id" element={<ScheduleForm />} />
-                <Route path="/schedules/:id" element={<ScheduleDetail />} />
-                
-                {/* Job Routes */}
-                <Route path="/jobs" element={<JobList />} />
-                <Route path="/jobs/create" element={<JobForm />} />
-                <Route path="/jobs/edit/:id" element={<JobForm />} />
-                <Route path="/jobs/:id" element={<JobDetail />} />
-              </Route>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <MainLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Dashboard />} />
+              <Route path="schedules" element={<ScheduleList />} />
+              <Route path="schedules/new" element={<ScheduleForm />} />
+              <Route path="schedules/:id" element={<ScheduleDetail />} />
+              <Route path="schedules/:id/edit" element={<ScheduleForm />} />
+              <Route path="jobs" element={<JobList />} />
+              <Route path="jobs/new" element={<JobForm />} />
+              <Route path="jobs/:id" element={<JobDetail />} />
+              <Route path="jobs/:id/edit" element={<JobForm />} />
+              <Route path="actions" element={<Actions />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
-            
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
       </AuthProvider>
