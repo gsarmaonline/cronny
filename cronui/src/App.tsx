@@ -9,6 +9,7 @@ import Register from './components/auth/Register';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
 import Dashboard from './components/Dashboard';
+import Profile from './components/profile/Profile';
 
 // Schedule Components
 import ScheduleList from './components/schedules/ScheduleList';
@@ -202,6 +203,7 @@ function App() {
               }
             >
               <Route index element={<Dashboard />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="schedules" element={<ScheduleList />} />
               <Route path="schedules/new" element={<ScheduleForm />} />
               <Route path="schedules/:id" element={<ScheduleDetail />} />

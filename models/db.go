@@ -105,5 +105,7 @@ func SetupModels(db *gorm.DB) (err error) {
 	db.AutoMigrate(&Job{})
 	db.AutoMigrate(&JobTemplate{})
 	db.AutoMigrate(&JobExecution{})
+	db.AutoMigrate(&Plan{})
+	db.AutoMigrate(&Feature{})
 	return
 }

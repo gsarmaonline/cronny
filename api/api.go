@@ -93,6 +93,10 @@ func (apiServer *ApiServer) Setup() (err error) {
 	{
 		// User routes
 		authorized.GET("/auth/me", UserMeHandler(apiServer.db))
+		authorized.GET("/user/profile", apiServer.handler.GetUserProfileHandler)
+		authorized.PUT("/user/profile", apiServer.handler.UpdateUserProfileHandler)
+		authorized.PUT("/user/plan", apiServer.handler.UpdateUserPlanHandler)
+		authorized.GET("/user/plans", apiServer.handler.GetAvailablePlansHandler)
 
 		// Dashboard stats
 		authorized.GET("/dashboard/stats", apiServer.handler.DashboardStatsHandler)

@@ -13,7 +13,15 @@ type User struct {
 	Password  string    `json:"-" gorm:"type:varchar(255)"`             // Password is never returned in JSON
 	GoogleID  string    `json:"-" gorm:"type:varchar(255);uniqueIndex"` // Google ID for OAuth
 	AvatarURL string    `json:"avatar_url" gorm:"type:varchar(255)"`    // Profile picture URL
-	PlanID    uint      `json:"plan_id" gorm:"default:1"`               // Default to Starter plan
+	FirstName string    `json:"first_name" gorm:"type:varchar(100)"`
+	LastName  string    `json:"last_name" gorm:"type:varchar(100)"`
+	Address   string    `json:"address" gorm:"type:text"`
+	City      string    `json:"city" gorm:"type:varchar(100)"`
+	State     string    `json:"state" gorm:"type:varchar(100)"`
+	Country   string    `json:"country" gorm:"type:varchar(100)"`
+	ZipCode   string    `json:"zip_code" gorm:"type:varchar(20)"`
+	Phone     string    `json:"phone" gorm:"type:varchar(20)"`
+	PlanID    uint      `json:"plan_id" gorm:"default:1"` // Default to Starter plan
 	Plan      Plan      `json:"plan" gorm:"foreignKey:PlanID"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -62,4 +70,21 @@ func GetDefaultPlan() Plan {
 			{Name: "Community support", Description: "Community-based support"},
 		},
 	}
+}
+
+// UserProfileUpdate represents a profile update request
+type UserProfileUpdate struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Address   string `json:"address"`
+	City      string `json:"city"`
+	State     string `json:"state"`
+	Country   string `json:"country"`
+	ZipCode   string `json:"zip_code"`
+	Phone     string `json:"phone"`
+}
+
+// UserPlanUpdate represents a plan update request
+type UserPlanUpdate struct {
+	PlanID uint `json:"plan_id" binding:"required"`
 }

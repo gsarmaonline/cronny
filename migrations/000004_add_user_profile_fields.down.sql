@@ -1,0 +1,9 @@
+ALTER TABLE users
+DROP COLUMN first_name,
+DROP COLUMN last_name,
+DROP COLUMN address,
+DROP COLUMN city,
+DROP COLUMN state,
+DROP COLUMN country,
+DROP COLUMN zip_code,
+DROP COLUMN phone; 
