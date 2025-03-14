@@ -94,6 +94,9 @@ func (apiServer *ApiServer) Setup() (err error) {
 		// User routes
 		authorized.GET("/auth/me", UserMeHandler(apiServer.db))
 
+		// Dashboard stats
+		authorized.GET("/dashboard/stats", apiServer.handler.DashboardStatsHandler)
+
 		// Schedules
 		authorized.GET("/schedules", apiServer.handler.ScheduleIndexHandler)
 		authorized.GET("/schedules/:id", apiServer.handler.ScheduleShowHandler)

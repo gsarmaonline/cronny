@@ -15,27 +15,29 @@ import {
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import jobService from '../services/job.service';
 import scheduleService from '../services/schedule.service';
+import actionService from '../services/action.service';
 import TypewriterText from './common/TypewriterText';
+import api from '../services/api';
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalJobs: 0,
     totalSchedules: 0,
+    totalActions: 0,
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [jobs, schedules] = await Promise.all([
-          jobService.getJobs(),
-          scheduleService.getSchedules(),
-        ]);
-
-        setStats({
-          totalJobs: jobs.length,
-          totalSchedules: schedules.length,
-        });
+        const response = await api.get('/dashboard/stats');
+        if (response.data.stats) {
+          setStats({
+            totalJobs: response.data.stats.total_jobs,
+            totalSchedules: response.data.stats.total_schedules,
+            totalActions: response.data.stats.total_actions,
+          });
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -122,6 +124,31 @@ const Dashboard: React.FC = () => {
             </CardActionArea>
           </Card>
         </Grid>
+        <Grid item xs={12} md={6} lg={4}>
+          <Card>
+            <CardActionArea component={Link} to="/actions">
+              <CardHeader title="Actions" />
+              <CardContent>
+                <Typography variant="h3" align="center">
+                  {stats.totalActions}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" align="center">
+                  Total Actions
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <Button 
+                    endIcon={<ArrowForwardIcon />}
+                    component={Link} 
+                    to="/actions"
+                    color="primary"
+                  >
+                    Manage Actions
+                  </Button>
+                </Box>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
       </Grid>
 
       <Paper 
@@ -168,6 +195,20 @@ const Dashboard: React.FC = () => {
             }}
           >
             Create New Schedule
+          </Button>
+          <Button 
+            variant="contained" 
+            component={Link} 
+            to="/actions"
+            color="info"
+            sx={{
+              background: '#29b6f6',
+              '&:hover': {
+                background: '#0288d1',
+              },
+            }}
+          >
+            Create New Action
           </Button>
         </Box>
       </Paper>
