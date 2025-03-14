@@ -1,10 +1,14 @@
 runall: install-concurrently
 	make setup
-	npx concurrently --kill-others "CRONNY_ENV=development go run cmd/all/all.go" "make ui-start"
+	npx concurrently --kill-others "cd cmd/api && CRONNY_ENV=development $(HOME)/go/bin/air" "make ui-start"
 
 runapi:
 	make setup
 	CRONNY_ENV=development go run cmd/api/api.go
+
+runapi-dev:
+	make setup
+	cd cmd/api && CRONNY_ENV=development $(HOME)/go/bin/air
 
 # UI related targets
 ui-install:
@@ -19,7 +23,7 @@ ui-build:
 # Start both API and UI in development mode
 # This requires concurrently package
 run-dev: install-concurrently
-	npx concurrently --kill-others "make runapi" "make ui-start"
+	npx concurrently --kill-others "make runapi-dev" "make ui-start"
 
 # Install concurrently if not already installed
 install-concurrently:
@@ -48,6 +52,7 @@ help:
 	@echo "Available commands:"
 	@echo "  make runall          - Run all services"
 	@echo "  make runapi          - Run API server only"
+	@echo "  make runapi-dev      - Run API server with hot reloading"
 	@echo "  make ui-install      - Install UI dependencies"
 	@echo "  make ui-start        - Start UI development server"
 	@echo "  make ui-build        - Build UI for production"
@@ -57,4 +62,4 @@ help:
 	@echo "  make clean           - Drop databases and recreate them"
 	@echo "  make runexamples     - Run API examples"
 
-.PHONY: runall runapi ui-install ui-start ui-build run-dev install-concurrently seed setup clean runexamples help
+.PHONY: runall runapi runapi-dev ui-install ui-start ui-build run-dev install-concurrently seed setup clean runexamples help
