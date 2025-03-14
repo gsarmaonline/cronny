@@ -201,7 +201,7 @@ const ScheduleList: React.FC = () => {
                     
                     <IconButton
                       component={Link}
-                      to={`/schedules/edit/${schedule.ID}`}
+                      to={`/schedules/${schedule.ID}/edit`}
                       size="small"
                       color="primary"
                       title="Edit schedule"

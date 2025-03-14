@@ -203,7 +203,7 @@ const JobList: React.FC = () => {
                     
                     <IconButton
                       component={Link}
-                      to={`/jobs/edit/${job.ID}`}
+                      to={`/jobs/${job.ID}/edit`}
                       size="small"
                       color="primary"
                       title="Edit job"

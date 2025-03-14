@@ -33,10 +33,25 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Token expired or invalid, redirect to login
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Check if the error is due to token expiration
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const exp = payload.exp * 1000; // Convert to milliseconds
+          if (Date.now() >= exp) {
+            // Token is expired, redirect to login
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+          }
+        } catch (err) {
+          // If we can't parse the token, it's invalid
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
+      }
     }
     return Promise.reject(error);
   }
