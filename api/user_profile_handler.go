@@ -43,7 +43,13 @@ func (handler *Handler) GetUserProfileHandler(c *gin.Context) {
 
 // UpdateUserProfileHandler updates the current user's profile
 func (handler *Handler) UpdateUserProfileHandler(c *gin.Context) {
-	userID := c.GetUint("user_id")
+	userID, exists := GetUserID(c)
+	if !exists {
+		c.JSON(401, gin.H{
+			"message": "User not authenticated",
+		})
+		return
+	}
 
 	var update models.UserProfileUpdate
 	if err := c.ShouldBindJSON(&update); err != nil {
@@ -94,7 +100,13 @@ func (handler *Handler) UpdateUserProfileHandler(c *gin.Context) {
 
 // UpdateUserPlanHandler updates the current user's plan
 func (handler *Handler) UpdateUserPlanHandler(c *gin.Context) {
-	userID := c.GetUint("user_id")
+	userID, exists := GetUserID(c)
+	if !exists {
+		c.JSON(401, gin.H{
+			"message": "User not authenticated",
+		})
+		return
+	}
 
 	var update models.UserPlanUpdate
 	if err := c.ShouldBindJSON(&update); err != nil {

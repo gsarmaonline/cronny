@@ -58,7 +58,7 @@ func GoogleLoginHandler(db *gorm.DB) gin.HandlerFunc {
 				user = models.User{
 					Username:  googleUser.Name,
 					Email:     googleUser.Email,
-					GoogleID:  googleUser.ID,
+					GoogleID:  &googleUser.ID,
 					AvatarURL: googleUser.Picture,
 				}
 
@@ -68,7 +68,7 @@ func GoogleLoginHandler(db *gorm.DB) gin.HandlerFunc {
 				}
 			} else {
 				// User found by email, update Google ID
-				user.GoogleID = googleUser.ID
+				user.GoogleID = &googleUser.ID
 				user.AvatarURL = googleUser.Picture
 				if err := db.Save(&user).Error; err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})

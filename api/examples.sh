@@ -59,7 +59,8 @@ curl -s -XPOST $API_URL/job_templates \
   -H 'Content-Type: application/json' \
   --data @- << EOF | jq '.'
 {
-    "name": "http"
+    "name": "http",
+    "user_id": 2
 }
 EOF
 
@@ -70,7 +71,8 @@ curl -s -XPOST $API_URL/job_templates \
   -H 'Content-Type: application/json' \
   --data @- << EOF | jq '.'
 {
-    "name": "slack"
+    "name": "slack",
+    "user_id": 2
 }
 EOF
 
@@ -81,7 +83,8 @@ curl -s -XPOST $API_URL/actions \
   -H 'Content-Type: application/json' \
   --data @- << EOF | jq '.'
 {
-    "name": "action-1"
+    "name": "action-1",
+    "user_id": 2
 }
 EOF
 
@@ -98,7 +101,8 @@ curl -s -XPOST $API_URL/jobs \
     "job_input_type": "static_input",
     "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
     "is_root_job": true,
-    "job_template_id": 1
+    "job_template_id": 1,
+    "user_id": 2
 }
 EOF
 
@@ -113,7 +117,8 @@ curl -s -XPOST $API_URL/schedules \
     "schedule_type": 3,
     "schedule_value": "10",
     "schedule_unit": "second",
-    "action_id": 1
+    "action_id": 1,
+    "user_id": 2
 }
 EOF
 
@@ -128,14 +133,48 @@ curl -s -XPUT $API_URL/schedules/1 \
 }
 EOF
 
-# Get user profile
-echo -e "\n${BLUE}8. Getting User Profile:${NC}"
-curl -s -X GET "$AUTH_URL/me" \
-  -H "$AUTH_HEADER" | jq '.'
-
 # List all jobs
 echo -e "\n${BLUE}9. Listing All Jobs:${NC}"
 curl -s -X GET "$API_URL/jobs" \
   -H "$AUTH_HEADER" | jq '.'
+
+# Get user profile
+echo -e "\n${BLUE}10. Getting User Profile:${NC}"
+curl -s -X GET "$API_URL/user/profile" \
+  -H "$AUTH_HEADER" | jq '.'
+
+# Update user profile
+echo -e "\n${BLUE}11. Updating User Profile:${NC}"
+curl -s -X PUT "$API_URL/user/profile" \
+  -H "$AUTH_HEADER" \
+  -H 'Content-Type: application/json' \
+  --data @- << EOF | jq '.'
+{
+    "first_name": "John",
+    "last_name": "Doe",
+    "address": "123 Main St",
+    "city": "San Francisco",
+    "state": "CA",
+    "country": "USA",
+    "zip_code": "94105",
+    "phone": "+1-555-123-4567"
+}
+EOF
+
+# Get available plans
+echo -e "\n${BLUE}12. Getting Available Plans:${NC}"
+curl -s -X GET "$API_URL/user/plans" \
+  -H "$AUTH_HEADER" | jq '.'
+
+# Update user plan
+echo -e "\n${BLUE}13. Updating User Plan:${NC}"
+curl -s -X PUT "$API_URL/user/plan" \
+  -H "$AUTH_HEADER" \
+  -H 'Content-Type: application/json' \
+  --data @- << EOF | jq '.'
+{
+    "plan_id": 2
+}
+EOF
 
 echo -e "\n${GREEN}All examples completed successfully!${NC}"

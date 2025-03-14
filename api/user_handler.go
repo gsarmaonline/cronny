@@ -79,6 +79,7 @@ func UserRegisterHandler(db *gorm.DB) gin.HandlerFunc {
 			Username: registerRequest.Username,
 			Email:    registerRequest.Email,
 			Password: registerRequest.Password,
+			PlanID:   1, // Set default plan (Starter)
 		}
 
 		// Hash password

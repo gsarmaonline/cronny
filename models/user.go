@@ -11,7 +11,7 @@ type User struct {
 	Username  string    `json:"username" gorm:"type:varchar(100);uniqueIndex"`
 	Email     string    `json:"email" gorm:"type:varchar(100);uniqueIndex"`
 	Password  string    `json:"-" gorm:"type:varchar(255)"`             // Password is never returned in JSON
-	GoogleID  string    `json:"-" gorm:"type:varchar(255);uniqueIndex"` // Google ID for OAuth
+	GoogleID  *string   `json:"-" gorm:"type:varchar(255);uniqueIndex"` // Google ID for OAuth, nullable
 	AvatarURL string    `json:"avatar_url" gorm:"type:varchar(255)"`    // Profile picture URL
 	FirstName string    `json:"first_name" gorm:"type:varchar(100)"`
 	LastName  string    `json:"last_name" gorm:"type:varchar(100)"`
