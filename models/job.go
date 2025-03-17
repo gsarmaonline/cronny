@@ -32,7 +32,7 @@ var (
 
 type (
 	Job struct {
-		gorm.Model
+		BaseModel
 
 		Name    string `json:"name"`
 		JobType string `json:"job_type"`
@@ -58,12 +58,11 @@ type (
 
 		JobExecutions []*JobExecution `json:"job_executions"`
 
-		UserID uint  `json:"user_id" gorm:"index"`
-		User   *User `json:"user"`
+		User *User `json:"user"`
 	}
 
 	JobTemplate struct {
-		gorm.Model
+		BaseModel
 
 		Name string `json:"job_template"`
 
@@ -74,12 +73,11 @@ type (
 
 		Jobs []*Job `json:"jobs"`
 
-		UserID uint  `json:"user_id" gorm:"index"`
-		User   *User `json:"user"`
+		User *User `json:"user"`
 	}
 
 	JobExecution struct {
-		gorm.Model
+		BaseModel
 
 		JobID uint `json:"job_id"`
 		Job   *Job `json:"job"`
@@ -89,8 +87,7 @@ type (
 		ExecutionStartTime time.Time `json:"execution_start_time" gorm:"type:TIMESTAMP;null;default:null"`
 		ExecutionStopTime  time.Time `json:"execution_stop_time" gorm:"type:TIMESTAMP;null;default:null"`
 
-		UserID uint  `json:"user_id" gorm:"index"`
-		User   *User `json:"user"`
+		User *User `json:"user"`
 	}
 )
 

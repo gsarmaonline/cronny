@@ -8,28 +8,24 @@ const (
 	// Schedule Execution Type
 	InternalExecType = ExecTypeT(1)
 	AwsExecType      = ExecTypeT(2)
-
 )
 
 type (
-	ExecTypeT       int
-	TriggerStatusT  int
+	ExecTypeT      int
+	TriggerStatusT int
 
 	JobInputT  string
 	JobOutputT string
 
-
 	Action struct {
-		gorm.Model
+		BaseModel
 
 		Name string `json:"name"`
 		Jobs []*Job `json:"jobs"`
 
-		UserID uint `json:"user_id" gorm:"index"`
-		User   *User `json:"user"`
+		User *User `json:"user"`
 	}
 )
-
 
 // ==========================================================
 // Actions

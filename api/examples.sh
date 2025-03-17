@@ -39,15 +39,18 @@ if [[ "$TOKEN" == "null" || "$TOKEN" == "" ]]; then
       "password": "password123"
     }')
     
+  # Extract token and user ID from response
   TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.token')
+  USER_ID=$(echo "$LOGIN_RESPONSE" | jq -r '.user.id')
   
   if [[ "$TOKEN" == "null" || "$TOKEN" == "" ]]; then
-    echo "Login also failed. Exiting."
+    echo "Login failed. Exiting."
     exit 1
   fi
 fi
 
 echo -e "\n${BLUE}Using token:${NC} ${TOKEN:0:20}... (truncated)"
+echo -e "${BLUE}Using user ID:${NC} ${USER_ID}"
 
 # Auth header for all subsequent requests
 AUTH_HEADER="Authorization: Bearer $TOKEN"
@@ -60,7 +63,7 @@ curl -s -XPOST $API_URL/job_templates \
   --data @- << EOF | jq '.'
 {
     "name": "http",
-    "user_id": 2
+    "user_id": ${USER_ID}
 }
 EOF
 
@@ -72,7 +75,7 @@ curl -s -XPOST $API_URL/job_templates \
   --data @- << EOF | jq '.'
 {
     "name": "slack",
-    "user_id": 2
+    "user_id": ${USER_ID}
 }
 EOF
 
@@ -84,7 +87,7 @@ curl -s -XPOST $API_URL/actions \
   --data @- << EOF | jq '.'
 {
     "name": "action-1",
-    "user_id": 2
+    "user_id": ${USER_ID}
 }
 EOF
 
@@ -102,7 +105,7 @@ curl -s -XPOST $API_URL/jobs \
     "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
     "is_root_job": true,
     "job_template_id": 1,
-    "user_id": 2
+    "user_id": ${USER_ID}
 }
 EOF
 
@@ -118,7 +121,7 @@ curl -s -XPOST $API_URL/schedules \
     "schedule_value": "10",
     "schedule_unit": "second",
     "action_id": 1,
-    "user_id": 2
+    "user_id": ${USER_ID}
 }
 EOF
 

@@ -12,7 +12,7 @@ import (
 )
 
 // UserID is the key to store the user ID in the context
-const UserID = "userID"
+const UserIDKey = "userID"
 
 // AuthMiddleware validates JWT tokens and extracts user information
 func AuthMiddleware() gin.HandlerFunc {
@@ -58,7 +58,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			}
 
 			// Store user ID in context
-			c.Set(UserID, uint(userID))
+			c.Set(UserIDKey, uint(userID))
 			c.Next()
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
@@ -69,7 +69,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 // GetUserID extracts the user ID from the context
 func GetUserID(c *gin.Context) (uint, bool) {
-	userID, exists := c.Get(UserID)
+	userID, exists := c.Get(UserIDKey)
 	if !exists {
 		return 0, false
 	}

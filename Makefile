@@ -47,6 +47,13 @@ clean:
 runexamples:
 	bash api/examples.sh
 
+# Test targets
+test:
+	go test ./... -v
+
+test-coverage:
+	go test ./... -v -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
+
 # Help target to display available commands
 help:
 	@echo "Available commands:"
@@ -61,5 +68,7 @@ help:
 	@echo "  make setup           - Create databases if they don't exist"
 	@echo "  make clean           - Drop databases and recreate them"
 	@echo "  make runexamples     - Run API examples"
+	@echo "  make test            - Run all Go tests"
+	@echo "  make test-coverage   - Run tests with coverage report"
 
-.PHONY: runall runapi runapi-dev ui-install ui-start ui-build run-dev install-concurrently seed setup clean runexamples help
+.PHONY: runall runapi runapi-dev ui-install ui-start ui-build run-dev install-concurrently seed setup clean runexamples help test test-coverage

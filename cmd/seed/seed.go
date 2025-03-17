@@ -78,8 +78,8 @@ func getJobTemplate(userID uint) (jobTemplate *models.JobTemplate) {
 	jobTemplate = &models.JobTemplate{
 		Name:     "http",
 		ExecType: models.InternalExecType,
-		UserID:   userID,
 	}
+	jobTemplate.SetUserID(userID)
 	return
 }
 
@@ -106,9 +106,9 @@ func getConditionForJobOne(jobId uint) (conditionS string) {
 
 func getAction(db *gorm.DB, userID uint) (action *models.Action) {
 	action = &models.Action{
-		Name:   "http-action",
-		UserID: userID,
+		Name: "http-action",
 	}
+	action.SetUserID(userID)
 	db.Save(action)
 	jobTemplate := getJobTemplate(userID)
 	db.Save(jobTemplate)
@@ -118,19 +118,21 @@ func getAction(db *gorm.DB, userID uint) (action *models.Action) {
 		JobType:       "slack",
 		JobInputType:  models.StaticJsonInput,
 		JobInputValue: fmt.Sprintf("{\"slack_api_token\": \"%s\", \"channel_id\": \"channel_1\", \"message\": \"hello from cronny\"}", SlackToken),
-		UserID:        userID,
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
+	jobThree.SetUserID(userID)
 	db.Save(jobThree)
+
 	jobTwo := &models.Job{
 		Name:          "job-2",
 		JobType:       "logger",
-		UserID:        userID,
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
+	jobTwo.SetUserID(userID)
 	db.Save(jobTwo)
+
 	jobOne := &models.Job{
 		Name:          "job-1",
 		JobType:       "http",
@@ -138,10 +140,10 @@ func getAction(db *gorm.DB, userID uint) (action *models.Action) {
 		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
 		Condition:     getConditionForJobOne(jobTwo.ID),
 		IsRootJob:     true,
-		UserID:        userID,
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
+	jobOne.SetUserID(userID)
 	db.Save(jobOne)
 
 	// Update jobTwo's input value with jobOne's ID
@@ -179,8 +181,8 @@ func main() {
 			EndsAt:         time.Now().UTC().Add(2 * time.Minute).Format(time.RFC3339),
 			ScheduleStatus: models.PendingScheduleStatus,
 			Action:         action,
-			UserID:         user.ID, // Add UserID to schedules as well
 		}
+		sched.SetUserID(user.ID)
 		db.Save(sched)
 	}
 }

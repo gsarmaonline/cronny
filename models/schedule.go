@@ -37,7 +37,7 @@ type (
 	ScheduleStatusT int
 
 	Schedule struct {
-		gorm.Model
+		BaseModel
 
 		Name string `json:"name"`
 
@@ -55,8 +55,7 @@ type (
 		Action   *Action `json:"action"`
 		ActionID uint    `json:"action_id"`
 
-		UserID uint  `json:"user_id" gorm:"index"`
-		User   *User `json:"user"`
+		User *User `json:"user"`
 	}
 )
 
