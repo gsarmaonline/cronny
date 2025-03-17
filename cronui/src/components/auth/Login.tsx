@@ -79,17 +79,20 @@ const plans = [
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(''); // Clear previous errors
     try {
       await login({ username, password });
-      navigate('/dashboard');
-    } catch (error) {
+      navigate('/');
+    } catch (error: any) {
       console.error('Login failed:', error);
+      setError(error.response?.data?.error || 'Login failed. Please check your credentials.');
     }
   };
 
@@ -255,8 +258,24 @@ const Login: React.FC = () => {
                   fontWeight: 300,
                 }}
               >
-                Welcome Back
+                Login to Your Account
               </Typography>
+
+              {error && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    mb: 2,
+                    color: 'error.main',
+                    backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                    padding: 2,
+                    borderRadius: 1,
+                  }}
+                >
+                  {error}
+                </Typography>
+              )}
+
               <form onSubmit={handleSubmit}>
                 <TextField
                   fullWidth

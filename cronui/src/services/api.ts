@@ -1,12 +1,10 @@
 import axios from 'axios';
 import { Action } from './action.service';
-
-const API_URL = 'http://localhost:8009';
-const API_PREFIX = '/api/cronny/v1';
+import { API_BASE_URL } from '../config';
 
 // Create an axios instance
 const api = axios.create({
-  baseURL: API_URL + API_PREFIX,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   }
