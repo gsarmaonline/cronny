@@ -36,7 +36,9 @@ interface ActionOption {
 const ScheduleForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isEditMode = !!id;
+  // Check if we're in create mode (path is /schedules/new) or edit mode (path is /schedules/:id)
+  const isCreateMode = id === "new";
+  const isEditMode = !!id && !isCreateMode;
   
   // Form state
   const [name, setName] = useState('');
@@ -66,7 +68,7 @@ const ScheduleForm: React.FC = () => {
     if (isEditMode) {
       fetchSchedule();
     }
-  }, [id]);
+  }, [id, isEditMode]);
 
   const fetchActions = async () => {
     try {
@@ -179,9 +181,16 @@ const ScheduleForm: React.FC = () => {
         scheduleData.ends_at = endsAt;
       }
       
-      if (isEditMode && id) {
-        await scheduleService.updateSchedule(parseInt(id), scheduleData);
+      if (isEditMode) {
+        // Make sure we have a valid ID before attempting to update
+        const scheduleId = parseInt(id!);
+        if (isNaN(scheduleId)) {
+          setError('Invalid schedule ID');
+          return;
+        }
+        await scheduleService.updateSchedule(scheduleId, scheduleData);
       } else {
+        // Create new schedule
         await scheduleService.createSchedule(scheduleData);
       }
       

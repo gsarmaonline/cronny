@@ -135,7 +135,7 @@ const ScheduleList: React.FC = () => {
           variant="contained"
           startIcon={<AddIcon />}
           component={Link}
-          to="/schedules/create"
+          to="/schedules/new"
         >
           Create Schedule
         </Button>

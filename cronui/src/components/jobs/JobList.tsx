@@ -131,7 +131,7 @@ const JobList: React.FC = () => {
           variant="contained"
           startIcon={<AddIcon />}
           component={Link}
-          to="/jobs/create"
+          to="/jobs/new"
         >
           Create Job
         </Button>

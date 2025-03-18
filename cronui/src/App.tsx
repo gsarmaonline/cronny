@@ -206,12 +206,12 @@ function App() {
               <Route path="profile" element={<Profile />} />
               <Route path="schedules" element={<ScheduleList />} />
               <Route path="schedules/new" element={<ScheduleForm />} />
-              <Route path="schedules/:id" element={<ScheduleDetail />} />
               <Route path="schedules/:id/edit" element={<ScheduleForm />} />
+              <Route path="schedules/:id" element={<ScheduleDetail />} />
               <Route path="jobs" element={<JobList />} />
               <Route path="jobs/new" element={<JobForm />} />
-              <Route path="jobs/:id" element={<JobDetail />} />
               <Route path="jobs/:id/edit" element={<JobForm />} />
+              <Route path="jobs/:id" element={<JobDetail />} />
               <Route path="actions" element={<Actions />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
