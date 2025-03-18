@@ -81,10 +81,8 @@ class JobService {
   async getJobTemplates(): Promise<JobTemplate[]> {
     try {
       const response = await api.get<JobTemplatesResponse>('/job_templates');
-      console.log('Job templates response:', response);
       return response.data.job_templates || [];
     } catch (err) {
-      console.error('Error fetching job templates:', err);
       return [];
     }
   }

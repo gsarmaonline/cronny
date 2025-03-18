@@ -82,7 +82,6 @@ const ActionJobManager: React.FC = () => {
       }
     } catch (err) {
       setError('Failed to fetch actions');
-      console.error('Error fetching actions:', err);
       setActions([]);
     }
   };
@@ -93,20 +92,14 @@ const ActionJobManager: React.FC = () => {
       setJobs(response);
     } catch (err) {
       setError('Failed to fetch jobs');
-      console.error('Error fetching jobs:', err);
     }
   };
 
   const fetchJobTemplates = async () => {
     try {
       const templates = await jobService.getJobTemplates();
-      console.log('Raw templates from API:', templates);
       
       const options = templates.map(template => {
-        console.log('Processing template:', {
-          id: template.ID,
-          name: template.name,
-        });
         
         return {
           id: template.ID,
@@ -114,10 +107,8 @@ const ActionJobManager: React.FC = () => {
         };
       });
 
-      console.log('Final template options:', options);
       setJobTemplateOptions(options);
     } catch (err) {
-      console.error('Failed to fetch job templates:', err);
       setError('Failed to fetch job templates');
     }
   };
@@ -137,7 +128,6 @@ const ActionJobManager: React.FC = () => {
       }
     } catch (err) {
       setError('Failed to delete action');
-      console.error('Error deleting action:', err);
     }
   };
 
@@ -207,8 +197,6 @@ const ActionJobManager: React.FC = () => {
       };
       
       const response = await actionsApi.createAction(actionToSave);
-      console.log('Action creation response:', response); // Debug log
-      console.log('Response data:', response?.data); // Additional debug log
 
       if (response?.data) {
         // Use type assertion since we know the structure from the API
@@ -224,14 +212,8 @@ const ActionJobManager: React.FC = () => {
         }
       }
 
-      console.error('Response data structure:', {
-        hasData: !!response?.data,
-        dataKeys: response?.data ? Object.keys(response.data) : [],
-        fullResponse: response
-      });
       throw new Error('Invalid response format from server');
     } catch (err) {
-      console.error('Full error details:', err); // Debug log
       if (err instanceof Error) {
         setError(`Failed to save action: ${err.message}`);
       } else {
@@ -269,7 +251,6 @@ const ActionJobManager: React.FC = () => {
       setError(null);
     } catch (err) {
       setError('Failed to save job');
-      console.error('Error saving job:', err);
     }
   };
 
