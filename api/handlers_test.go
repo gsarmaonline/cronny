@@ -176,7 +176,7 @@ type TestModel struct {
 	Name string
 }
 
-func TestSaveWithUser_NilDB(t *testing.T) {
+func TestSaveWithUser(t *testing.T) {
 	// Setup
 	db := setupTestDB(t)
 	// Create the test table
@@ -193,61 +193,42 @@ func TestSaveWithUser_NilDB(t *testing.T) {
 	model := &TestModel{
 		Name: "Test Model",
 	}
-	model.SetUserID(userID)
 
 	// Execute
-	err := handler.SaveWithUser(c, nil, model)
+	err := handler.SaveWithUser(c, model)
 
 	// Verify
 	assert.NoError(t, err, "Should not return error when saving a valid model")
 
-	// Check that the model was saved
+	// Check that the model was saved with correct user ID
 	var savedModel TestModel
 	result := db.First(&savedModel, model.ID)
 	assert.NoError(t, result.Error, "Should be able to find the saved model")
 	assert.Equal(t, model.Name, savedModel.Name, "Saved model should have the same name")
-	assert.Equal(t, userID, savedModel.GetUserID(), "Saved model should have the same user ID")
+	assert.Equal(t, userID, savedModel.GetUserID(), "Saved model should have the correct user ID")
 }
 
-func TestSaveWithUser_WithProvidedDB(t *testing.T) {
+func TestSaveWithUser_NoUserID(t *testing.T) {
 	// Setup
-	originalDB := setupTestDB(t)
-	providedDB := setupTestDB(t)
+	db := setupTestDB(t)
+	// Create the test table
+	db.AutoMigrate(&TestModel{})
 
-	// Create the test table in both DBs
-	originalDB.AutoMigrate(&TestModel{})
-	providedDB.AutoMigrate(&TestModel{})
-
-	handler := &Handler{db: originalDB}
+	handler := &Handler{db: db}
 	c, _ := setupTestContext()
-
-	// Set user ID in context
-	userID := uint(123)
-	c.Set(UserIDKey, userID)
+	// Do not set user ID in context
 
 	// Create a test model
 	model := &TestModel{
 		Name: "Test Model",
 	}
-	model.SetUserID(userID)
 
 	// Execute
-	err := handler.SaveWithUser(c, providedDB, model)
+	err := handler.SaveWithUser(c, model)
 
 	// Verify
-	assert.NoError(t, err, "Should not return error when saving a valid model")
-
-	// Check that the model was saved in the provided DB
-	var savedModel TestModel
-	result := providedDB.First(&savedModel, model.ID)
-	assert.NoError(t, result.Error, "Should be able to find the saved model in provided DB")
-	assert.Equal(t, model.Name, savedModel.Name, "Saved model should have the same name")
-	assert.Equal(t, userID, savedModel.GetUserID(), "Saved model should have the same user ID")
-
-	// Check that the model was NOT saved in the original DB
-	var notSavedModel TestModel
-	result = originalDB.First(&notSavedModel, model.ID)
-	assert.Error(t, result.Error, "Should not be able to find the model in original DB")
+	assert.Error(t, err, "Should return error when user ID is not found")
+	assert.Contains(t, err.Error(), "user ID not found", "Error message should indicate user ID is missing")
 }
 
 func TestSaveWithUser_InvalidModel(t *testing.T) {
@@ -280,10 +261,124 @@ func TestSaveWithUser_InvalidModel(t *testing.T) {
 	// Set an error on the DB
 	mockDB.AddError(fmt.Errorf("mock save error"))
 
+	// Replace handler's DB with mock
+	originalDB := handler.db
+	handler.db = mockDB
+	defer func() { handler.db = originalDB }()
+
 	// Execute with the mock DB
-	err = handler.SaveWithUser(c, mockDB, model)
+	err = handler.SaveWithUser(c, model)
 
 	// Verify
 	assert.Error(t, err, "Should return error when saving an invalid model")
 	assert.Contains(t, err.Error(), "mock save error", "Error message should contain the mock error")
+}
+
+func TestUpdateWithUser(t *testing.T) {
+	// Setup
+	db := setupTestDB(t)
+	// Create the test table
+	db.AutoMigrate(&TestModel{})
+
+	handler := &Handler{db: db}
+	c, _ := setupTestContext()
+
+	// Set user ID in context
+	userID := uint(123)
+	c.Set(UserIDKey, userID)
+
+	// Create a test model and save it
+	originalModel := &TestModel{
+		Name: "Original Name",
+	}
+	originalModel.SetUserID(userID)
+	db.Create(originalModel)
+
+	// Create updated model
+	updatedModel := &TestModel{
+		Name: "Updated Name",
+	}
+
+	// Execute
+	err := handler.UpdateWithUser(c, originalModel, updatedModel)
+
+	// Verify
+	assert.NoError(t, err, "Should not return error when updating a valid model")
+
+	// Check that the model was updated
+	var savedModel TestModel
+	result := db.First(&savedModel, originalModel.ID)
+	assert.NoError(t, result.Error, "Should be able to find the updated model")
+	assert.Equal(t, "Updated Name", savedModel.Name, "Model should have the updated name")
+	assert.Equal(t, userID, savedModel.GetUserID(), "Model should preserve the user ID")
+}
+
+func TestUpdateWithUser_NoUserID(t *testing.T) {
+	// Setup
+	db := setupTestDB(t)
+	// Create the test table
+	db.AutoMigrate(&TestModel{})
+
+	handler := &Handler{db: db}
+	c, _ := setupTestContext()
+	// Do not set user ID in context
+
+	// Create models for update
+	originalModel := &TestModel{Name: "Original Name"}
+	updatedModel := &TestModel{Name: "Updated Name"}
+
+	// Execute
+	err := handler.UpdateWithUser(c, originalModel, updatedModel)
+
+	// Verify
+	assert.Error(t, err, "Should return error when user ID is not found")
+	assert.Contains(t, err.Error(), "user ID not found", "Error message should indicate user ID is missing")
+}
+
+func TestUpdateWithUser_Error(t *testing.T) {
+	// Setup
+	db := setupTestDB(t)
+	// Create the test table
+	db.AutoMigrate(&TestModel{})
+
+	handler := &Handler{db: db}
+	c, _ := setupTestContext()
+
+	// Set user ID in context
+	userID := uint(123)
+	c.Set(UserIDKey, userID)
+
+	// Create a test model
+	originalModel := &TestModel{
+		Name: "Original Name",
+	}
+	originalModel.SetUserID(userID)
+
+	updatedModel := &TestModel{
+		Name: "Updated Name",
+	}
+
+	// Create a mock DB that will return an error
+	mockDB, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	assert.NoError(t, err, "Should be able to create a mock DB")
+
+	// Create a DB session that will always return an error
+	mockDB = mockDB.Session(&gorm.Session{
+		DryRun: true,
+	})
+
+	// Set an error on the DB
+	mockDB.AddError(fmt.Errorf("mock update error"))
+
+	// Replace handler's DB with mock
+	originalDB := handler.db
+	handler.db = mockDB
+	defer func() { handler.db = originalDB }()
+
+	// Execute with the mock DB
+	err = handler.UpdateWithUser(c, originalModel, updatedModel)
+
+	// Verify
+	assert.Error(t, err, "Should return error when updating fails")
+	assert.Contains(t, err.Error(), "mock update error", "Error message should contain the mock error")
 }

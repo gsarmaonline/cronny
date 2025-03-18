@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/cronny/models"
@@ -59,28 +58,15 @@ func (handler *Handler) ScheduleCreateHandler(c *gin.Context) {
 	)
 	schedule = &models.Schedule{}
 	if err = c.ShouldBindJSON(schedule); err != nil {
-		log.Println(schedule, err)
 		c.JSON(400, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
-	schedule.ScheduleExecType = models.AwsExecType
-	schedule.ScheduleStatus = models.ScheduleStatusT(models.InactiveScheduleStatus)
 
-	// Set the user ID from the context
-	userID, exists := GetUserID(c)
-	if !exists {
-		c.JSON(401, gin.H{
-			"message": "user ID not found",
-		})
-		return
-	}
-	schedule.SetUserID(userID)
-
-	if ex := handler.GetUserScopedDb(c).Save(schedule); ex.Error != nil {
+	if err = handler.SaveWithUser(c, schedule); err != nil {
 		c.JSON(500, gin.H{
-			"message": ex.Error.Error(),
+			"message": err.Error(),
 		})
 		return
 	}
@@ -103,18 +89,10 @@ func (handler *Handler) ScheduleUpdateHandler(c *gin.Context) {
 
 	schedule = &models.Schedule{}
 	updatedSchedule = &models.Schedule{}
-	schedule.ScheduleExecType = models.AwsExecType
-	updatedSchedule.ScheduleExecType = models.AwsExecType
 
 	if scheduleId, err = strconv.Atoi(c.Param("id")); err != nil {
 		c.JSON(400, gin.H{
 			"message": "Improper ID format",
-		})
-		return
-	}
-	if ex := handler.GetUserScopedDb(c).Where("id = ?", uint(scheduleId)).First(schedule); ex.Error != nil {
-		c.JSON(400, gin.H{
-			"message": ex.Error.Error(),
 		})
 		return
 	}
@@ -124,11 +102,16 @@ func (handler *Handler) ScheduleUpdateHandler(c *gin.Context) {
 		})
 		return
 	}
-
-	// Reload the schedule data to return in response
-	if ex := handler.GetUserScopedDb(c).Model(schedule).Updates(updatedSchedule); ex.Error != nil {
-		c.JSON(500, gin.H{
+	if ex := handler.GetUserScopedDb(c).Where("id = ?", uint(scheduleId)).First(schedule); ex.Error != nil {
+		c.JSON(400, gin.H{
 			"message": ex.Error.Error(),
+		})
+		return
+	}
+	// Reload the schedule data to return in response
+	if err = handler.UpdateWithUser(c, schedule, updatedSchedule); err != nil {
+		c.JSON(500, gin.H{
+			"message": err.Error(),
 		})
 		return
 	}

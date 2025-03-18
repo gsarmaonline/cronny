@@ -40,11 +40,7 @@ func (handler *Handler) GetUserScopedDb(c *gin.Context) (db *gorm.DB) {
 	return
 }
 
-func (handler *Handler) SaveWithUser(c *gin.Context, db *gorm.DB, model interface{}) (err error) {
-	if db == nil {
-		db = handler.db
-	}
-
+func (handler *Handler) SaveWithUser(c *gin.Context, model interface{}) (err error) {
 	userID, exists := GetUserID(c)
 	if !exists {
 		err = errors.New("user ID not found")
@@ -56,6 +52,22 @@ func (handler *Handler) SaveWithUser(c *gin.Context, db *gorm.DB, model interfac
 		userOwned.SetUserID(userID)
 	}
 
-	err = db.Save(model).Error
+	err = handler.db.Save(model).Error
+	return
+}
+
+func (handler *Handler) UpdateWithUser(c *gin.Context, prevModel, updatedModel interface{}) (err error) {
+	userID, exists := GetUserID(c)
+	if !exists {
+		err = errors.New("user ID not found")
+		return
+	}
+
+	// Set the UserID field on the model if it implements UserOwned interface
+	if userOwned, ok := prevModel.(models.UserOwned); ok {
+		userOwned.SetUserID(userID)
+	}
+
+	err = handler.db.Model(prevModel).Updates(updatedModel).Error
 	return
 }

@@ -247,9 +247,6 @@ func TestScheduleCreateHandler(t *testing.T) {
 				assert.True(t, ok)
 				assert.Equal(t, tc.requestBody["name"], schedule["name"])
 
-				// Verify default values were set
-				assert.Equal(t, float64(models.AwsExecType), schedule["schedule_exec_type"])
-				assert.Equal(t, float64(models.InactiveScheduleStatus), schedule["schedule_status"])
 			} else {
 				assert.Contains(t, msg, tc.expectedMsg)
 			}
