@@ -64,16 +64,8 @@ type (
 	JobTemplate struct {
 		BaseModel
 
-		Name string `json:"job_template"`
-
-		ExecType ExecTypeT `json:"exec_type"`
-		ExecLink string    `json:"exec_link"`
-
-		Code string `json:"code"`
-
-		Jobs []*Job `json:"jobs"`
-
-		User *User `json:"user"`
+		Name string `json:"name"`
+		User *User  `json:"user"`
 	}
 
 	JobExecution struct {
@@ -101,8 +93,23 @@ func (job *Job) setDefaultValues() (err error) {
 	return
 }
 
+func (job *Job) validateAssociations() (err error) {
+	if job.Action == nil && job.ActionID == 0 {
+		err = fmt.Errorf("Action is nil for job %s", job.Name)
+		return
+	}
+	if job.JobTemplate == nil {
+		err = fmt.Errorf("JobTemplate is nil for job %s", job.Name)
+		return
+	}
+	return
+}
+
 func (job *Job) BeforeSave(db *gorm.DB) (err error) {
 	if err = job.setDefaultValues(); err != nil {
+		return
+	}
+	if err = job.validateAssociations(); err != nil {
 		return
 	}
 	return

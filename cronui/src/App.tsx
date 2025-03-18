@@ -22,7 +22,7 @@ import JobDetail from './components/jobs/JobDetail';
 import JobForm from './components/jobs/JobForm';
 
 // Action Components
-import { Actions } from './components/actions/Actions';
+import ActionJobManager from './components/actions/ActionJobManager';
 
 // Create a theme
 const theme = createTheme({
@@ -212,7 +212,7 @@ function App() {
               <Route path="jobs/new" element={<JobForm />} />
               <Route path="jobs/:id/edit" element={<JobForm />} />
               <Route path="jobs/:id" element={<JobDetail />} />
-              <Route path="actions" element={<Actions />} />
+              <Route path="actions" element={<ActionJobManager />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

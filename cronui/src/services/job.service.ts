@@ -11,6 +11,14 @@ export interface JobExecution {
   execution_stop_time: string;
 }
 
+export interface JobTemplate {
+  ID: number;
+  CreatedAt: string;
+  UpdatedAt: string;
+  DeletedAt: string | null;
+  name: string;
+}
+
 export interface Job {
   ID: number;
   CreatedAt: string;
@@ -39,6 +47,11 @@ export interface JobsResponse {
   jobs: Job[];
 }
 
+export interface JobTemplatesResponse {
+  message: string;
+  job_templates: JobTemplate[];
+}
+
 class JobService {
   async getJobs(actionId?: number): Promise<Job[]> {
     const url = actionId ? `/jobs?action_id=${actionId}` : '/jobs';
@@ -63,6 +76,17 @@ class JobService {
 
   async deleteJob(id: number): Promise<void> {
     await api.delete(`/jobs/${id}`);
+  }
+
+  async getJobTemplates(): Promise<JobTemplate[]> {
+    try {
+      const response = await api.get<JobTemplatesResponse>('/job_templates');
+      console.log('Job templates response:', response);
+      return response.data.job_templates || [];
+    } catch (err) {
+      console.error('Error fetching job templates:', err);
+      return [];
+    }
   }
 }
 

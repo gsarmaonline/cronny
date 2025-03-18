@@ -90,6 +90,7 @@ func (apiServer *ApiServer) Setup() (err error) {
 	// Protected routes
 	authorized := apiServer.engine.Group(cronnyApiPrefix)
 	authorized.Use(AuthMiddleware())
+	authorized.Use(UserScopeMiddleware(apiServer.db))
 	{
 		// User routes
 		authorized.GET("/auth/me", UserMeHandler(apiServer.db))
@@ -124,7 +125,6 @@ func (apiServer *ApiServer) Setup() (err error) {
 
 		// Job Templates
 		authorized.GET("/job_templates", apiServer.handler.JobTemplateIndexHandler)
-		authorized.POST("/job_templates", apiServer.handler.jobTemplateCreateHandler)
 	}
 
 	return

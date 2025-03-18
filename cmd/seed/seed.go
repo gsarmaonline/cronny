@@ -76,8 +76,7 @@ func createDefaultUser(db *gorm.DB) (*models.User, error) {
 
 func getJobTemplate(userID uint) (jobTemplate *models.JobTemplate) {
 	jobTemplate = &models.JobTemplate{
-		Name:     "http",
-		ExecType: models.InternalExecType,
+		Name: "http",
 	}
 	jobTemplate.SetUserID(userID)
 	return
