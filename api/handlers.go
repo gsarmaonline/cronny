@@ -8,6 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// ScopedDBKey is the key used to store the user-scoped database in the context
+const ScopedDBKey = "scopedDB"
+
 type (
 	Handler struct {
 		db *gorm.DB
@@ -28,18 +31,12 @@ func (handler *Handler) rootHandler(c *gin.Context) {
 	return
 }
 
-func (handler *Handler) GetUserScopedDb(c *gin.Context, db *gorm.DB) (newDb *gorm.DB, err error) {
-	if db == nil {
-		db = handler.db
-	}
+func (handler *Handler) GetUserScopedDb(c *gin.Context) (db *gorm.DB) {
+	// Not checking if the scoped DB exists because it should always exist
+	// and is set in the user_scope_middleware.
+	scopedDB, _ := c.Get(ScopedDBKey)
+	db = scopedDB.(*gorm.DB)
 
-	userID, exists := GetUserID(c)
-	if !exists {
-		err = errors.New("user ID not found")
-		return
-	}
-
-	newDb = db.Where("user_id = ?", userID)
 	return
 }
 

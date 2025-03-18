@@ -29,18 +29,79 @@ func setupTestContext() (*gin.Context, *httptest.ResponseRecorder) {
 	return c, w
 }
 
+// Test cases for the combined GetScopedDB method
+func TestGetScopedDB_ContextFirst(t *testing.T) {
+	// Setup
+	db := setupTestDB(t)
+	handler := &Handler{db: db}
+	c, _ := setupTestContext()
+
+	// Set user ID in context
+	userID := uint(123)
+	c.Set(UserIDKey, userID)
+
+	// Create a pre-scoped DB and put it in context
+	preScoped := db.Where("user_id = ?", uint(999)) // Different user ID to prove it's using this DB
+	c.Set(ScopedDBKey, preScoped)
+
+	// Execute - should return the DB from context
+	result := handler.GetUserScopedDb(c)
+
+	// Verify
+	assert.NotNil(t, result, "Should return a DB instance")
+	assert.Equal(t, preScoped, result, "Should return the same DB instance from context")
+}
+
+func TestGetScopedDB_CreateNew(t *testing.T) {
+	// Setup
+	db := setupTestDB(t)
+	handler := &Handler{db: db}
+	c, _ := setupTestContext()
+
+	// Set user ID in context
+	userID := uint(123)
+	c.Set(UserIDKey, userID)
+
+	// Create a scoped DB and set it in the context
+	scopedDB := db.Where("user_id = ?", userID)
+	c.Set(ScopedDBKey, scopedDB)
+
+	// Execute - should get the DB from context
+	result := handler.GetUserScopedDb(c)
+
+	// Verify
+	assert.NotNil(t, result, "Should return a DB instance")
+	assert.Equal(t, scopedDB, result, "Should return the DB from context")
+
+	// Verify it's a properly scoped DB
+	stmt := result.Session(&gorm.Session{DryRun: true}).Find(&struct{}{})
+	assert.Contains(t, stmt.Statement.SQL.String(), "WHERE user_id = ?",
+		"SQL should contain WHERE user_id = ? clause")
+}
+
+func TestGetScopedDB_NoUserID(t *testing.T) {
+	// This test is now redundant since the GetUserScopedDb function doesn't check for user ID
+	// Keeping it as a placeholder
+	t.Skip("This test is now redundant")
+}
+
+// Original tests for GetUserScopedDb
 func TestGetUserScopedDb_WithoutUserID(t *testing.T) {
 	// Setup
 	db := setupTestDB(t)
 	handler := &Handler{db: db}
 	c, _ := setupTestContext()
 
+	// Create a scoped DB and set it in the context
+	scopedDB := db.Session(&gorm.Session{}) // Create a new DB session
+	c.Set(ScopedDBKey, scopedDB)
+
 	// Execute
-	scopedDB, err := handler.GetUserScopedDb(c, nil)
+	result := handler.GetUserScopedDb(c)
 
 	// Verify
-	assert.Error(t, err, "Should return error when no user ID is in context")
-	assert.Nil(t, scopedDB, "Should return nil DB when no user ID is in context")
+	assert.NotNil(t, result, "Should return a DB instance even without user ID")
+	assert.Equal(t, scopedDB, result, "Should return the DB from context")
 }
 
 func TestGetUserScopedDb_WithUserID(t *testing.T) {
@@ -53,18 +114,16 @@ func TestGetUserScopedDb_WithUserID(t *testing.T) {
 	userID := uint(123)
 	c.Set(UserIDKey, userID)
 
+	// First put a scoped DB in the context
+	scopedDB := db.Where("user_id = ?", userID)
+	c.Set(ScopedDBKey, scopedDB)
+
 	// Execute
-	scopedDB, err := handler.GetUserScopedDb(c, nil)
+	result := handler.GetUserScopedDb(c)
 
 	// Verify
-	assert.NoError(t, err, "Should not return error when user ID is in context")
-	assert.NotNil(t, scopedDB, "Should return a DB instance")
-
-	// We can also check the statement by executing a dummy query and checking the SQL
-	// This is a bit of a hack, but it works for testing purposes
-	stmt := scopedDB.Session(&gorm.Session{DryRun: true}).Find(&struct{}{})
-	assert.Contains(t, stmt.Statement.SQL.String(), "WHERE user_id = ?",
-		"SQL should contain WHERE user_id = ? clause")
+	assert.NotNil(t, result, "Should return a DB instance")
+	assert.Equal(t, scopedDB, result, "Should return the DB from context")
 }
 
 func TestGetUserScopedDb_WithProvidedDB(t *testing.T) {
@@ -78,23 +137,16 @@ func TestGetUserScopedDb_WithProvidedDB(t *testing.T) {
 	userID := uint(123)
 	c.Set(UserIDKey, userID)
 
+	// Create a scoped DB and put it in context
+	scopedDB := providedDB.Where("user_id = ?", userID)
+	c.Set(ScopedDBKey, scopedDB)
+
 	// Execute
-	scopedDB, err := handler.GetUserScopedDb(c, providedDB)
+	result := handler.GetUserScopedDb(c)
 
 	// Verify
-	assert.NoError(t, err, "Should not return error when user ID is in context")
-	assert.NotNil(t, scopedDB, "Should return a DB instance")
-
-	// The scoped DB should be based on the provided DB, not the handler's DB
-	stmt := scopedDB.Session(&gorm.Session{DryRun: true}).Find(&struct{}{})
-	assert.Contains(t, stmt.Statement.SQL.String(), "WHERE user_id = ?",
-		"SQL should contain WHERE user_id = ? clause")
-
-	// We can also verify it's not using the handler's DB by checking that a modification
-	// to the scoped DB doesn't affect the handler's DB
-	originalStmt := originalDB.Session(&gorm.Session{DryRun: true}).Find(&struct{}{})
-	assert.NotContains(t, originalStmt.Statement.SQL.String(), "WHERE user_id = ?",
-		"Original DB should not be modified")
+	assert.NotNil(t, result, "Should return a DB instance")
+	assert.Equal(t, scopedDB, result, "Should return the DB from context")
 }
 
 func TestGetUserScopedDb_InvalidUserIDType(t *testing.T) {
@@ -106,12 +158,16 @@ func TestGetUserScopedDb_InvalidUserIDType(t *testing.T) {
 	// Set an invalid user ID type in context
 	c.Set(UserIDKey, "not-a-uint")
 
+	// Create a scoped DB and put it in context
+	scopedDB := db // Just use the regular DB for this test
+	c.Set(ScopedDBKey, scopedDB)
+
 	// Execute
-	scopedDB, err := handler.GetUserScopedDb(c, nil)
+	result := handler.GetUserScopedDb(c)
 
 	// Verify
-	assert.Error(t, err, "Should return error when user ID is of invalid type")
-	assert.Nil(t, scopedDB, "Should return nil DB when user ID is of invalid type")
+	assert.NotNil(t, result, "Should return a DB instance even with invalid user ID type")
+	assert.Equal(t, scopedDB, result, "Should return the DB from context")
 }
 
 // Define a test model for SaveWithUser tests

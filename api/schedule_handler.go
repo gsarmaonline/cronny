@@ -12,7 +12,8 @@ func (handler *Handler) ScheduleIndexHandler(c *gin.Context) {
 	var (
 		schedules []*models.Schedule
 	)
-	if ex := handler.db.Preload("Action").Find(&schedules); ex.Error != nil {
+
+	if ex := handler.GetUserScopedDb(c).Preload("Action").Find(&schedules); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
@@ -31,13 +32,14 @@ func (handler *Handler) ScheduleShowHandler(c *gin.Context) {
 		scheduleId int
 		err        error
 	)
+
 	if scheduleId, err = strconv.Atoi(c.Param("id")); err != nil {
 		c.JSON(400, gin.H{
 			"message": "Improper ID format",
 		})
 		return
 	}
-	if ex := handler.db.Preload("Action").Where("id = ?", uint(scheduleId)).First(&schedule); ex.Error != nil {
+	if ex := handler.GetUserScopedDb(c).Preload("Action").Where("id = ?", uint(scheduleId)).First(&schedule); ex.Error != nil {
 		c.JSON(404, gin.H{
 			"message": "Schedule not found",
 		})
@@ -66,7 +68,17 @@ func (handler *Handler) ScheduleCreateHandler(c *gin.Context) {
 	schedule.ScheduleExecType = models.AwsExecType
 	schedule.ScheduleStatus = models.ScheduleStatusT(models.InactiveScheduleStatus)
 
-	if ex := handler.db.Save(schedule); ex.Error != nil {
+	// Set the user ID from the context
+	userID, exists := GetUserID(c)
+	if !exists {
+		c.JSON(401, gin.H{
+			"message": "user ID not found",
+		})
+		return
+	}
+	schedule.SetUserID(userID)
+
+	if ex := handler.GetUserScopedDb(c).Save(schedule); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
@@ -86,6 +98,9 @@ func (handler *Handler) ScheduleUpdateHandler(c *gin.Context) {
 		scheduleId      int
 		err             error
 	)
+
+	// Get the user-scoped database from context
+
 	schedule = &models.Schedule{}
 	updatedSchedule = &models.Schedule{}
 	schedule.ScheduleExecType = models.AwsExecType
@@ -97,7 +112,7 @@ func (handler *Handler) ScheduleUpdateHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Where("id = ?", uint(scheduleId)).First(schedule); ex.Error != nil {
+	if ex := handler.GetUserScopedDb(c).Where("id = ?", uint(scheduleId)).First(schedule); ex.Error != nil {
 		c.JSON(400, gin.H{
 			"message": ex.Error.Error(),
 		})
@@ -109,14 +124,17 @@ func (handler *Handler) ScheduleUpdateHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Model(schedule).Updates(updatedSchedule); ex.Error != nil {
+
+	// Reload the schedule data to return in response
+	if ex := handler.GetUserScopedDb(c).Model(schedule).Updates(updatedSchedule); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
 		return
 	}
+
 	c.JSON(200, gin.H{
-		"schedule": schedule,
+		"schedule": updatedSchedule,
 		"message":  "success",
 	})
 	return
@@ -128,21 +146,34 @@ func (handler *Handler) ScheduleDeleteHandler(c *gin.Context) {
 		scheduleId int
 		err        error
 	)
+
+	// Get the user-scoped database from context
+
 	if scheduleId, err = strconv.Atoi(c.Param("id")); err != nil {
 		c.JSON(400, gin.H{
 			"message": "Improper ID format",
 		})
 		return
 	}
-	if ex := handler.db.Delete(&models.Schedule{}, scheduleId); ex.Error != nil {
+
+	// First find the schedule to ensure it belongs to the user
+	schedule = &models.Schedule{}
+	if ex := handler.GetUserScopedDb(c).Where("id = ?", uint(scheduleId)).First(schedule); ex.Error != nil {
+		c.JSON(404, gin.H{
+			"message": "Schedule not found",
+		})
+		return
+	}
+
+	// Then delete it using the handler's DB to avoid the ambiguous column issue
+	if ex := handler.db.Delete(schedule); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
 		return
 	}
 	c.JSON(200, gin.H{
-		"schedule": schedule,
-		"message":  "success",
+		"message": "success",
 	})
 	return
 }
