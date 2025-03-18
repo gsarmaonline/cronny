@@ -28,7 +28,7 @@ func (handler *Handler) GetUserProfileHandler(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := handler.db.Preload("Plan").First(&user, userID).Error; err != nil {
+	if err := handler.GetUserScopedDb(c).Preload("Plan").First(&user, userID).Error; err != nil {
 		c.JSON(404, gin.H{
 			"message": "User not found",
 		})
@@ -60,7 +60,7 @@ func (handler *Handler) UpdateUserProfileHandler(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := handler.db.First(&user, userID).Error; err != nil {
+	if err := handler.GetUserScopedDb(c).First(&user, userID).Error; err != nil {
 		c.JSON(404, gin.H{
 			"message": "User not found",
 		})
@@ -77,7 +77,7 @@ func (handler *Handler) UpdateUserProfileHandler(c *gin.Context) {
 	user.ZipCode = update.ZipCode
 	user.Phone = update.Phone
 
-	if err := handler.db.Save(&user).Error; err != nil {
+	if err := handler.SaveWithUser(c, &user); err != nil {
 		c.JSON(500, gin.H{
 			"message": "Failed to update profile",
 		})
@@ -85,7 +85,7 @@ func (handler *Handler) UpdateUserProfileHandler(c *gin.Context) {
 	}
 
 	// Reload user with plan data
-	if err := handler.db.Preload("Plan").First(&user, user.ID).Error; err != nil {
+	if err := handler.GetUserScopedDb(c).Preload("Plan").First(&user, user.ID).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Failed to reload user data",
 		})
@@ -117,7 +117,7 @@ func (handler *Handler) UpdateUserPlanHandler(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := handler.db.First(&user, userID).Error; err != nil {
+	if err := handler.GetUserScopedDb(c).First(&user, userID).Error; err != nil {
 		c.JSON(404, gin.H{
 			"message": "User not found",
 		})
@@ -136,7 +136,7 @@ func (handler *Handler) UpdateUserPlanHandler(c *gin.Context) {
 	// Update user's plan
 	user.PlanID = update.PlanID
 
-	if err := handler.db.Save(&user).Error; err != nil {
+	if err := handler.SaveWithUser(c, &user); err != nil {
 		c.JSON(500, gin.H{
 			"message": "Failed to update plan",
 		})
@@ -144,7 +144,7 @@ func (handler *Handler) UpdateUserPlanHandler(c *gin.Context) {
 	}
 
 	// Reload user with plan and features data
-	if err := handler.db.Preload("Plan").Preload("Plan.Features").First(&user, user.ID).Error; err != nil {
+	if err := handler.GetUserScopedDb(c).Preload("Plan").Preload("Plan.Features").First(&user, user.ID).Error; err != nil {
 		c.JSON(500, gin.H{
 			"message": "Failed to reload user data",
 		})

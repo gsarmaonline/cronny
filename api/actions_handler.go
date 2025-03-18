@@ -12,7 +12,7 @@ func (handler *Handler) ActionIndexHandler(c *gin.Context) {
 		actions []*models.Action
 	)
 
-	if ex := handler.db.Find(&actions); ex.Error != nil {
+	if ex := handler.GetUserScopedDb(c).Find(&actions); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
@@ -38,7 +38,7 @@ func (handler *Handler) ActionShowHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Preload("Jobs").Where("id = ?", actionId).First(&action); ex.Error != nil {
+	if ex := handler.GetUserScopedDb(c).Preload("Jobs").Where("id = ?", actionId).First(&action); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
@@ -63,12 +63,14 @@ func (handler *Handler) ActionCreateHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Save(action); ex.Error != nil {
+
+	if err = handler.SaveWithUser(c, action); err != nil {
 		c.JSON(500, gin.H{
-			"message": ex.Error.Error(),
+			"message": err.Error(),
 		})
 		return
 	}
+
 	c.JSON(200, gin.H{
 		"action":  action,
 		"message": "success",
@@ -92,24 +94,28 @@ func (handler *Handler) ActionUpdateHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Where("id = ?", uint(actionId)).First(action); ex.Error != nil {
+
+	if ex := handler.GetUserScopedDb(c).Where("id = ?", uint(actionId)).First(action); ex.Error != nil {
 		c.JSON(400, gin.H{
 			"message": ex.Error.Error(),
 		})
 		return
 	}
+
 	if err = c.ShouldBindJSON(updatedAction); err != nil {
 		c.JSON(400, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
-	if ex := handler.db.Model(action).Updates(updatedAction); ex.Error != nil {
+
+	if err = handler.UpdateWithUser(c, action, updatedAction); err != nil {
 		c.JSON(500, gin.H{
-			"message": ex.Error.Error(),
+			"message": err.Error(),
 		})
 		return
 	}
+
 	c.JSON(200, gin.H{
 		"action":  action,
 		"message": "success",
@@ -129,12 +135,24 @@ func (handler *Handler) ActionDeleteHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Delete(&models.Action{}, actionId); ex.Error != nil {
+
+	// First find the action to ensure it belongs to the user
+	action = &models.Action{}
+	if ex := handler.GetUserScopedDb(c).Where("id = ?", uint(actionId)).First(action); ex.Error != nil {
+		c.JSON(404, gin.H{
+			"message": "Action not found",
+		})
+		return
+	}
+
+	// Then delete it using the handler's DB to avoid any ambiguity
+	if ex := handler.db.Delete(action); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
 		return
 	}
+
 	c.JSON(200, gin.H{
 		"action":  action,
 		"message": "success",

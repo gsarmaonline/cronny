@@ -11,7 +11,7 @@ func (handler *Handler) JobIndexHandler(c *gin.Context) {
 	var (
 		jobs []*models.Job
 	)
-	
+
 	// Check if action_id query param exists
 	actionIDStr := c.Query("action_id")
 	if actionIDStr != "" {
@@ -22,22 +22,22 @@ func (handler *Handler) JobIndexHandler(c *gin.Context) {
 			})
 			return
 		}
-		
-		if ex := handler.db.Preload("JobExecutions").Where("action_id = ?", actionID).Find(&jobs); ex.Error != nil {
+
+		if ex := handler.GetUserScopedDb(c).Preload("JobExecutions").Where("action_id = ?", actionID).Find(&jobs); ex.Error != nil {
 			c.JSON(500, gin.H{
 				"message": ex.Error.Error(),
 			})
 			return
 		}
 	} else {
-		if ex := handler.db.Preload("JobExecutions").Find(&jobs); ex.Error != nil {
+		if ex := handler.GetUserScopedDb(c).Preload("JobExecutions").Find(&jobs); ex.Error != nil {
 			c.JSON(500, gin.H{
 				"message": ex.Error.Error(),
 			})
 			return
 		}
 	}
-	
+
 	c.JSON(200, gin.H{
 		"jobs":    jobs,
 		"message": "success",
@@ -57,7 +57,7 @@ func (handler *Handler) JobShowHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Preload("JobExecutions").Where("id = ?", jobId).First(&job); ex.Error != nil {
+	if ex := handler.GetUserScopedDb(c).Preload("JobExecutions").Where("id = ?", jobId).First(&job); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
@@ -82,12 +82,14 @@ func (handler *Handler) JobCreateHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Save(job); ex.Error != nil {
+
+	if err = handler.SaveWithUser(c, job); err != nil {
 		c.JSON(500, gin.H{
-			"message": ex.Error.Error(),
+			"message": err.Error(),
 		})
 		return
 	}
+
 	c.JSON(200, gin.H{
 		"job":     job,
 		"message": "success",
@@ -111,24 +113,28 @@ func (handler *Handler) JobUpdateHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Where("id = ?", uint(jobId)).First(job); ex.Error != nil {
+
+	if ex := handler.GetUserScopedDb(c).Where("id = ?", uint(jobId)).First(job); ex.Error != nil {
 		c.JSON(400, gin.H{
 			"message": ex.Error.Error(),
 		})
 		return
 	}
+
 	if err = c.ShouldBindJSON(updatedJob); err != nil {
 		c.JSON(400, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
-	if ex := handler.db.Model(job).Updates(updatedJob); ex.Error != nil {
+
+	if err = handler.UpdateWithUser(c, job, updatedJob); err != nil {
 		c.JSON(500, gin.H{
-			"message": ex.Error.Error(),
+			"message": err.Error(),
 		})
 		return
 	}
+
 	c.JSON(200, gin.H{
 		"job":     job,
 		"message": "success",
@@ -148,12 +154,24 @@ func (handler *Handler) JobDeleteHandler(c *gin.Context) {
 		})
 		return
 	}
-	if ex := handler.db.Delete(&models.Job{}, jobId); ex.Error != nil {
+
+	// First find the job to ensure it belongs to the user
+	job = &models.Job{}
+	if ex := handler.GetUserScopedDb(c).Where("id = ?", uint(jobId)).First(job); ex.Error != nil {
+		c.JSON(404, gin.H{
+			"message": "Job not found",
+		})
+		return
+	}
+
+	// Then delete it using the handler's DB to avoid any ambiguity
+	if ex := handler.db.Delete(job); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
 		})
 		return
 	}
+
 	c.JSON(200, gin.H{
 		"job":     job,
 		"message": "success",
