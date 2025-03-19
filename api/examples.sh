@@ -100,7 +100,6 @@ curl -s -XPOST $API_URL/jobs \
 {
     "name": "job-1",
     "action_id": 1,
-    "job_type": "http",
     "job_input_type": "static_input",
     "job_input_value": "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
     "is_root_job": true,

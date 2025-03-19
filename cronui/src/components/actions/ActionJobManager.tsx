@@ -46,7 +46,6 @@ const ActionJobManager: React.FC = () => {
   const [newAction, setNewAction] = useState<Action>({ name: '', description: '', user_id: 0, ID: 0, CreatedAt: '', UpdatedAt: '', DeletedAt: null });
   const [jobFormData, setJobFormData] = useState({
     name: '',
-    type: 'http',
     inputType: 'static_input',
     inputValue: '{}',
     actionId: 0,
@@ -143,7 +142,6 @@ const ActionJobManager: React.FC = () => {
       setEditingJob(job);
       setJobFormData({
         name: job.name,
-        type: job.job_type,
         inputType: job.job_input_type,
         inputValue: job.job_input_value,
         actionId: job.action_id,
@@ -158,7 +156,6 @@ const ActionJobManager: React.FC = () => {
       // Set default values with the first template if available
       setJobFormData({
         name: '',
-        type: 'http',
         inputType: 'static_input',
         inputValue: '{}',
         actionId: selectedAction?.ID || 0,
@@ -177,7 +174,6 @@ const ActionJobManager: React.FC = () => {
     setEditingJob(null);
     setJobFormData({
       name: '',
-      type: 'http',
       inputType: 'static_input',
       inputValue: '{}',
       actionId: 0,
@@ -238,11 +234,8 @@ const ActionJobManager: React.FC = () => {
       return;
     }
 
-    console.log(jobFormData);
-
     const newJob = {
       name: jobFormData.name,
-      job_type: jobFormData.type,
       job_input_type: jobFormData.inputType,
       job_input_value: jobFormData.inputValue,
       action_id: selectedAction.ID,
@@ -356,7 +349,6 @@ const ActionJobManager: React.FC = () => {
                 <Card key={job.ID} sx={{ mb: 2 }}>
                   <CardContent>
                     <Typography variant="h6">{job.name}</Typography>
-                    <Typography>Type: {job.job_type}</Typography>
                     <Typography>Input Type: {job.job_input_type}</Typography>
                     <IconButton
                       onClick={(e) => {
@@ -448,24 +440,6 @@ const ActionJobManager: React.FC = () => {
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth margin="normal">
-                <InputLabel id="job-type-label">Job Type</InputLabel>
-                <Select
-                  labelId="job-type-label"
-                  id="job-type"
-                  value={jobFormData.type}
-                  label="Job Type"
-                  onChange={e => setJobFormData({ ...jobFormData, type: e.target.value })}
-                  inputProps={{ "data-testid": "job-type-select" }}
-                >
-                  <MenuItem value="http">HTTP</MenuItem>
-                  <MenuItem value="slack">Slack</MenuItem>
-                  <MenuItem value="logger">Logger</MenuItem>
-                  <MenuItem value="docker">Docker</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth margin="normal">
                 <InputLabel id="input-type-label">Input Type</InputLabel>
                 <Select
                   labelId="input-type-label"
@@ -507,12 +481,10 @@ const ActionJobManager: React.FC = () => {
                     // Find the selected template
                     const selectedTemplate = jobTemplateOptions.find(template => template.id === templateId);
                     if (selectedTemplate) {
-                      // Update the job type and other relevant fields based on the template
-                      // You may want to fetch the full template details here if needed
+                      // Update relevant fields based on the template
                       setJobFormData(prev => ({
                         ...prev,
                         jobTemplateId: templateId,
-                        type: selectedTemplate.type || prev.type,
                         inputType: selectedTemplate.inputType || prev.inputType,
                         inputValue: selectedTemplate.inputValue || prev.inputValue
                       }));

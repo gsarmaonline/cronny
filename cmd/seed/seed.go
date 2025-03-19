@@ -114,7 +114,6 @@ func getAction(db *gorm.DB, userID uint) (action *models.Action) {
 
 	jobThree := &models.Job{
 		Name:          "job-3",
-		JobType:       "slack",
 		JobInputType:  models.StaticJsonInput,
 		JobInputValue: fmt.Sprintf("{\"slack_api_token\": \"%s\", \"channel_id\": \"channel_1\", \"message\": \"hello from cronny\"}", SlackToken),
 		ActionID:      action.ID,
@@ -125,7 +124,6 @@ func getAction(db *gorm.DB, userID uint) (action *models.Action) {
 
 	jobTwo := &models.Job{
 		Name:          "job-2",
-		JobType:       "logger",
 		ActionID:      action.ID,
 		JobTemplateID: jobTemplate.ID,
 	}
@@ -134,7 +132,6 @@ func getAction(db *gorm.DB, userID uint) (action *models.Action) {
 
 	jobOne := &models.Job{
 		Name:          "job-1",
-		JobType:       "http",
 		JobInputType:  models.StaticJsonInput,
 		JobInputValue: "{\"method\": \"GET\", \"url\": \"https://jsonplaceholder.typicode.com/todos/1\"}",
 		Condition:     getConditionForJobOne(jobTwo.ID),

@@ -34,8 +34,7 @@ type (
 	Job struct {
 		BaseModel
 
-		Name    string `json:"name"`
-		JobType string `json:"job_type"`
+		Name string `json:"name"`
 
 		InternalOutput JobOutputT `gorm:"-" json:"-"`
 
@@ -200,12 +199,21 @@ func (job *Job) ExecuteJobTemplate(db *gorm.DB) (output JobOutputT, err error) {
 		outputMap      actions.Output
 		outputB        []byte
 		baseAction     actions.BaseAction
+		jobTemplate    *JobTemplate
 	)
 	if inp, err = job.GetInput(db); err != nil {
 		return
 	}
-	if actionExecutor, isPresent = JobMaps[job.JobType]; !isPresent {
-		err = errors.New(fmt.Sprintf("JobType %s not defined", job.JobType))
+
+	// Get job template
+	jobTemplate = &JobTemplate{}
+	if ex := db.Where("id = ?", job.JobTemplateID).First(jobTemplate); ex.Error != nil {
+		err = ex.Error
+		return
+	}
+
+	if actionExecutor, isPresent = JobMaps[jobTemplate.Name]; !isPresent {
+		err = errors.New(fmt.Sprintf("JobTemplate %s not defined", jobTemplate.Name))
 		return
 	}
 	if outputMap, err = baseAction.Execute(actionExecutor, inp); err != nil {
