@@ -24,6 +24,7 @@ interface JobFormProps {
   setJobFormData: (data: JobFormData | ((prev: JobFormData) => JobFormData)) => void;
   jobTemplateOptions: JobTemplateOption[];
   isEditing: boolean;
+  actionId: number;
 }
 
 const JobForm: React.FC<JobFormProps> = ({
@@ -33,8 +34,17 @@ const JobForm: React.FC<JobFormProps> = ({
   jobFormData,
   setJobFormData,
   jobTemplateOptions,
-  isEditing
+  isEditing,
+  actionId
 }) => {
+  const updateFormData = (updates: Partial<JobFormData>) => {
+    setJobFormData(prev => ({
+      ...prev,
+      ...updates,
+      actionId // Always include the current actionId
+    }));
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle data-testid="job-dialog-title">{isEditing ? 'Edit Job' : 'Add Job'}</DialogTitle>
@@ -45,7 +55,7 @@ const JobForm: React.FC<JobFormProps> = ({
               id="job-name"
               label="Job Name"
               value={jobFormData.name}
-              onChange={e => setJobFormData({ ...jobFormData, name: e.target.value })}
+              onChange={e => updateFormData({ name: e.target.value })}
               fullWidth
               margin="normal"
               inputProps={{ "data-testid": "job-name-input" }}
@@ -59,7 +69,7 @@ const JobForm: React.FC<JobFormProps> = ({
                 id="job-type"
                 value={jobFormData.type}
                 label="Job Type"
-                onChange={e => setJobFormData({ ...jobFormData, type: e.target.value })}
+                onChange={e => updateFormData({ type: e.target.value })}
                 inputProps={{ "data-testid": "job-type-select" }}
               >
                 <MenuItem value="http">HTTP</MenuItem>
@@ -77,7 +87,7 @@ const JobForm: React.FC<JobFormProps> = ({
                 id="input-type"
                 value={jobFormData.inputType}
                 label="Input Type"
-                onChange={e => setJobFormData({ ...jobFormData, inputType: e.target.value })}
+                onChange={e => updateFormData({ inputType: e.target.value })}
                 inputProps={{ "data-testid": "input-type-select" }}
               >
                 <MenuItem value="static_input">Static Input</MenuItem>
@@ -90,7 +100,7 @@ const JobForm: React.FC<JobFormProps> = ({
               id="input-value"
               label="Input Value"
               value={jobFormData.inputValue}
-              onChange={e => setJobFormData({ ...jobFormData, inputValue: e.target.value })}
+              onChange={e => updateFormData({ inputValue: e.target.value })}
               fullWidth
               margin="normal"
               multiline
@@ -110,13 +120,12 @@ const JobForm: React.FC<JobFormProps> = ({
                   const templateId = Number(e.target.value);
                   const selectedTemplate = jobTemplateOptions.find(template => template.id === templateId);
                   if (selectedTemplate) {
-                    setJobFormData(prev => ({
-                      ...prev,
+                    updateFormData({
                       jobTemplateId: templateId,
-                      type: selectedTemplate.type || prev.type,
-                      inputType: selectedTemplate.inputType || prev.inputType,
-                      inputValue: selectedTemplate.inputValue || prev.inputValue
-                    }));
+                      type: selectedTemplate.type || jobFormData.type,
+                      inputType: selectedTemplate.inputType || jobFormData.inputType,
+                      inputValue: selectedTemplate.inputValue || jobFormData.inputValue
+                    });
                   }
                 }}
                 inputProps={{ "data-testid": "job-template-select" }}
@@ -136,7 +145,7 @@ const JobForm: React.FC<JobFormProps> = ({
               label="Timeout (seconds)"
               type="number"
               value={jobFormData.jobTimeoutInSecs}
-              onChange={e => setJobFormData({ ...jobFormData, jobTimeoutInSecs: Number(e.target.value) })}
+              onChange={e => updateFormData({ jobTimeoutInSecs: Number(e.target.value) })}
               fullWidth
               margin="normal"
               inputProps={{ "data-testid": "timeout-input" }}
@@ -148,7 +157,7 @@ const JobForm: React.FC<JobFormProps> = ({
                 <Switch
                   id="root-job"
                   checked={jobFormData.isRootJob}
-                  onChange={e => setJobFormData({ ...jobFormData, isRootJob: e.target.checked })}
+                  onChange={e => updateFormData({ isRootJob: e.target.checked })}
                   data-testid="root-job-switch"
                 />
               }
@@ -160,7 +169,7 @@ const JobForm: React.FC<JobFormProps> = ({
               id="condition"
               label="Condition"
               value={jobFormData.condition}
-              onChange={e => setJobFormData({ ...jobFormData, condition: e.target.value })}
+              onChange={e => updateFormData({ condition: e.target.value })}
               fullWidth
               margin="normal"
               multiline
@@ -173,7 +182,7 @@ const JobForm: React.FC<JobFormProps> = ({
               id="proceed-condition"
               label="Proceed Condition"
               value={jobFormData.proceedCondition}
-              onChange={e => setJobFormData({ ...jobFormData, proceedCondition: e.target.value })}
+              onChange={e => updateFormData({ proceedCondition: e.target.value })}
               fullWidth
               margin="normal"
               inputProps={{ "data-testid": "proceed-condition-input" }}

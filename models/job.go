@@ -98,7 +98,7 @@ func (job *Job) validateAssociations() (err error) {
 		err = fmt.Errorf("Action is nil for job %s", job.Name)
 		return
 	}
-	if job.JobTemplate == nil {
+	if job.JobTemplate == nil && job.JobTemplateID == 0 {
 		err = fmt.Errorf("JobTemplate is nil for job %s", job.Name)
 		return
 	}

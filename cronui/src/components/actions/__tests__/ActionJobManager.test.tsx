@@ -22,6 +22,18 @@ const mockJobTemplates = [
   { ID: 2, name: 'Template 2', exec_type: 2, exec_link: 'link2', code: 'code2', CreatedAt: '', UpdatedAt: '', DeletedAt: null }
 ];
 
+const mockActions = [
+  {
+    ID: 1,
+    name: 'Test Action 1',
+    description: 'Test Description 1',
+    user_id: 1,
+    CreatedAt: '',
+    UpdatedAt: '',
+    DeletedAt: null
+  }
+];
+
 const mockJobs = [
   {
     ID: 1,
@@ -44,12 +56,13 @@ const mockJobs = [
 
 describe('ActionJobManager', () => {
   beforeEach(() => {
-    // Reset all mocks before each test
     jest.clearAllMocks();
 
     // Setup default mock implementations
     (jobService.getJobTemplates as jest.Mock).mockResolvedValue(mockJobTemplates);
-    (actionsApi.createAction as jest.Mock).mockResolvedValue({ data: { actions: { ID: 1, name: 'New Action' } } });
+    (jobService.getJobs as jest.Mock).mockResolvedValue(mockJobs);
+    (actionsApi.getActions as jest.Mock).mockResolvedValue({ data: { actions: mockActions } });
+    (actionsApi.createAction as jest.Mock).mockResolvedValue({ data: { action: mockActions[0] } });
   });
 
   const renderComponent = () => {
@@ -68,162 +81,176 @@ describe('ActionJobManager', () => {
     );
   };
 
-  it('renders the component with initial state', async () => {
+  it('renders the component and fetches initial data', async () => {
     renderComponent();
 
-    // Check for main elements
-    expect(screen.getByText('Manage Action and Jobs')).toBeInTheDocument();
-    expect(screen.getByLabelText('Action Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Description')).toBeInTheDocument();
-    expect(screen.getByText('Add Job')).toBeInTheDocument();
+    expect(screen.getByText('Actions')).toBeInTheDocument();
 
-    // Verify job templates are fetched
     await waitFor(() => {
       expect(jobService.getJobTemplates).toHaveBeenCalled();
+      expect(actionsApi.getActions).toHaveBeenCalled();
     });
   });
 
-  it('opens job dialog when Add Job button is clicked', async () => {
+  it('handles action selection and fetches jobs', async () => {
     renderComponent();
 
-    // Click the Add Job button
-    fireEvent.click(screen.getByTestId('add-job-button'));
+    await waitFor(() => {
+      expect(screen.getByText('Test Action 1')).toBeInTheDocument();
+    });
 
-    // Verify dialog is open with form fields
-    expect(screen.getByTestId('job-dialog-title')).toBeInTheDocument();
-    expect(screen.getByLabelText('Job Name')).toBeInTheDocument();
-    expect(screen.getByTestId('job-type-select')).toBeInTheDocument();
-    expect(screen.getByTestId('input-type-select')).toBeInTheDocument();
-    expect(screen.getByTestId('input-value-input')).toBeInTheDocument();
-    expect(screen.getByTestId('job-template-select')).toBeInTheDocument();
-    expect(screen.getByTestId('timeout-input')).toBeInTheDocument();
-    expect(screen.getByTestId('root-job-switch')).toBeInTheDocument();
-    expect(screen.getByTestId('condition-input')).toBeInTheDocument();
-    expect(screen.getByTestId('proceed-condition-input')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Test Action 1'));
+
+    await waitFor(() => {
+      expect(jobService.getJobs).toHaveBeenCalledWith(1);
+      expect(screen.getByText('Test Job 1')).toBeInTheDocument();
+    });
   });
 
-  it('handles job creation', async () => {
+  it('prevents job creation when no action is selected', async () => {
     renderComponent();
 
+    fireEvent.click(screen.getByText('Add Job'));
+
+    expect(screen.getByText('Please select an action before creating a job')).toBeInTheDocument();
+  });
+
+  it('handles job creation with selected action', async () => {
+    const newJob = {
+      name: 'New Job',
+      job_type: 'http',
+      job_input_type: 'static_input',
+      job_input_value: '{}',
+      action_id: 1,
+      job_template_id: 0,
+      is_root_job: false,
+      condition: '{}',
+      proceed_condition: '',
+      job_timeout_in_secs: 300
+    };
+
+    (jobService.createJob as jest.Mock).mockResolvedValue({
+      ...newJob,
+      ID: 2,
+      CreatedAt: '',
+      UpdatedAt: '',
+      DeletedAt: null,
+      job_executions: []
+    });
+
+    renderComponent();
+
+    // Select an action first
+    await waitFor(() => {
+      expect(screen.getByText('Test Action 1')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Test Action 1'));
+
+    // Open job dialog and fill form
+    fireEvent.click(screen.getByText('Add Job'));
+    await userEvent.type(screen.getByTestId('job-name-input'), 'New Job');
+    
+    // Save the job
+    fireEvent.click(screen.getByTestId('save-job-button'));
+
+    await waitFor(() => {
+      expect(jobService.createJob).toHaveBeenCalledWith(expect.objectContaining({
+        name: 'New Job',
+        action_id: 1
+      }));
+    });
+  });
+
+  it('handles job editing', async () => {
+    const updatedJob = {
+      ...mockJobs[0],
+      name: 'Updated Job'
+    };
+
+    (jobService.updateJob as jest.Mock).mockResolvedValue(updatedJob);
+
+    renderComponent();
+
+    // Select an action first
+    await waitFor(() => {
+      expect(screen.getByText('Test Action 1')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Test Action 1'));
+
+    // Wait for jobs to load
+    await waitFor(() => {
+      expect(screen.getByText('Test Job 1')).toBeInTheDocument();
+    });
+
+    // Click edit button and update job
+    const editButtons = screen.getAllByTestId('edit-job-button');
+    fireEvent.click(editButtons[0]);
+
+    await userEvent.clear(screen.getByTestId('job-name-input'));
+    await userEvent.type(screen.getByTestId('job-name-input'), 'Updated Job');
+
+    fireEvent.click(screen.getByTestId('save-job-button'));
+
+    await waitFor(() => {
+      expect(jobService.updateJob).toHaveBeenCalledWith(1, expect.objectContaining({
+        name: 'Updated Job'
+      }));
+      expect(screen.getByText('Updated Job')).toBeInTheDocument();
+    });
+  });
+
+  it('handles errors during job operations', async () => {
+    (jobService.createJob as jest.Mock).mockRejectedValue(new Error('Failed to create job'));
+
+    renderComponent();
+
+    // Select an action first
+    await waitFor(() => {
+      expect(screen.getByText('Test Action 1')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Test Action 1'));
+
+    // Try to create a job
+    fireEvent.click(screen.getByText('Add Job'));
+    await userEvent.type(screen.getByTestId('job-name-input'), 'New Job');
+    fireEvent.click(screen.getByTestId('save-job-button'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to save job')).toBeInTheDocument();
+    });
+  });
+
+  it('preserves actionId in job form data', async () => {
+    renderComponent();
+
+    // Select an action first
+    await waitFor(() => {
+      expect(screen.getByText('Test Action 1')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Test Action 1'));
+
     // Open job dialog
-    fireEvent.click(screen.getByTestId('add-job-button'));
+    fireEvent.click(screen.getByText('Add Job'));
 
-    // Fill in the form
-    await userEvent.type(screen.getByLabelText('Job Name'), 'New Test Job');
-    
-    // Select job type
-    const jobTypeSelect = screen.getByTestId('job-type-select');
-    fireEvent.mouseDown(jobTypeSelect);
-    fireEvent.click(screen.getByText('HTTP'));
-
-    // Select input type
-    const inputTypeSelect = screen.getByTestId('input-type-select');
-    fireEvent.mouseDown(inputTypeSelect);
-    fireEvent.click(screen.getByText('Static Input'));
-
-    // Fill in other fields
-    const inputValue = screen.getByTestId('input-value-input');
-    fireEvent.change(inputValue, { target: { value: '{"test": "value"}' } });
-    
-    const timeoutInput = screen.getByTestId('timeout-input');
-    await userEvent.clear(timeoutInput);
-    await userEvent.type(timeoutInput, '600');
-    
-    // Toggle root job
-    await userEvent.click(screen.getByTestId('root-job-switch'));
+    // Update various form fields
+    await userEvent.type(screen.getByTestId('job-name-input'), 'New Job');
+    fireEvent.change(screen.getByTestId('job-type-select'), {
+      target: { value: 'slack' }
+    });
+    fireEvent.click(screen.getByTestId('root-job-switch'));
 
     // Save the job
     fireEvent.click(screen.getByTestId('save-job-button'));
 
-    // Verify the job is added to the list
     await waitFor(() => {
-      expect(screen.getByText('New Test Job')).toBeInTheDocument();
+      expect(jobService.createJob).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action_id: 1,
+          name: 'New Job',
+          job_type: 'slack',
+          is_root_job: true
+        })
+      );
     });
-  });
-
-  it('handles action creation', async () => {
-    renderComponent();
-
-    // Fill in action details
-    await userEvent.type(screen.getByLabelText('Action Name'), 'New Action');
-    await userEvent.type(screen.getByLabelText('Description'), 'Test Description');
-
-    // Save the action
-    fireEvent.click(screen.getByText('Save Action'));
-
-    await waitFor(() => {
-      expect(actionsApi.createAction).toHaveBeenCalledWith({
-        name: 'New Action',
-        description: 'Test Description',
-        user_id: mockUser.id,
-        ID: 0,
-        CreatedAt: '',
-        UpdatedAt: '',
-        DeletedAt: null
-      });
-    });
-  });
-
-  it('handles errors gracefully', async () => {
-    // Mock an error response
-    (actionsApi.createAction as jest.Mock).mockRejectedValue(new Error('Failed to create action'));
-    
-    renderComponent();
-
-    // Fill in action details and try to save
-    await userEvent.type(screen.getByLabelText('Action Name'), 'New Action');
-    fireEvent.click(screen.getByText('Save Action'));
-
-    // Verify error message is displayed
-    await waitFor(() => {
-      const errorMessage = screen.getByTestId('error-message');
-      expect(errorMessage).toBeInTheDocument();
-      expect(errorMessage).toHaveTextContent('Failed to save action');
-    });
-  });
-
-  it('allows editing existing jobs', async () => {
-    renderComponent();
-
-    // Add a mock job first
-    fireEvent.click(screen.getByText('Add Job'));
-    await userEvent.type(screen.getByLabelText('Job Name'), 'Test Job');
-    fireEvent.click(screen.getByText('Save Job'));
-
-    // Click edit button
-    const editButtons = screen.getAllByTestId('edit-button');
-    fireEvent.click(editButtons[0]);
-
-    // Verify edit dialog opens with job data
-    expect(screen.getByDisplayValue('Test Job')).toBeInTheDocument();
-
-    // Edit the job name
-    await userEvent.clear(screen.getByLabelText('Job Name'));
-    await userEvent.type(screen.getByLabelText('Job Name'), 'Updated Job');
-
-    // Save the changes
-    fireEvent.click(screen.getByText('Save Job'));
-
-    // Verify the job is updated in the list
-    expect(screen.getByText('Updated Job')).toBeInTheDocument();
-  });
-
-  it('allows deleting jobs', async () => {
-    renderComponent();
-
-    // Add a mock job first
-    fireEvent.click(screen.getByText('Add Job'));
-    await userEvent.type(screen.getByLabelText('Job Name'), 'Test Job');
-    fireEvent.click(screen.getByText('Save Job'));
-
-    // Verify job is in the list
-    expect(screen.getByText('Test Job')).toBeInTheDocument();
-
-    // Click delete button
-    const deleteButtons = screen.getAllByTestId('delete-button');
-    fireEvent.click(deleteButtons[0]);
-
-    // Verify job is removed from the list
-    expect(screen.queryByText('Test Job')).not.toBeInTheDocument();
   });
 }); 
