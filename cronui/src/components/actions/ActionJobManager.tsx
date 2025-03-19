@@ -476,17 +476,33 @@ const ActionJobManager: React.FC = () => {
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth margin="normal">
-                <InputLabel id="input-type-label">Input Type</InputLabel>
+                <InputLabel id="job-template-label">Job Template</InputLabel>
                 <Select
-                  labelId="input-type-label"
-                  id="input-type"
-                  value={jobFormData.inputType}
-                  label="Input Type"
-                  onChange={e => setJobFormData({ ...jobFormData, inputType: e.target.value })}
-                  inputProps={{ "data-testid": "input-type-select" }}
+                  labelId="job-template-label"
+                  id="job-template"
+                  value={jobFormData.jobTemplateId}
+                  label="Job Template"
+                  onChange={e => {
+                    const templateId = Number(e.target.value);
+                    setJobFormData({ ...jobFormData, jobTemplateId: templateId });
+                    // Find the selected template
+                    const selectedTemplate = jobTemplateOptions.find(template => template.id === templateId);
+                    if (selectedTemplate) {
+                      // Update relevant fields based on the template
+                      setJobFormData(prev => ({
+                        ...prev,
+                        jobTemplateId: templateId,
+                        inputValue: selectedTemplate.inputValue || prev.inputValue
+                      }));
+                    }
+                  }}
+                  inputProps={{ "data-testid": "job-template-select" }}
                 >
-                  <MenuItem value="static_input">Static Input</MenuItem>
-                  <MenuItem value="dynamic_input">Dynamic Input</MenuItem>
+                  {jobTemplateOptions.map(template => (
+                    <MenuItem key={template.id} value={template.id}>
+                      {template.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -504,39 +520,6 @@ const ActionJobManager: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="job-template-label">Job Template</InputLabel>
-                <Select
-                  labelId="job-template-label"
-                  id="job-template"
-                  value={jobFormData.jobTemplateId}
-                  label="Job Template"
-                  onChange={e => {
-                    const templateId = Number(e.target.value);
-                    setJobFormData({ ...jobFormData, jobTemplateId: templateId });
-                    // Find the selected template
-                    const selectedTemplate = jobTemplateOptions.find(template => template.id === templateId);
-                    if (selectedTemplate) {
-                      // Update relevant fields based on the template
-                      setJobFormData(prev => ({
-                        ...prev,
-                        jobTemplateId: templateId,
-                        inputType: selectedTemplate.inputType || prev.inputType,
-                        inputValue: selectedTemplate.inputValue || prev.inputValue
-                      }));
-                    }
-                  }}
-                  inputProps={{ "data-testid": "job-template-select" }}
-                >
-                  {jobTemplateOptions.map(template => (
-                    <MenuItem key={template.id} value={template.id}>
-                      {template.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
               <TextField
                 id="timeout"
                 label="Timeout (seconds)"
@@ -546,43 +529,6 @@ const ActionJobManager: React.FC = () => {
                 fullWidth
                 margin="normal"
                 inputProps={{ "data-testid": "timeout-input" }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    id="root-job"
-                    checked={jobFormData.isRootJob}
-                    onChange={e => setJobFormData({ ...jobFormData, isRootJob: e.target.checked })}
-                    data-testid="root-job-switch"
-                  />
-                }
-                label="Root Job"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                id="condition"
-                label="Condition"
-                value={jobFormData.condition}
-                onChange={e => setJobFormData({ ...jobFormData, condition: e.target.value })}
-                fullWidth
-                margin="normal"
-                multiline
-                rows={4}
-                inputProps={{ "data-testid": "condition-input" }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                id="proceed-condition"
-                label="Proceed Condition"
-                value={jobFormData.proceedCondition}
-                onChange={e => setJobFormData({ ...jobFormData, proceedCondition: e.target.value })}
-                fullWidth
-                margin="normal"
-                inputProps={{ "data-testid": "proceed-condition-input" }}
               />
             </Grid>
           </Grid>
