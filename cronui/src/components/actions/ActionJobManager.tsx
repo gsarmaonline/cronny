@@ -126,14 +126,28 @@ const ActionJobManager: React.FC = () => {
 
   const handleDeleteAction = async (actionId: number) => {
     try {
-      await actionsApi.deleteAction(actionId);
-      setActions(actions.filter(a => a.ID !== actionId));
-      if (selectedAction?.ID === actionId) {
-        setSelectedAction(null);
-        setJobs([]);
+      const response = await actionsApi.deleteAction(actionId);
+      const data = response?.data as { message?: string };
+      
+      if (data?.message === "success") {
+        setActions(actions.filter(a => a.ID !== actionId));
+        if (selectedAction?.ID === actionId) {
+          setSelectedAction(null);
+          setJobs([]);
+        }
+        setError(null);
+      } else if (data?.message) {
+        setError(data.message);
       }
     } catch (err) {
-      setError('Failed to delete action');
+      if (typeof err === 'object' && err !== null && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        setError(axiosError.response?.data?.message || 'Failed to delete action');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to delete action');
+      }
     }
   };
 
@@ -203,10 +217,14 @@ const ActionJobManager: React.FC = () => {
       const response = await actionsApi.createAction(actionToSave);
 
       if (response?.data) {
-        // Use type assertion since we know the structure from the API
-        const responseData = response.data as { action?: Action; actions?: Action };
-        const savedAction = responseData.action || responseData.actions;
+        const responseData = response.data as { action?: Action; actions?: Action; message?: string };
         
+        if (responseData.message && responseData.message !== "success") {
+          setError(responseData.message);
+          return;
+        }
+        
+        const savedAction = responseData.action || responseData.actions;
         if (savedAction) {
           setActions(prevActions => [...prevActions, savedAction]);
           setOpenActionDialog(false);
@@ -218,8 +236,11 @@ const ActionJobManager: React.FC = () => {
 
       throw new Error('Invalid response format from server');
     } catch (err) {
-      if (err instanceof Error) {
-        setError(`Failed to save action: ${err.message}`);
+      if (typeof err === 'object' && err !== null && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        setError(axiosError.response?.data?.message || 'Failed to save action');
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
         setError('Failed to save action');
       }
@@ -250,15 +271,30 @@ const ActionJobManager: React.FC = () => {
     try {
       if (editingJob) {
         const updatedJob = await jobService.updateJob(editingJob.ID, newJob);
+        if (typeof updatedJob === 'object' && 'message' in updatedJob && updatedJob.message !== "success") {
+          setError(updatedJob.message as string);
+          return;
+        }
         setJobs(jobs.map(j => (j.ID === editingJob.ID ? updatedJob : j)));
       } else {
         const createdJob = await jobService.createJob(newJob);
+        if (typeof createdJob === 'object' && 'message' in createdJob && createdJob.message !== "success") {
+          setError(createdJob.message as string);
+          return;
+        }
         setJobs([...jobs, createdJob]);
       }
       handleCloseJobDialog();
       setError(null);
     } catch (err) {
-      setError('Failed to save job');
+      if (typeof err === 'object' && err !== null && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        setError(axiosError.response?.data?.message || 'Failed to save job');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to save job');
+      }
     }
   };
 

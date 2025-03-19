@@ -103,32 +103,7 @@ const Dashboard: React.FC = () => {
       </Box>
       
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6} lg={4}>
-          <Card>
-            <CardActionArea component={Link} to="/jobs">
-              <CardHeader title="Jobs" />
-              <CardContent>
-                <Typography variant="h3" align="center">
-                  {stats.total_jobs}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" align="center">
-                  Total Jobs
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <Button 
-                    endIcon={<ArrowForwardIcon />}
-                    component={Link} 
-                    to="/jobs"
-                    color="primary"
-                  >
-                    Manage Jobs
-                  </Button>
-                </Box>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6} lg={4}>
+        <Grid item xs={12} md={6} lg={6}>
           <Card>
             <CardActionArea component={Link} to="/schedules">
               <CardHeader title="Schedules" />
@@ -153,7 +128,7 @@ const Dashboard: React.FC = () => {
             </CardActionArea>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6} lg={4}>
+        <Grid item xs={12} md={6} lg={6}>
           <Card>
             <CardActionArea component={Link} to="/actions">
               <CardHeader title="Actions" />
