@@ -16,11 +16,6 @@ import ScheduleList from './components/schedules/ScheduleList';
 import ScheduleDetail from './components/schedules/ScheduleDetail';
 import ScheduleForm from './components/schedules/ScheduleForm';
 
-// Job Components
-import JobList from './components/jobs/JobList';
-import JobDetail from './components/jobs/JobDetail';
-import JobForm from './components/jobs/JobForm';
-
 // Action Components
 import ActionJobManager from './components/actions/ActionJobManager';
 
@@ -208,10 +203,6 @@ function App() {
               <Route path="schedules/new" element={<ScheduleForm />} />
               <Route path="schedules/:id/edit" element={<ScheduleForm />} />
               <Route path="schedules/:id" element={<ScheduleDetail />} />
-              <Route path="jobs" element={<JobList />} />
-              <Route path="jobs/new" element={<JobForm />} />
-              <Route path="jobs/:id/edit" element={<JobForm />} />
-              <Route path="jobs/:id" element={<JobDetail />} />
               <Route path="actions" element={<ActionJobManager />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

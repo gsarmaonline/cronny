@@ -1,0 +1,194 @@
+import React from 'react';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Switch,
+  TextField
+} from '@mui/material';
+import { JobFormData, JobTemplateOption } from './types';
+
+interface JobFormProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: () => void;
+  jobFormData: JobFormData;
+  setJobFormData: (data: JobFormData | ((prev: JobFormData) => JobFormData)) => void;
+  jobTemplateOptions: JobTemplateOption[];
+  isEditing: boolean;
+}
+
+const JobForm: React.FC<JobFormProps> = ({
+  open,
+  onClose,
+  onSave,
+  jobFormData,
+  setJobFormData,
+  jobTemplateOptions,
+  isEditing
+}) => {
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle data-testid="job-dialog-title">{isEditing ? 'Edit Job' : 'Add Job'}</DialogTitle>
+      <DialogContent>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              id="job-name"
+              label="Job Name"
+              value={jobFormData.name}
+              onChange={e => setJobFormData({ ...jobFormData, name: e.target.value })}
+              fullWidth
+              margin="normal"
+              inputProps={{ "data-testid": "job-name-input" }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="job-type-label">Job Type</InputLabel>
+              <Select
+                labelId="job-type-label"
+                id="job-type"
+                value={jobFormData.type}
+                label="Job Type"
+                onChange={e => setJobFormData({ ...jobFormData, type: e.target.value })}
+                inputProps={{ "data-testid": "job-type-select" }}
+              >
+                <MenuItem value="http">HTTP</MenuItem>
+                <MenuItem value="slack">Slack</MenuItem>
+                <MenuItem value="logger">Logger</MenuItem>
+                <MenuItem value="docker">Docker</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="input-type-label">Input Type</InputLabel>
+              <Select
+                labelId="input-type-label"
+                id="input-type"
+                value={jobFormData.inputType}
+                label="Input Type"
+                onChange={e => setJobFormData({ ...jobFormData, inputType: e.target.value })}
+                inputProps={{ "data-testid": "input-type-select" }}
+              >
+                <MenuItem value="static_input">Static Input</MenuItem>
+                <MenuItem value="dynamic_input">Dynamic Input</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              id="input-value"
+              label="Input Value"
+              value={jobFormData.inputValue}
+              onChange={e => setJobFormData({ ...jobFormData, inputValue: e.target.value })}
+              fullWidth
+              margin="normal"
+              multiline
+              rows={4}
+              inputProps={{ "data-testid": "input-value-input" }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="job-template-label">Job Template</InputLabel>
+              <Select
+                labelId="job-template-label"
+                id="job-template"
+                value={jobFormData.jobTemplateId}
+                label="Job Template"
+                onChange={e => {
+                  const templateId = Number(e.target.value);
+                  const selectedTemplate = jobTemplateOptions.find(template => template.id === templateId);
+                  if (selectedTemplate) {
+                    setJobFormData(prev => ({
+                      ...prev,
+                      jobTemplateId: templateId,
+                      type: selectedTemplate.type || prev.type,
+                      inputType: selectedTemplate.inputType || prev.inputType,
+                      inputValue: selectedTemplate.inputValue || prev.inputValue
+                    }));
+                  }
+                }}
+                inputProps={{ "data-testid": "job-template-select" }}
+              >
+                <MenuItem value={0}>No Template</MenuItem>
+                {jobTemplateOptions.map(template => (
+                  <MenuItem key={template.id} value={template.id}>
+                    {template.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              id="timeout"
+              label="Timeout (seconds)"
+              type="number"
+              value={jobFormData.jobTimeoutInSecs}
+              onChange={e => setJobFormData({ ...jobFormData, jobTimeoutInSecs: Number(e.target.value) })}
+              fullWidth
+              margin="normal"
+              inputProps={{ "data-testid": "timeout-input" }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Switch
+                  id="root-job"
+                  checked={jobFormData.isRootJob}
+                  onChange={e => setJobFormData({ ...jobFormData, isRootJob: e.target.checked })}
+                  data-testid="root-job-switch"
+                />
+              }
+              label="Root Job"
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              id="condition"
+              label="Condition"
+              value={jobFormData.condition}
+              onChange={e => setJobFormData({ ...jobFormData, condition: e.target.value })}
+              fullWidth
+              margin="normal"
+              multiline
+              rows={4}
+              inputProps={{ "data-testid": "condition-input" }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              id="proceed-condition"
+              label="Proceed Condition"
+              value={jobFormData.proceedCondition}
+              onChange={e => setJobFormData({ ...jobFormData, proceedCondition: e.target.value })}
+              fullWidth
+              margin="normal"
+              inputProps={{ "data-testid": "proceed-condition-input" }}
+            />
+          </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onSave} variant="contained" color="primary" data-testid="save-job-button">
+          Save Job
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export default JobForm; 

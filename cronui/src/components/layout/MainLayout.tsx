@@ -53,7 +53,6 @@ const MainLayout: React.FC = () => {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Actions', icon: <ActionIcon />, path: '/actions' },
-    { text: 'Jobs', icon: <JobIcon />, path: '/jobs' },
     { text: 'Schedules', icon: <ScheduleIcon />, path: '/schedules' },
     { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
   ];
