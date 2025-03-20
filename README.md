@@ -1,6 +1,6 @@
 # Cronny
 
-<iframe src="https://drive.google.com/file/d/1ut81Cw-vQWiUKjU7i0xOEsqhlgHFrAuD/view" ></iframe>
+<iframe src="https://drive.google.com/file/d/1ut81Cw-vQWiUKjU7i0xOEsqhlgHFrAuD/preview" ></iframe>
 
 ## Quickstart
 
