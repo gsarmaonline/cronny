@@ -23,10 +23,10 @@ const (
 
 var (
 	JobMaps = map[string]actions.ActionExecutor{
-		"http":   actions.HttpAction{},
-		"logger": actions.LoggerAction{},
-		"slack":  actions.SlackMessageAction{},
-		"docker": actions.DockerAction{},
+		"http":            actions.HttpAction{},
+		"logger":          actions.LoggerAction{},
+		"slack":           actions.SlackMessageAction{},
+		"docker-registry": actions.DockerRegistryAction{},
 	}
 )
 

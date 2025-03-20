@@ -5,39 +5,39 @@ import (
 )
 
 func TestDockerAction_RequiredKeys(t *testing.T) {
-	dockerAction := DockerAction{}
+	dockerAction := DockerRegistryAction{}
 	requiredKeys := dockerAction.RequiredKeys()
-	
+
 	// Should only have one required key: "image"
 	if len(requiredKeys) != 1 {
 		t.Errorf("Expected 1 required key, got %d", len(requiredKeys))
 	}
-	
+
 	if requiredKeys[0].Name != "image" || requiredKeys[0].KeyType != StringActionKeyType {
-		t.Errorf("Expected required key {image, string}, got {%s, %v}", 
+		t.Errorf("Expected required key {image, string}, got {%s, %v}",
 			requiredKeys[0].Name, requiredKeys[0].KeyType)
 	}
 }
 
 func TestDockerAction_OptionalKeys(t *testing.T) {
-	dockerAction := DockerAction{}
+	dockerAction := DockerRegistryAction{}
 	optionalKeys := dockerAction.OptionalKeys()
-	
+
 	// Should have three optional keys
 	if len(optionalKeys) != 3 {
 		t.Errorf("Expected 3 optional keys, got %d", len(optionalKeys))
 	}
-	
+
 	// Check each of the expected optional keys
 	expectedKeys := []ActionKey{
 		{"registry", StringActionKeyType},
 		{"registry_username", StringActionKeyType},
 		{"registry_password", StringActionKeyType},
 	}
-	
+
 	for i, key := range optionalKeys {
 		if key.Name != expectedKeys[i].Name || key.KeyType != expectedKeys[i].KeyType {
-			t.Errorf("Expected optional key %d to be {%s, %v}, got {%s, %v}", 
+			t.Errorf("Expected optional key %d to be {%s, %v}, got {%s, %v}",
 				i, expectedKeys[i].Name, expectedKeys[i].KeyType, key.Name, key.KeyType)
 		}
 	}
@@ -100,12 +100,12 @@ func TestDockerAction_Validate(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dockerAction := DockerAction{}
+			dockerAction := DockerRegistryAction{}
 			err := dockerAction.Validate(tt.input)
-			
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DockerAction.Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -143,18 +143,18 @@ func TestNewDockerExecutor(t *testing.T) {
 			password: "pass",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Skip the client creation which requires Docker
 			executor, err := NewDockerExecutor(tt.image, tt.registry, tt.username, tt.password)
-			
+
 			// Just check that no error occurred and fields are set correctly
 			if err != nil {
 				t.Errorf("NewDockerExecutor() error = %v", err)
 				return
 			}
-			
+
 			// Compare fields individually, ignoring ctx and client
 			if executor.Image != tt.image {
 				t.Errorf("Image = %v, want %v", executor.Image, tt.image)
@@ -204,7 +204,7 @@ func TestDockerExecutor_PrepareImageName(t *testing.T) {
 			wantFullImageName: "registry.example.com/nginx:latest",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Test just the image name construction logic
@@ -212,7 +212,7 @@ func TestDockerExecutor_PrepareImageName(t *testing.T) {
 			if tt.registry != "" {
 				imageName = tt.registry + "/" + tt.image
 			}
-			
+
 			if imageName != tt.wantFullImageName {
 				t.Errorf("Expected image name %v, got %v", tt.wantFullImageName, imageName)
 			}

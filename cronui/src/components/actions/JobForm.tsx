@@ -75,7 +75,7 @@ const JobForm: React.FC<JobFormProps> = ({
                 <MenuItem value="http">HTTP</MenuItem>
                 <MenuItem value="slack">Slack</MenuItem>
                 <MenuItem value="logger">Logger</MenuItem>
-                <MenuItem value="docker">Docker</MenuItem>
+                <MenuItem value="docker-registry">Docker Registry</MenuItem>
               </Select>
             </FormControl>
           </Grid>
