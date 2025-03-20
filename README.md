@@ -1,5 +1,23 @@
 # Cronny
 
+Cronny started out as a Cron Job Manager or a Scheduler app.
+
+Cronly is a service which allows users to define different types of actions which can be
+triggered at different intervals. The intervals can be an absolute date, relative time or
+a recurring interval.
+
+We are currently in the process of building Cronny both as an open source tool and are planning
+to offer it as a cloud service.
+
+## Screenshots
+
+### Cronny Login
+![Login](static/cronny_login.png)
+
+### Dashboard tour
+![Dashboard Glance](static/cronny_dashboard.gif)
+
+
 ## Quickstart
 
 ### Locally
@@ -96,10 +114,6 @@ fly launch --image gsarmaonline/cronnyapi:latest
 ```
 
 ## Introduction
-
-Cronly is a service which allows users to define different types of actions which can be
-triggered at different intervals. The intervals can be an absolute date, relative time or
-a recurring interval.
 
 Cronny has 2 primary tasks:
 

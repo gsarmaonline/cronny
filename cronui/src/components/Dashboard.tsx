@@ -252,20 +252,6 @@ const Dashboard: React.FC = () => {
           <Button 
             variant="contained" 
             component={Link} 
-            to="/jobs/create"
-            color="primary"
-            sx={{
-              background: '#ffa726',
-              '&:hover': {
-                background: '#ff9800',
-              },
-            }}
-          >
-            Create New Job
-          </Button>
-          <Button 
-            variant="contained" 
-            component={Link} 
             to="/schedules/create"
             color="secondary"
             sx={{
