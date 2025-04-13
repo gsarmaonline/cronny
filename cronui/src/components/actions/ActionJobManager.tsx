@@ -1,32 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
-  Card,
-  CardContent,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
   IconButton,
-  TextField,
   Typography,
   CircularProgress,
   Alert,
-  FormControlLabel,
-  Switch,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  List,
-  ButtonBase,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
-  ListItemText,
-  ListItemSecondaryAction,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { 
+  Add as AddIcon, 
+  Edit as EditIcon, 
+  Delete as DeleteIcon,
+  Info as InfoIcon 
+} from '@mui/icons-material';
 import { actionsApi } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Action } from '../../services/action.service';
@@ -41,9 +35,7 @@ const ActionJobManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openJobDialog, setOpenJobDialog] = useState(false);
-  const [openActionDialog, setOpenActionDialog] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
-  const [newAction, setNewAction] = useState<Action>({ name: '', description: '', user_id: 0, ID: 0, CreatedAt: '', UpdatedAt: '', DeletedAt: null });
   const [jobFormData, setJobFormData] = useState({
     name: '',
     inputType: 'static_input',
@@ -62,6 +54,7 @@ const ActionJobManager: React.FC = () => {
     inputType?: string;
     inputValue?: string;
   }>>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -151,101 +144,32 @@ const ActionJobManager: React.FC = () => {
     }
   };
 
-  const handleOpenJobDialog = (job?: Job) => {
-    if (job) {
-      setEditingJob(job);
-      setJobFormData({
-        name: job.name,
-        inputType: job.job_input_type,
-        inputValue: job.job_input_value,
-        actionId: job.action_id,
-        jobTemplateId: job.job_template_id,
-        isRootJob: job.is_root_job,
-        condition: job.condition,
-        proceedCondition: job.proceed_condition,
-        jobTimeoutInSecs: job.job_timeout_in_secs
-      });
-    } else {
-      setEditingJob(null);
-      // Set default values with the first template if available
-      setJobFormData({
-        name: '',
-        inputType: 'static_input',
-        inputValue: '{}',
-        actionId: selectedAction?.ID || 0,
-        jobTemplateId: jobTemplateOptions.length > 0 ? jobTemplateOptions[0].id : 0,
-        isRootJob: false,
-        condition: '{}',
-        proceedCondition: '',
-        jobTimeoutInSecs: 300
-      });
+  const handleOpenCreateJobPage = () => {
+    if (!selectedAction) {
+      setError('No action selected');
+      return;
     }
-    setOpenJobDialog(true);
+    navigate(`/actions/${selectedAction.ID}/jobs/new`);
   };
 
-  const handleCloseJobDialog = () => {
-    setOpenJobDialog(false);
-    setEditingJob(null);
-    setJobFormData({
-      name: '',
-      inputType: 'static_input',
-      inputValue: '{}',
-      actionId: 0,
-      jobTemplateId: 0,
-      isRootJob: false,
-      condition: '{}',
-      proceedCondition: '',
-      jobTimeoutInSecs: 300
-    });
+  const handleOpenEditJobPage = (job: Job) => {
+    navigate(`/actions/${job.action_id}/jobs/${job.ID}/edit`);
   };
 
-  const handleSaveAction = async () => {
-    setLoading(true);
+  const handleDeleteJob = async (jobId: number) => {
     try {
-      if (newAction.user_id === 0 && user) {
-        newAction.user_id = user.id;
-      }
-      
-      // Add current timestamp in RFC3339 format
-      const now = new Date().toISOString();
-      const actionToSave = {
-        ...newAction,
-        CreatedAt: now,
-        UpdatedAt: now
-      };
-      
-      const response = await actionsApi.createAction(actionToSave);
-
-      if (response?.data) {
-        const responseData = response.data as { action?: Action; actions?: Action; message?: string };
-        
-        if (responseData.message && responseData.message !== "success") {
-          setError(responseData.message);
-          return;
-        }
-        
-        const savedAction = responseData.action || responseData.actions;
-        if (savedAction) {
-          setActions(prevActions => [...prevActions, savedAction]);
-          setOpenActionDialog(false);
-          setNewAction({ name: '', description: '', user_id: 0, ID: 0, CreatedAt: '', UpdatedAt: '', DeletedAt: null });
-          setError(null);
-          return;
-        }
-      }
-
-      throw new Error('Invalid response format from server');
+      await jobService.deleteJob(jobId);
+      setJobs(jobs.filter(j => j.ID !== jobId));
+      setError(null);
     } catch (err) {
       if (typeof err === 'object' && err !== null && 'response' in err) {
         const axiosError = err as { response?: { data?: { message?: string } } };
-        setError(axiosError.response?.data?.message || 'Failed to save action');
+        setError(axiosError.response?.data?.message || 'Failed to delete job');
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Failed to save action');
+        setError('Failed to delete job');
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -284,7 +208,6 @@ const ActionJobManager: React.FC = () => {
         }
         setJobs([...jobs, createdJob]);
       }
-      handleCloseJobDialog();
       setError(null);
     } catch (err) {
       if (typeof err === 'object' && err !== null && 'response' in err) {
@@ -300,246 +223,192 @@ const ActionJobManager: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>Actions</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5">Actions</Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          component={Link}
+          to="/actions/new"
+          data-testid="add-action-button"
+        >
+          Create New Action
+        </Button>
+      </Box>
+      
       {error && (
         <Alert severity="error" data-testid="error-message" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
-      
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setOpenActionDialog(true)}
-        sx={{ mb: 3 }}
-        data-testid="add-action-button"
-      >
-        Create New Action
-      </Button>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
-          <Typography variant="h6" gutterBottom>Action List</Typography>
-          <List>
-            {Array.isArray(actions) && actions.map((action) => (
-              action && action.ID ? (
-                <Paper
+      {actions.length === 0 ? (
+        <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Typography>No actions found. Create your first action!</Typography>
+        </Paper>
+      ) : (
+        <TableContainer component={Paper} sx={{ mb: 4 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Created At</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {actions.map((action) => (
+                <TableRow 
                   key={action.ID}
-                  elevation={selectedAction?.ID === action.ID ? 3 : 1}
-                  sx={{ mb: 1 }}
+                  sx={{ 
+                    bgcolor: selectedAction?.ID === action.ID ? 'action.selected' : 'background.paper',
+                    '&:hover': { bgcolor: 'action.hover' }
+                  }}
+                  onClick={() => handleSelectAction(action)}
+                  data-testid={`action-item-${action.ID}`}
                 >
-                  <ButtonBase
-                    onClick={() => handleSelectAction(action)}
-                    sx={{
-                      width: '100%',
-                      textAlign: 'left',
-                      p: 2,
-                      bgcolor: selectedAction?.ID === action.ID ? 'action.selected' : 'background.paper'
-                    }}
-                    data-testid={`action-item-${action.ID}`}
-                  >
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="subtitle1">{action.name || 'Unnamed Action'}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {action.description || 'No description'}
-                      </Typography>
-                    </Box>
+                  <TableCell>
+                    <Typography 
+                      component={Link} 
+                      to={`/actions/${action.ID}`}
+                      sx={{ 
+                        fontWeight: selectedAction?.ID === action.ID ? 'bold' : 'normal',
+                        cursor: 'pointer',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        '&:hover': {
+                          textDecoration: 'underline'
+                        }
+                      }}
+                      onClick={(e) => {
+                        // Stop the propagation to prevent triggering the row click
+                        e.stopPropagation();
+                      }}
+                    >
+                      {action.name || 'Unnamed Action'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>{action.description || 'No description'}</TableCell>
+                  <TableCell>{new Date(action.CreatedAt).toLocaleString()}</TableCell>
+                  <TableCell>
+                    <IconButton
+                      component={Link}
+                      to={`/actions/${action.ID}`}
+                      size="small"
+                      color="primary"
+                      title="View details"
+                      onClick={(e) => {
+                        // Stop the propagation to prevent triggering the row click
+                        e.stopPropagation();
+                      }}
+                    >
+                      <InfoIcon fontSize="small" />
+                    </IconButton>
                     <IconButton
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteAction(action.ID);
                       }}
                       data-testid={`delete-action-${action.ID}`}
-                      sx={{ ml: 1 }}
+                      size="small"
+                      color="error"
+                      title="Delete action"
                     >
-                      <DeleteIcon />
+                      <DeleteIcon fontSize="small" />
                     </IconButton>
-                  </ButtonBase>
-                </Paper>
-              ) : null
-            ))}
-            {(!Array.isArray(actions) || actions.length === 0) && (
-              <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-                No actions available
-              </Typography>
-            )}
-          </List>
-        </Grid>
-
-        <Grid item xs={12} md={8}>
-          {selectedAction ? (
-            <>
-              <Typography variant="h6" gutterBottom>
-                Jobs for {selectedAction.name}
-              </Typography>
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={() => handleOpenJobDialog()}
-                sx={{ mb: 2 }}
-                data-testid="add-job-button"
-              >
-                Add Job
-              </Button>
-              {jobs.map(job => (
-                <Card key={job.ID} sx={{ mb: 2 }}>
-                  <CardContent>
-                    <Typography variant="h6">{job.name}</Typography>
-                    <Typography>Input Type: {job.job_input_type}</Typography>
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenJobDialog(job);
-                      }}
-                      data-testid={`edit-job-${job.ID}`}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setJobs(jobs.filter(j => j.ID !== job.ID));
-                      }}
-                      data-testid={`delete-job-${job.ID}`}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </CardContent>
-                </Card>
+                  </TableCell>
+                </TableRow>
               ))}
-            </>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {selectedAction && (
+        <Box sx={{ mt: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h6">Jobs for {selectedAction.name}</Typography>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={handleOpenCreateJobPage}
+              data-testid="add-job-button"
+            >
+              Add Job
+            </Button>
+          </Box>
+
+          {jobs.length === 0 ? (
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
+              <Typography>No jobs found for this action. Add your first job!</Typography>
+            </Paper>
           ) : (
-            <Typography variant="body1" color="textSecondary">
-              Select an action to view and manage its jobs
-            </Typography>
-          )}
-        </Grid>
-      </Grid>
-
-      {/* Action Creation Dialog */}
-      <Dialog
-        open={openActionDialog}
-        onClose={() => setOpenActionDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Create New Action</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Action Name"
-            value={newAction.name}
-            onChange={e => setNewAction({ ...newAction, name: e.target.value })}
-            fullWidth
-            margin="normal"
-            inputProps={{ "data-testid": "new-action-name-input" }}
-          />
-          <TextField
-            label="Description"
-            value={newAction.description}
-            onChange={e => setNewAction({ ...newAction, description: e.target.value })}
-            fullWidth
-            margin="normal"
-            multiline
-            rows={3}
-            inputProps={{ "data-testid": "new-action-description-input" }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenActionDialog(false)}>Cancel</Button>
-          <Button
-            onClick={handleSaveAction}
-            variant="contained"
-            color="primary"
-            disabled={loading}
-            data-testid="save-new-action-button"
-          >
-            {loading ? <CircularProgress size={24} /> : 'Create Action'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Existing Job Dialog */}
-      <Dialog open={openJobDialog} onClose={handleCloseJobDialog} maxWidth="md" fullWidth>
-        <DialogTitle data-testid="job-dialog-title">{editingJob ? 'Edit Job' : 'Add Job'}</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                id="job-name"
-                label="Job Name"
-                value={jobFormData.name}
-                onChange={e => setJobFormData({ ...jobFormData, name: e.target.value })}
-                fullWidth
-                margin="normal"
-                inputProps={{ "data-testid": "job-name-input" }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="job-template-label">Job Template</InputLabel>
-                <Select
-                  labelId="job-template-label"
-                  id="job-template"
-                  value={jobFormData.jobTemplateId}
-                  label="Job Template"
-                  onChange={e => {
-                    const templateId = Number(e.target.value);
-                    setJobFormData({ ...jobFormData, jobTemplateId: templateId });
-                    // Find the selected template
-                    const selectedTemplate = jobTemplateOptions.find(template => template.id === templateId);
-                    if (selectedTemplate) {
-                      // Update relevant fields based on the template
-                      setJobFormData(prev => ({
-                        ...prev,
-                        jobTemplateId: templateId,
-                        inputValue: selectedTemplate.inputValue || prev.inputValue
-                      }));
-                    }
-                  }}
-                  inputProps={{ "data-testid": "job-template-select" }}
-                >
-                  {jobTemplateOptions.map(template => (
-                    <MenuItem key={template.id} value={template.id}>
-                      {template.name}
-                    </MenuItem>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Job Name</TableCell>
+                    <TableCell>Input Type</TableCell>
+                    <TableCell>Template ID</TableCell>
+                    <TableCell>Root Job</TableCell>
+                    <TableCell>Timeout (s)</TableCell>
+                    <TableCell>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {jobs.map((job) => (
+                    <TableRow key={job.ID}>
+                      <TableCell>
+                        <Typography
+                          component="span"
+                          sx={{
+                            cursor: 'pointer',
+                            '&:hover': {
+                              textDecoration: 'underline'
+                            }
+                          }}
+                          onClick={() => handleOpenEditJobPage(job)}
+                          data-testid={`job-name-${job.ID}`}
+                        >
+                          {job.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{job.job_input_type}</TableCell>
+                      <TableCell>{job.job_template_id}</TableCell>
+                      <TableCell>{job.is_root_job ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>{job.job_timeout_in_secs}</TableCell>
+                      <TableCell>
+                        <IconButton
+                          onClick={() => handleOpenEditJobPage(job)}
+                          data-testid={`edit-job-${job.ID}`}
+                          size="small"
+                          color="primary"
+                          title="Edit job"
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteJob(job.ID);
+                          }}
+                          data-testid={`delete-job-${job.ID}`}
+                          size="small"
+                          color="error"
+                          title="Delete job"
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                id="input-value"
-                label="Input Value"
-                value={jobFormData.inputValue}
-                onChange={e => setJobFormData({ ...jobFormData, inputValue: e.target.value })}
-                fullWidth
-                margin="normal"
-                multiline
-                rows={4}
-                inputProps={{ "data-testid": "input-value-input" }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                id="timeout"
-                label="Timeout (seconds)"
-                type="number"
-                value={jobFormData.jobTimeoutInSecs}
-                onChange={e => setJobFormData({ ...jobFormData, jobTimeoutInSecs: Number(e.target.value) })}
-                fullWidth
-                margin="normal"
-                inputProps={{ "data-testid": "timeout-input" }}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseJobDialog}>Cancel</Button>
-          <Button onClick={handleSaveJob} variant="contained" color="primary" data-testid="save-job-button">
-            Save Job
-          </Button>
-        </DialogActions>
-      </Dialog>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Box>
+      )}
     </Box>
   );
 };

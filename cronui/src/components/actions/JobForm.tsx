@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Button,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -12,14 +11,15 @@ import {
   MenuItem,
   Select,
   Switch,
-  TextField
+  TextField,
+  Box,
+  Paper
 } from '@mui/material';
 import { JobFormData, JobTemplateOption } from './types';
 
 interface JobFormProps {
-  open: boolean;
-  onClose: () => void;
   onSave: () => void;
+  onCancel: () => void;
   jobFormData: JobFormData;
   setJobFormData: (data: JobFormData | ((prev: JobFormData) => JobFormData)) => void;
   jobTemplateOptions: JobTemplateOption[];
@@ -28,9 +28,8 @@ interface JobFormProps {
 }
 
 const JobForm: React.FC<JobFormProps> = ({
-  open,
-  onClose,
   onSave,
+  onCancel,
   jobFormData,
   setJobFormData,
   jobTemplateOptions,
@@ -46,9 +45,8 @@ const JobForm: React.FC<JobFormProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle data-testid="job-dialog-title">{isEditing ? 'Edit Job' : 'Add Job'}</DialogTitle>
-      <DialogContent>
+    <Box>
+      <Box sx={{ mb: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
@@ -126,6 +124,8 @@ const JobForm: React.FC<JobFormProps> = ({
                       inputType: selectedTemplate.inputType || jobFormData.inputType,
                       inputValue: selectedTemplate.inputValue || jobFormData.inputValue
                     });
+                  } else {
+                    updateFormData({ jobTemplateId: templateId });
                   }
                 }}
                 inputProps={{ "data-testid": "job-template-select" }}
@@ -189,14 +189,14 @@ const JobForm: React.FC<JobFormProps> = ({
             />
           </Grid>
         </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+        <Button onClick={onCancel} sx={{ mr: 1 }}>Cancel</Button>
         <Button onClick={onSave} variant="contained" color="primary" data-testid="save-job-button">
           Save Job
         </Button>
-      </DialogActions>
-    </Dialog>
+      </Box>
+    </Box>
   );
 };
 

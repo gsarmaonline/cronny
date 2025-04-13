@@ -18,6 +18,9 @@ import ScheduleForm from './components/schedules/ScheduleForm';
 
 // Action Components
 import ActionJobManager from './components/actions/ActionJobManager';
+import ActionDetail from './components/actions/ActionDetail';
+import JobFormPage from './components/actions/JobFormPage';
+import ActionForm from './components/actions/ActionForm';
 
 // Create a theme
 const theme = createTheme({
@@ -204,6 +207,11 @@ function App() {
               <Route path="schedules/:id/edit" element={<ScheduleForm />} />
               <Route path="schedules/:id" element={<ScheduleDetail />} />
               <Route path="actions" element={<ActionJobManager />} />
+              <Route path="actions/new" element={<ActionForm />} />
+              <Route path="actions/:id/edit" element={<ActionForm />} />
+              <Route path="actions/:id" element={<ActionDetail />} />
+              <Route path="actions/:actionId/jobs/new" element={<JobFormPage />} />
+              <Route path="actions/:actionId/jobs/:jobId/edit" element={<JobFormPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
