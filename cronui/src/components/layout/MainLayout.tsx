@@ -16,6 +16,7 @@ import {
   Typography,
   Button,
   Avatar,
+  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -25,8 +26,11 @@ import {
   Logout as LogoutIcon,
   Person as PersonIcon,
   PlayArrow as ActionIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import Logo from '../common/Logo';
 
 const drawerWidth = 240;
@@ -34,6 +38,7 @@ const drawerWidth = 240;
 const MainLayout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { mode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleDrawerToggle = () => {
@@ -59,17 +64,15 @@ const MainLayout: React.FC = () => {
 
   const drawer = (
     <div>
-      <Toolbar sx={{ justifyContent: 'center' }}>
-        <Logo variant="small" />
+      <Toolbar>
+        <Logo />
       </Toolbar>
       <Divider />
       <List>
         {menuItems.map((item) => (
-          <ListItem disablePadding key={item.text}>
+          <ListItem key={item.text} disablePadding>
             <ListItemButton onClick={() => handleNavigation(item.path)}>
-              <ListItemIcon>
-                {item.icon}
-              </ListItemIcon>
+              <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>
           </ListItem>
@@ -109,38 +112,33 @@ const MainLayout: React.FC = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: '#ffa726' }}>
-            Cron Job Manager
-          </Typography>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" noWrap component="div">
+              Cronny
+            </Typography>
+          </Box>
+          
+          <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
+            <IconButton 
+              color="inherit" 
+              onClick={toggleTheme} 
+              sx={{ mr: 2 }}
+              aria-label="toggle theme"
+            >
+              {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+            </IconButton>
+          </Tooltip>
+
           {user && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Avatar sx={{ width: 28, height: 28, bgcolor: '#ffa726' }}>
-                <PersonIcon sx={{ fontSize: 16 }} />
-              </Avatar>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  fontSize: '0.875rem',
-                  color: '#ffa726',
-                  textTransform: 'none',
-                  letterSpacing: 'normal',
-                  textShadow: 'none',
-                }}
-              >
-                {user.username}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="body2" sx={{ mr: 1 }}>
+                {user.username || user.email}
               </Typography>
-              <Button 
-                color="inherit" 
-                onClick={handleLogout} 
-                size="small"
-                sx={{ 
-                  fontSize: '0.875rem',
-                  textTransform: 'none',
-                  letterSpacing: 'normal',
-                }}
-              >
-                Logout
-              </Button>
+              <Avatar sx={{ width: 32, height: 32 }}>
+                {(user.username && user.username[0]) ||
+                  (user.email && user.email[0]) ||
+                  'U'}
+              </Avatar>
             </Box>
           )}
         </Toolbar>
@@ -154,14 +152,11 @@ const MainLayout: React.FC = () => {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true, // Better mobile performance
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
         >
           {drawer}
@@ -170,10 +165,7 @@ const MainLayout: React.FC = () => {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
           open
         >
@@ -182,13 +174,8 @@ const MainLayout: React.FC = () => {
       </Box>
       <Box
         component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-        }}
+        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` }, mt: 8 }}
       >
-        <Toolbar />
         <Outlet />
       </Box>
     </Box>

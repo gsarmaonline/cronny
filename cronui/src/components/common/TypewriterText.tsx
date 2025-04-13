@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Typography } from '@mui/material';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface TypewriterTextProps {
   text: string;
@@ -16,6 +17,10 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({
   prefix = '',
   suffix = '',
 }) => {
+  const { mode } = useTheme();
+  const isDark = mode === 'dark';
+  const textColor = isDark ? '#ffa726' : '#ff9800';
+  
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
@@ -43,7 +48,7 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({
     <Typography
       variant="h5"
       sx={{
-        color: '#ffa726',
+        color: textColor,
         maxWidth: '600px',
         mx: 'auto',
         mb: 4,
@@ -56,7 +61,7 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({
           transform: 'translateY(-50%)',
           width: '2px',
           height: '1em',
-          backgroundColor: '#ffa726',
+          backgroundColor: textColor,
           animation: 'blink 1s step-end infinite',
         },
       }}
