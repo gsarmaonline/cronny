@@ -2,32 +2,12 @@ package api
 
 import (
 	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	"github.com/cronny/models"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
-
-func setupTestDB(t *testing.T) *gorm.DB {
-	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	if err != nil {
-		t.Fatalf("Failed to open in-memory SQLite database: %v", err)
-	}
-	return db
-}
-
-func setupTestContext() (*gin.Context, *httptest.ResponseRecorder) {
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Request, _ = http.NewRequest("GET", "/", nil)
-	return c, w
-}
 
 // Test cases for the combined GetScopedDB method
 func TestGetScopedDB_ContextFirst(t *testing.T) {
@@ -168,12 +148,6 @@ func TestGetUserScopedDb_InvalidUserIDType(t *testing.T) {
 	// Verify
 	assert.NotNil(t, result, "Should return a DB instance even with invalid user ID type")
 	assert.Equal(t, scopedDB, result, "Should return the DB from context")
-}
-
-// Define a test model for SaveWithUser tests
-type TestModel struct {
-	models.BaseModel
-	Name string
 }
 
 func TestSaveWithUser(t *testing.T) {

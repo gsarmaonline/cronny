@@ -12,72 +12,7 @@ import (
 	"github.com/cronny/models"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
-
-// setupScheduleTest creates a test environment with a handler and router
-func setupScheduleTest(t *testing.T) (*Handler, *gin.Engine) {
-	db := setupTestDB(t)
-
-	// Create necessary tables
-	db.AutoMigrate(&models.Schedule{}, &models.Action{}, &models.User{})
-
-	handler := &Handler{db: db}
-
-	// Setup router
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-
-	// Add middleware to set user ID in context for testing
-	router.Use(func(c *gin.Context) {
-		c.Set(UserIDKey, uint(1)) // Set user ID to 1 for testing
-		c.Next()
-	})
-
-	// Add user scope middleware
-	router.Use(UserScopeMiddleware(db))
-
-	// Add routes
-	router.GET("/schedules", handler.ScheduleIndexHandler)
-	router.GET("/schedules/:id", handler.ScheduleShowHandler)
-	router.POST("/schedules", handler.ScheduleCreateHandler)
-	router.PUT("/schedules/:id", handler.ScheduleUpdateHandler)
-	router.DELETE("/schedules/:id", handler.ScheduleDeleteHandler)
-
-	return handler, router
-}
-
-// createTestAction creates a test action in the database
-func createTestAction(t *testing.T, db *gorm.DB) *models.Action {
-	action := &models.Action{
-		Name: "Test Action",
-	}
-	action.SetUserID(1)
-
-	result := db.Create(action)
-	assert.NoError(t, result.Error, "Failed to create test action")
-
-	return action
-}
-
-// createTestSchedule creates a test schedule in the database
-func createTestSchedule(t *testing.T, db *gorm.DB, actionID uint) *models.Schedule {
-	schedule := &models.Schedule{
-		Name:             "Test Schedule",
-		ScheduleExecType: models.AwsExecType,
-		ScheduleType:     models.RecurringScheduleType,
-		ScheduleValue:    "5",
-		ScheduleUnit:     models.MinuteScheduleUnit,
-		ScheduleStatus:   models.PendingScheduleStatus,
-		ActionID:         actionID,
-	}
-	schedule.SetUserID(1)
-
-	result := db.Create(schedule)
-	assert.NoError(t, result.Error, "Failed to create test schedule")
-
-	return schedule
-}
 
 func TestScheduleIndexHandler(t *testing.T) {
 	// Setup

@@ -61,23 +61,6 @@ func TestGetUserID_InvalidType(t *testing.T) {
 	assert.Equal(t, uint(0), userID, "Should return 0 when user ID is of invalid type")
 }
 
-// Helper function to generate a valid JWT token for testing
-func generateTestToken(userID uint) string {
-	// Create claims
-	claims := jwt.MapClaims{
-		"user_id": float64(userID),
-		"exp":     time.Now().Add(time.Hour).Unix(),
-		"iat":     time.Now().Unix(),
-	}
-
-	// Create token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// Sign token with secret
-	tokenString, _ := token.SignedString([]byte(config.JWTSecret))
-	return tokenString
-}
-
 func TestAuthMiddleware_ValidToken(t *testing.T) {
 	// Setup
 	gin.SetMode(gin.TestMode)
@@ -95,7 +78,7 @@ func TestAuthMiddleware_ValidToken(t *testing.T) {
 
 	// Create a request with a valid token
 	req, _ := http.NewRequest("GET", "/test", nil)
-	req.Header.Set("Authorization", "Bearer "+generateTestToken(123))
+	req.Header.Set("Authorization", "Bearer "+GenerateTestToken(123))
 
 	// Execute
 	r.ServeHTTP(w, req)
