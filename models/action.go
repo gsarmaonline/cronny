@@ -22,8 +22,9 @@ type (
 	Action struct {
 		BaseModel
 
-		Name string `json:"name"`
-		Jobs []*Job `json:"jobs"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Jobs        []*Job `json:"jobs"`
 
 		User *User `json:"user"`
 	}

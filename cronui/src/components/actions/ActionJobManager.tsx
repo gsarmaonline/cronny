@@ -67,6 +67,7 @@ const ActionJobManager: React.FC = () => {
     try {
       const response = await actionsApi.getActions();
       if (response?.data?.actions) {
+        console.log("Fetched actions:", response.data.actions);
         setActions(response.data.actions);
       } else {
         setActions([]);
@@ -263,10 +264,11 @@ const ActionJobManager: React.FC = () => {
                   key={action.ID}
                   sx={{ 
                     bgcolor: selectedAction?.ID === action.ID ? 'action.selected' : 'background.paper',
-                    '&:hover': { bgcolor: 'action.hover' }
+                    '&:hover': { bgcolor: 'action.hover' },
+                    cursor: 'pointer'
                   }}
-                  onClick={() => handleSelectAction(action)}
                   data-testid={`action-item-${action.ID}`}
+                  onClick={() => navigate(`/actions/${action.ID}/edit`)}
                 >
                   <TableCell>
                     <Typography 
@@ -281,10 +283,7 @@ const ActionJobManager: React.FC = () => {
                           textDecoration: 'underline'
                         }
                       }}
-                      onClick={(e) => {
-                        // Stop the propagation to prevent triggering the row click
-                        e.stopPropagation();
-                      }}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       {action.name || 'Unnamed Action'}
                     </Typography>
@@ -298,10 +297,7 @@ const ActionJobManager: React.FC = () => {
                       size="small"
                       color="primary"
                       title="View details"
-                      onClick={(e) => {
-                        // Stop the propagation to prevent triggering the row click
-                        e.stopPropagation();
-                      }}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <InfoIcon fontSize="small" />
                     </IconButton>
