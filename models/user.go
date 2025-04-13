@@ -8,6 +8,7 @@ import (
 
 type User struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
+	UserID    uint      `json:"user_id" gorm:"index"` // Add UserID field for scoping
 	Username  string    `json:"username" gorm:"type:varchar(100);uniqueIndex"`
 	Email     string    `json:"email" gorm:"type:varchar(100);uniqueIndex"`
 	Password  string    `json:"-" gorm:"type:varchar(255)"`             // Password is never returned in JSON
@@ -25,6 +26,28 @@ type User struct {
 	Plan      Plan      `json:"plan" gorm:"foreignKey:PlanID"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// SetUserID sets the user ID for the model
+func (u *User) SetUserID(userID uint) {
+	u.UserID = userID
+}
+
+// GetUserID returns the user ID associated with the model
+func (u *User) GetUserID() uint {
+	return u.UserID
+}
+
+// HasUserID checks if the model has a user ID set
+func (u *User) HasUserID() bool {
+	return u.UserID > 0
+}
+
+// ValidateUserID validates that the model has a valid user ID
+func (u *User) ValidateUserID() error {
+	// For User model, we allow UserID to be 0 or match the ID
+	// This is because user records represent themselves
+	return nil
 }
 
 // HashPassword hashes the user's password

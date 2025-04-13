@@ -59,6 +59,16 @@ func (handler *Handler) UpdateUserProfileHandler(c *gin.Context) {
 		return
 	}
 
+	// Validate that at least one field is provided
+	if update.FirstName == "" && update.LastName == "" && update.Address == "" &&
+		update.City == "" && update.State == "" && update.Country == "" &&
+		update.ZipCode == "" && update.Phone == "" {
+		c.JSON(400, gin.H{
+			"message": "Invalid request data",
+		})
+		return
+	}
+
 	var user models.User
 	if err := handler.GetUserScopedDb(c).First(&user, userID).Error; err != nil {
 		c.JSON(404, gin.H{
