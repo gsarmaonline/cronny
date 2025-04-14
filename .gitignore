@@ -2,6 +2,7 @@
 coverage.html
 coverage.out
 
+bin/*
 # Binaries for programs and plugins
 *.exe
 *.exe~

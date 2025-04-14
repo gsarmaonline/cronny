@@ -54,6 +54,21 @@ test:
 test-coverage:
 	go test ./... -v -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
 
+# Build targets
+build-api:
+	CGO_ENABLED=0 GOOS=linux go build -o bin/cronnyapi cmd/all/all.go
+
+build-triggercreator:
+	CGO_ENABLED=0 GOOS=linux go build -o bin/triggercreator cmd/triggercreator/triggercreator.go
+
+build-triggerexecutor:
+	CGO_ENABLED=0 GOOS=linux go build -o bin/triggerexecutor cmd/triggerexecutor/triggerexecutor.go
+
+build-frontend:
+	make ui-build
+
+build: build-api build-frontend
+
 # Help target to display available commands
 help:
 	@echo "Available commands:"
@@ -71,4 +86,4 @@ help:
 	@echo "  make test            - Run all Go tests"
 	@echo "  make test-coverage   - Run tests with coverage report"
 
-.PHONY: runall runapi runapi-dev ui-install ui-start ui-build run-dev install-concurrently seed setup clean runexamples help test test-coverage
+.PHONY: runall runapi runapi-dev ui-install ui-start ui-build run-dev install-concurrently seed setup clean runexamples help test test-coverage build-api build-triggercreator build-triggerexecutor build-frontend build
