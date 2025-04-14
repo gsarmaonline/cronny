@@ -13,9 +13,11 @@ import {
   Switch,
   TextField,
   Box,
-  Paper
+  Paper,
+  Typography,
 } from '@mui/material';
 import { JobFormData, JobTemplateOption } from './types';
+import ConditionsManager from './ConditionsManager';
 
 interface JobFormProps {
   onSave: () => void;
@@ -25,6 +27,7 @@ interface JobFormProps {
   jobTemplateOptions: JobTemplateOption[];
   isEditing: boolean;
   actionId: number;
+  availableJobIds: number[];
 }
 
 const JobForm: React.FC<JobFormProps> = ({
@@ -34,7 +37,8 @@ const JobForm: React.FC<JobFormProps> = ({
   setJobFormData,
   jobTemplateOptions,
   isEditing,
-  actionId
+  actionId,
+  availableJobIds,
 }) => {
   const updateFormData = (updates: Partial<JobFormData>) => {
     setJobFormData(prev => ({
@@ -141,14 +145,14 @@ const JobForm: React.FC<JobFormProps> = ({
           </Grid>
           <Grid item xs={12}>
             <TextField
-              id="timeout"
-              label="Timeout (seconds)"
+              id="job-timeout"
+              label="Job Timeout (seconds)"
               type="number"
               value={jobFormData.jobTimeoutInSecs}
-              onChange={e => updateFormData({ jobTimeoutInSecs: Number(e.target.value) })}
+              onChange={e => updateFormData({ jobTimeoutInSecs: parseInt(e.target.value) || 0 })}
               fullWidth
               margin="normal"
-              inputProps={{ "data-testid": "timeout-input" }}
+              inputProps={{ "data-testid": "job-timeout-input" }}
             />
           </Grid>
           <Grid item xs={12}>
@@ -165,27 +169,11 @@ const JobForm: React.FC<JobFormProps> = ({
             />
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              id="condition"
-              label="Condition"
+            <Typography variant="h6" sx={{ mb: 2 }}>Conditions</Typography>
+            <ConditionsManager
               value={jobFormData.condition}
-              onChange={e => updateFormData({ condition: e.target.value })}
-              fullWidth
-              margin="normal"
-              multiline
-              rows={4}
-              inputProps={{ "data-testid": "condition-input" }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              id="proceed-condition"
-              label="Proceed Condition"
-              value={jobFormData.proceedCondition}
-              onChange={e => updateFormData({ proceedCondition: e.target.value })}
-              fullWidth
-              margin="normal"
-              inputProps={{ "data-testid": "proceed-condition-input" }}
+              onChange={(condition) => updateFormData({ condition })}
+              availableJobIds={availableJobIds}
             />
           </Grid>
         </Grid>

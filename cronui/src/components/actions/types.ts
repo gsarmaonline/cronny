@@ -1,5 +1,6 @@
 import { Action } from '../../services/action.service';
 import { Job, JobTemplate } from '../../services/job.service';
+import { Condition } from './ConditionsManager';
 
 export interface JobFormData {
   name: string;
@@ -9,8 +10,7 @@ export interface JobFormData {
   actionId: number;
   jobTemplateId: number;
   isRootJob: boolean;
-  condition: string;
-  proceedCondition: string;
+  condition: Condition;
   jobTimeoutInSecs: number;
 }
 

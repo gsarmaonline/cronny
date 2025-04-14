@@ -50,8 +50,6 @@ type (
 		Condition string `json:"condition"`
 		IsRootJob bool   `json:"is_root_job"`
 
-		ProceedCondition string `json:"proceed_condition"`
-
 		// Job Configuration controls
 		JobTimeoutInSecs int `json:"job_timeout_in_secs"`
 

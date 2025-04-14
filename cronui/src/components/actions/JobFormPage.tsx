@@ -14,6 +14,8 @@ import jobService from '../../services/job.service';
 import actionService from '../../services/action.service';
 import { JobFormData, JobTemplateOption } from './types';
 import { Action } from '../../services/action.service';
+import { Condition } from './ConditionsManager';
+import { Job } from '../../services/job.service';
 
 const JobFormPage: React.FC = () => {
   const { actionId, jobId } = useParams<{ actionId: string; jobId: string }>();
@@ -23,6 +25,7 @@ const JobFormPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobTemplateOptions, setJobTemplateOptions] = useState<JobTemplateOption[]>([]);
+  const [availableJobIds, setAvailableJobIds] = useState<number[]>([]);
   const [jobFormData, setJobFormData] = useState<JobFormData>({
     name: '',
     type: 'http', // Default to http
@@ -31,8 +34,10 @@ const JobFormPage: React.FC = () => {
     actionId: 0,
     jobTemplateId: 0,
     isRootJob: false,
-    condition: '{}',
-    proceedCondition: '',
+    condition: {
+      version: 1,
+      rules: []
+    },
     jobTimeoutInSecs: 300
   });
 
@@ -62,10 +67,28 @@ const JobFormPage: React.FC = () => {
         }));
         setJobTemplateOptions(options);
 
+        // Fetch all jobs for this action to get available job IDs
+        const jobs = await jobService.getJobs(actId);
+        const jobIds = jobs
+          .map((job: Job) => job.ID)
+          .filter((id: number) => !jobId || id !== parseInt(jobId)); // Exclude current job if editing
+        setAvailableJobIds(jobIds);
+
         // If editing, fetch job details
         if (jobId) {
           try {
             const job = await jobService.getJob(parseInt(jobId));
+            // Parse the condition string into a Condition object
+            let condition: Condition;
+            try {
+              condition = JSON.parse(job.condition);
+            } catch (e) {
+              // If parsing fails, use default condition
+              condition = {
+                version: 1,
+                rules: []
+              };
+            }
             setJobFormData({
               name: job.name,
               type: job.job_type || 'http',
@@ -74,8 +97,7 @@ const JobFormPage: React.FC = () => {
               actionId: actId,
               jobTemplateId: job.job_template_id,
               isRootJob: job.is_root_job,
-              condition: job.condition,
-              proceedCondition: job.proceed_condition,
+              condition,
               jobTimeoutInSecs: job.job_timeout_in_secs
             });
           } catch (error) {
@@ -106,8 +128,7 @@ const JobFormPage: React.FC = () => {
         action_id: jobFormData.actionId,
         job_template_id: jobFormData.jobTemplateId,
         is_root_job: jobFormData.isRootJob,
-        condition: jobFormData.condition,
-        proceed_condition: jobFormData.proceedCondition,
+        condition: JSON.stringify(jobFormData.condition),
         job_timeout_in_secs: jobFormData.jobTimeoutInSecs
       };
 
@@ -172,6 +193,7 @@ const JobFormPage: React.FC = () => {
           jobTemplateOptions={jobTemplateOptions}
           isEditing={isEditing}
           actionId={parseInt(actionId || '0')}
+          availableJobIds={availableJobIds}
         />
       </Paper>
       
