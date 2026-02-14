@@ -7,15 +7,18 @@ WORKDIR /app
 RUN apk add --no-cache git make
 
 # Copy go mod and sum files
-COPY go.mod go.sum ./
+COPY core/go.mod core/go.sum ./core/
 
 # Download dependencies
+WORKDIR /app/core
 RUN go mod download
 
-# Copy source code
-COPY . .
+# Copy source code and Makefile
+COPY core ./
+COPY Makefile /app/
 
 # Build the application
+WORKDIR /app
 RUN make build-triggerexecutor
 
 # Final stage

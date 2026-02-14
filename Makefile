@@ -1,14 +1,14 @@
 runall: install-concurrently
 	make setup
-	npx concurrently --kill-others "cd cmd/api && CRONNY_ENV=development $(HOME)/go/bin/air" "make ui-start"
+	npx concurrently --kill-others "cd core/cmd/api && CRONNY_ENV=development $(HOME)/go/bin/air" "make ui-start"
 
 runapi:
 	make setup
-	CRONNY_ENV=development go run cmd/api/api.go
+	cd core && CRONNY_ENV=development go run cmd/api/api.go
 
 runapi-dev:
 	make setup
-	cd cmd/api && CRONNY_ENV=development $(HOME)/go/bin/air
+	cd core/cmd/api && CRONNY_ENV=development $(HOME)/go/bin/air
 
 # UI related targets
 ui-install:
@@ -30,10 +30,10 @@ install-concurrently:
 	npm list -g concurrently || npm install -g concurrently
 
 seed:
-	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_dev;" 
-	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_test;" 
+	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_dev;"
+	mysql -uroot -e "DROP DATABASE IF EXISTS cronny_test;"
 	make setup
-	CRONNY_ENV=development go run cmd/seed/seed.go
+	cd core && CRONNY_ENV=development go run cmd/seed/seed.go
 
 setup:
 	mysql -uroot -e "CREATE DATABASE IF NOT EXISTS cronny_dev;" 
@@ -45,24 +45,24 @@ clean:
 	make setup
 
 runexamples:
-	bash api/examples.sh
+	bash core/api/examples.sh
 
 # Test targets
 test:
-	go test ./... -v
+	cd core && go test ./... -v
 
 test-coverage:
-	go test ./... -v -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
+	cd core && go test ./... -v -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
 
 # Build targets
 build-api:
-	CGO_ENABLED=0 GOOS=linux go build -o bin/cronnyapi cmd/all/all.go
+	cd core && CGO_ENABLED=0 GOOS=linux go build -o ../bin/cronnyapi cmd/all/all.go
 
 build-triggercreator:
-	CGO_ENABLED=0 GOOS=linux go build -o bin/triggercreator cmd/triggercreator/triggercreator.go
+	cd core && CGO_ENABLED=0 GOOS=linux go build -o ../bin/triggercreator cmd/triggercreator/triggercreator.go
 
 build-triggerexecutor:
-	CGO_ENABLED=0 GOOS=linux go build -o bin/triggerexecutor cmd/triggerexecutor/triggerexecutor.go
+	cd core && CGO_ENABLED=0 GOOS=linux go build -o ../bin/triggerexecutor cmd/triggerexecutor/triggerexecutor.go
 
 build-frontend:
 	make ui-build

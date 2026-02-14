@@ -1,4 +1,4 @@
-root = "cmd/api"
+root = "core/cmd/api"
 tmp_dir = "tmp"
 
 [build]
