@@ -9,15 +9,6 @@ a recurring interval.
 We are currently in the process of building Cronny both as an open source tool and are planning
 to offer it as a cloud service.
 
-## Screenshots
-
-### Cronny Login
-![Login](static/cronny_login.png)
-
-### Dashboard tour
-![Dashboard Glance](static/cronny_dashboard.gif)
-
-
 ## Quickstart
 
 ### Locally
@@ -37,7 +28,7 @@ make run
 make runapi
 
 # Building the docker images
-sudo docker build -t cronnyapi -f Dockerfile.api .
+sudo docker build -t cronnyapi -f build/Dockerfile.api .
 ```
 
 ### Create and Execute schedules
