@@ -4,7 +4,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile.api
+      dockerfile: build/Dockerfile.api
     environment:
       - USE_PG=yes
       - DB_HOST=postgres
@@ -20,7 +20,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
+      dockerfile: build/Dockerfile.frontend
     ports:
       - "80:80"
     depends_on:
