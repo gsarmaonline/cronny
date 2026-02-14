@@ -1,6 +1,6 @@
 runall: install-concurrently
 	make setup
-	npx concurrently --kill-others "cd core/cmd/api && CRONNY_ENV=development $(HOME)/go/bin/air" "make ui-start"
+	npx concurrently --kill-others "cd core && CRONNY_ENV=development $(HOME)/go/bin/air" "make ui-start"
 
 runapi:
 	make setup
@@ -8,7 +8,7 @@ runapi:
 
 runapi-dev:
 	make setup
-	cd core/cmd/api && CRONNY_ENV=development $(HOME)/go/bin/air
+	cd core && CRONNY_ENV=development $(HOME)/go/bin/air
 
 # UI related targets
 ui-install:
