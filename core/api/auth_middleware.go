@@ -53,7 +53,13 @@ func AuthMiddleware() gin.HandlerFunc {
 			// Extract user ID from claims
 			userID, ok := claims["user_id"].(float64)
 			if !ok {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims: user_id not found"})
+				return
+			}
+
+			// Validate userID is positive and within uint range
+			if userID < 0 || userID > float64(^uint(0)) {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims: user_id out of range"})
 				return
 			}
 

@@ -136,21 +136,20 @@ func (job *Job) GetInput(db *gorm.DB) (input actions.Input, err error) {
 			prevJobExecution *JobExecution
 		)
 		if prevJobOutputId, err = strconv.Atoi(job.JobInputValue); err != nil {
-			err = fmt.Errorf("[GetInput] Failed to convert the job ID to int %s - %s", job.JobInputValue, err)
+			err = fmt.Errorf("[GetInput] failed to convert job ID to int %s: %w", job.JobInputValue, err)
 			return
 		}
 		prevJob = &Job{}
 		if ex := db.Where("id = ?", prevJobOutputId).First(prevJob); ex.Error != nil {
-			err = ex.Error
-			err = fmt.Errorf("[GetInput] Failed to get the previous Job from ID %d - %s", prevJobOutputId, err)
+			err = fmt.Errorf("[GetInput] failed to get previous job with ID %d: %w", prevJobOutputId, ex.Error)
 			return
 		}
 		if prevJobExecution, err = prevJob.GetLatestJobExecution(db); err != nil {
-			err = fmt.Errorf("[GetInput] Failed to get the latest job execution from ID %d - %s", prevJobOutputId, err)
+			err = fmt.Errorf("[GetInput] failed to get latest job execution for ID %d: %w", prevJobOutputId, err)
 			return
 		}
 		if err = json.Unmarshal([]byte(prevJobExecution.Output), &input); err != nil {
-			err = fmt.Errorf("[GetInput] Failed to Unmarshal previous job's output %s - %s", string(prevJobExecution.Output), err)
+			err = fmt.Errorf("[GetInput] failed to unmarshal previous job output: %w", err)
 			return
 		}
 	case JobInputAsTemplate:
@@ -214,9 +213,30 @@ func (job *Job) ExecuteJobTemplate(db *gorm.DB) (output JobOutputT, err error) {
 		err = errors.New(fmt.Sprintf("JobTemplate %s not defined", jobTemplate.Name))
 		return
 	}
-	if outputMap, err = baseAction.Execute(actionExecutor, inp); err != nil {
-		return
+
+	// Execute with timeout enforcement
+	type result struct {
+		output actions.Output
+		err    error
 	}
+	resultCh := make(chan result, 1)
+	timeout := time.Duration(job.JobTimeoutInSecs) * time.Second
+
+	go func() {
+		out, execErr := baseAction.Execute(actionExecutor, inp)
+		resultCh <- result{output: out, err: execErr}
+	}()
+
+	select {
+	case res := <-resultCh:
+		if res.err != nil {
+			return "", res.err
+		}
+		outputMap = res.output
+	case <-time.After(timeout):
+		return "", fmt.Errorf("job execution timed out after %d seconds", job.JobTimeoutInSecs)
+	}
+
 	if outputB, err = json.Marshal(outputMap); err != nil {
 		return
 	}
@@ -235,21 +255,21 @@ func (job *Job) Execute(db *gorm.DB) (err error) {
 
 	startTime = time.Now().UTC()
 	if output, err = job.ExecuteJobTemplate(db); err != nil {
-		return
+		return fmt.Errorf("failed to execute job %s (ID: %d): %w", job.Name, job.ID, err)
 	}
 	stopTime = time.Now().UTC()
 
 	if err = job.CreateJobExecution(db, startTime, stopTime, output); err != nil {
-		return
+		return fmt.Errorf("failed to create job execution for job %s (ID: %d): %w", job.Name, job.ID, err)
 	}
 
 	job.InternalOutput = output
 	if nextJob, err = job.Next(db); err != nil {
-		return
+		return fmt.Errorf("failed to get next job for job %s (ID: %d): %w", job.Name, job.ID, err)
 	}
 
 	if err = nextJob.Execute(db); err != nil {
-		return
+		return fmt.Errorf("failed to execute next job from %s (ID: %d): %w", job.Name, job.ID, err)
 	}
 	return
 }
@@ -265,22 +285,21 @@ func (job *Job) Next(db *gorm.DB) (nextJob *Job, err error) {
 	prevJobOutput = make(actions.Output)
 
 	if err = json.Unmarshal([]byte(job.Condition), condition); err != nil {
-		err = fmt.Errorf("[Next] Failed to unmarshal condition for %s - %s", job.Condition, err)
+		err = fmt.Errorf("[Next] failed to unmarshal condition: %w", err)
 		return
 	}
 	if err = json.Unmarshal([]byte(job.InternalOutput), &prevJobOutput); err != nil {
-		err = fmt.Errorf("[Next] Failed to unmarshal prevJobOutput for %s - %s", job.InternalOutput, err)
+		err = fmt.Errorf("[Next] failed to unmarshal job output: %w", err)
 		return
 	}
 	// The previous job's output is used to decide the next job
 	// in the workflow/pipeline depending on the condition provided
 	if nextJobID, err = condition.GetNextJobID(actions.Input(prevJobOutput)); err != nil {
-		err = fmt.Errorf("[Next] Failed to get next job ID from condition %s - %s", actions.Input(prevJobOutput), err)
+		err = fmt.Errorf("[Next] failed to get next job ID: %w", err)
 		return
 	}
 	if ex := db.Where("id = ?", nextJobID).First(nextJob); ex.Error != nil {
-		err = ex.Error
-		err = fmt.Errorf("[Next] Failed to get next job %d - %s", nextJobID, err)
+		err = fmt.Errorf("[Next] failed to get next job with ID %d: %w", nextJobID, ex.Error)
 		return
 	}
 

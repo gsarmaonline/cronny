@@ -32,10 +32,16 @@ func (handler *Handler) rootHandler(c *gin.Context) {
 }
 
 func (handler *Handler) GetUserScopedDb(c *gin.Context) (db *gorm.DB) {
-	// Not checking if the scoped DB exists because it should always exist
-	// and is set in the user_scope_middleware.
-	scopedDB, _ := c.Get(ScopedDBKey)
-	db = scopedDB.(*gorm.DB)
+	scopedDB, exists := c.Get(ScopedDBKey)
+	if !exists {
+		// This should never happen if middleware is properly configured
+		panic("scoped DB not found in context - check middleware configuration")
+	}
+
+	db, ok := scopedDB.(*gorm.DB)
+	if !ok {
+		panic("scoped DB has incorrect type in context")
+	}
 
 	return
 }

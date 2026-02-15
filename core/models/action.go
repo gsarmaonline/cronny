@@ -74,11 +74,10 @@ func (action *Action) BeforeDelete(tx *gorm.DB) (err error) {
 func (action *Action) Execute(db *gorm.DB) (err error) {
 	job := &Job{}
 	if ex := db.Where("is_root_job = ? AND action_id = ?", true, action.ID).First(job); ex.Error != nil {
-		err = ex.Error
-		return
+		return fmt.Errorf("failed to find root job for action %s (ID: %d): %w", action.Name, action.ID, ex.Error)
 	}
 	if err = job.Execute(db); err != nil {
-		return
+		return fmt.Errorf("failed to execute root job for action %s (ID: %d): %w", action.Name, action.ID, err)
 	}
-	return
+	return nil
 }

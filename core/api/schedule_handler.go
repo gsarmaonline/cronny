@@ -148,7 +148,8 @@ func (handler *Handler) ScheduleDeleteHandler(c *gin.Context) {
 		return
 	}
 
-	// Then delete it using the handler's DB to avoid the ambiguous column issue
+	// Delete using unscoped handler DB since we've already verified ownership
+	// Using scoped DB causes "ambiguous column name: user_id" error
 	if ex := handler.db.Delete(schedule); ex.Error != nil {
 		c.JSON(500, gin.H{
 			"message": ex.Error.Error(),
