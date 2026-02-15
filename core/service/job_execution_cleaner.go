@@ -39,13 +39,14 @@ func (execCleaner *JobExecutionCleaner) runIter() (totalCleaned uint32, err erro
 		if len(jobExecutions) > int(execCleaner.AllowedJobExecutionsPerJob) {
 			toCleanIdx := len(jobExecutions) - int(execCleaner.AllowedJobExecutionsPerJob)
 			jobExecutions = jobExecutions[0:toCleanIdx]
-		}
-		for _, jobExecution := range jobExecutions {
-			if ex := execCleaner.db.Delete(&models.JobExecution{}, jobExecution.ID); ex.Error != nil {
-				err = ex.Error
-				return
+
+			for _, jobExecution := range jobExecutions {
+				if ex := execCleaner.db.Delete(&models.JobExecution{}, jobExecution.ID); ex.Error != nil {
+					err = ex.Error
+					return
+				}
+				totalCleaned += 1
 			}
-			totalCleaned += 1
 		}
 	}
 	return
