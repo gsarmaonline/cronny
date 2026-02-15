@@ -1,8 +1,8 @@
 {
-  "lastUpdated": "2026-02-15T00:52:01.670Z",
+  "lastUpdated": "2026-02-15T01:32:49.792Z",
   "date": "2026-02-15",
   "baseUrl": "http://localhost:3000",
-  "totalScreenshots": 9,
+  "totalScreenshots": 15,
   "routes": [
     {
       "path": "/",
@@ -32,6 +32,26 @@
         "dashboard-desktop.png",
         "dashboard-tablet.png",
         "dashboard-mobile.png"
+      ]
+    },
+    {
+      "path": "/schedules",
+      "name": "schedules",
+      "description": "Schedules management page",
+      "screenshots": [
+        "schedules-desktop.png",
+        "schedules-tablet.png",
+        "schedules-mobile.png"
+      ]
+    },
+    {
+      "path": "/actions",
+      "name": "actions",
+      "description": "Actions management page",
+      "screenshots": [
+        "actions-desktop.png",
+        "actions-tablet.png",
+        "actions-mobile.png"
       ]
     }
   ],

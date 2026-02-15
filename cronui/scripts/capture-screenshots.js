@@ -24,12 +24,18 @@ const routes = [
     description: 'Main dashboard view',
     requiresAuth: true
   },
-  // Add more routes as you build them:
-  // {
-  //   path: '/actions',
-  //   name: 'actions',
-  //   description: 'Actions management page'
-  // },
+  {
+    path: '/schedules',
+    name: 'schedules',
+    description: 'Schedules management page',
+    requiresAuth: true
+  },
+  {
+    path: '/actions',
+    name: 'actions',
+    description: 'Actions management page',
+    requiresAuth: true
+  },
 ];
 
 // Viewport configurations for responsive screenshots
