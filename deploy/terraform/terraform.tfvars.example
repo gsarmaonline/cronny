@@ -1,0 +1,34 @@
+# DigitalOcean API token (required)
+# Get your token from: https://cloud.digitalocean.com/account/api/tokens
+do_token = "dop_v1_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Environment name
+environment = "production"
+
+# Project name
+project_name = "cronny"
+
+# DigitalOcean region
+# Available regions: nyc1, nyc3, sfo3, sgp1, lon1, fra1, tor1, blr1, etc.
+region = "nyc3"
+
+# Droplet size
+# s-1vcpu-1gb   : $6/month  (1GB RAM)
+# s-2vcpu-2gb   : $12/month (2GB RAM) - Recommended
+# s-2vcpu-4gb   : $24/month (4GB RAM)
+droplet_size = "s-2vcpu-2gb"
+
+# Domain name
+domain_name = "example.com"
+
+# Path to your SSH public key
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+
+# Database volume size in GB
+volume_size = 10
+
+# Enable automated droplet backups ($1.20/month additional)
+enable_backups = true
+
+# Email for monitoring alerts (optional)
+alert_email = "your-email@example.com"

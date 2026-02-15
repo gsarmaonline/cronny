@@ -1,0 +1,208 @@
+version: '3.8'
+
+# Production Docker Compose configuration for Cronny
+# This file defines all services needed for the application
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: cronny-postgres-${CRONNY_ENV:-production}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ${DB_VOLUME_PATH}:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - cronny-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Cronny API Service
+  api:
+    build:
+      context: ${REPO_PATH}
+      dockerfile: build/Dockerfile.api
+    container_name: cronny-api-${CRONNY_ENV:-production}
+    restart: unless-stopped
+    environment:
+      - CRONNY_ENV=${CRONNY_ENV:-production}
+      - USE_PG=yes
+      - DB_HOST=postgres
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=5432
+      - PORT=8080
+      - JWT_SECRET=${JWT_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - cronny-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Cronny Frontend Service
+  frontend:
+    build:
+      context: ${REPO_PATH}
+      dockerfile: build/Dockerfile.frontend
+    container_name: cronny-frontend-${CRONNY_ENV:-production}
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_URL=${API_URL}
+      - REACT_APP_ENV=${CRONNY_ENV:-production}
+    depends_on:
+      api:
+        condition: service_healthy
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - cronny-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Trigger Creator Service (Background Worker)
+  triggercreator:
+    build:
+      context: ${REPO_PATH}
+      dockerfile: build/Dockerfile.triggercreator
+    container_name: cronny-triggercreator-${CRONNY_ENV:-production}
+    restart: unless-stopped
+    environment:
+      - CRONNY_ENV=${CRONNY_ENV:-production}
+      - USE_PG=yes
+      - DB_HOST=postgres
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - cronny-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Trigger Executor Service (Background Worker)
+  triggerexecutor:
+    build:
+      context: ${REPO_PATH}
+      dockerfile: build/Dockerfile.triggerexecutor
+    container_name: cronny-triggerexecutor-${CRONNY_ENV:-production}
+    restart: unless-stopped
+    environment:
+      - CRONNY_ENV=${CRONNY_ENV:-production}
+      - USE_PG=yes
+      - DB_HOST=postgres
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=5432
+      - DOCKER_HOST=${DOCKER_HOST:-unix:///var/run/docker.sock}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Mount Docker socket for Docker job execution
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - cronny-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Nginx Reverse Proxy with SSL
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: cronny-nginx-${CRONNY_ENV:-production}
+    restart: unless-stopped
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - CERTBOT_EMAIL=${CERTBOT_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    depends_on:
+      - api
+      - frontend
+    networks:
+      - cronny-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  # Certbot for SSL certificate renewal
+  certbot:
+    image: certbot/certbot:latest
+    container_name: cronny-certbot-${CRONNY_ENV:-production}
+    volumes:
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - cronny-network
+
+networks:
+  cronny-network:
+    name: cronny-network-${CRONNY_ENV:-production}
+    driver: bridge
+
+# Note: Database volume is mounted from host (DigitalOcean block storage)
+# No named volumes needed as we use host path for persistence

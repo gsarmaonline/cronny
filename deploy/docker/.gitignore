@@ -1,0 +1,15 @@
+# Environment files (contain secrets)
+.env
+.env.*
+!.env.example
+
+# SSL certificates
+nginx/ssl/
+nginx/certbot/
+
+# Database backups
+backups/
+
+# Logs
+logs/
+*.log
