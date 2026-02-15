@@ -1,43 +1,51 @@
 import { render, screen } from '@testing-library/react'
+import { useRouter } from 'next/navigation'
 import Home from '../page'
+import { authLib } from '@/lib/auth'
+
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+}))
+
+// Mock auth library
+jest.mock('@/lib/auth', () => ({
+  authLib: {
+    isAuthenticated: jest.fn(),
+  },
+}))
 
 describe('Home Page', () => {
-  it('renders the main heading', () => {
-    render(<Home />)
-    const heading = screen.getByRole('heading', { level: 1 })
-    expect(heading).toBeInTheDocument()
-    expect(heading).toHaveTextContent('To get started, edit the page.tsx file.')
+  const mockPush = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(useRouter as jest.Mock).mockReturnValue({
+      push: mockPush,
+    })
   })
 
-  it('renders the Next.js logo', () => {
+  it('redirects to dashboard when authenticated', () => {
+    ;(authLib.isAuthenticated as jest.Mock).mockReturnValue(true)
+
     render(<Home />)
-    const logo = screen.getByAltText('Next.js logo')
-    expect(logo).toBeInTheDocument()
+
+    expect(mockPush).toHaveBeenCalledWith('/dashboard')
   })
 
-  it('renders external links', () => {
-    render(<Home />)
-    const templatesLink = screen.getByText('Templates')
-    const learningLink = screen.getByText('Learning')
+  it('redirects to login when not authenticated', () => {
+    ;(authLib.isAuthenticated as jest.Mock).mockReturnValue(false)
 
-    expect(templatesLink).toBeInTheDocument()
-    expect(templatesLink).toHaveAttribute('href')
-    expect(learningLink).toBeInTheDocument()
-    expect(learningLink).toHaveAttribute('href')
+    render(<Home />)
+
+    expect(mockPush).toHaveBeenCalledWith('/login')
   })
 
-  it('renders the Deploy Now button', () => {
-    render(<Home />)
-    const deployButton = screen.getByText('Deploy Now')
-    expect(deployButton).toBeInTheDocument()
-    expect(deployButton.closest('a')).toHaveAttribute('target', '_blank')
-    expect(deployButton.closest('a')).toHaveAttribute('rel', 'noopener noreferrer')
-  })
+  it('shows loading state', () => {
+    ;(authLib.isAuthenticated as jest.Mock).mockReturnValue(false)
 
-  it('renders the Documentation link', () => {
     render(<Home />)
-    const docsLink = screen.getByText('Documentation')
-    expect(docsLink).toBeInTheDocument()
-    expect(docsLink.closest('a')).toHaveAttribute('target', '_blank')
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
   })
 })

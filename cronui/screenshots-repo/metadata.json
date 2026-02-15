@@ -1,8 +1,8 @@
 {
-  "lastUpdated": "2026-02-15T00:11:49.655Z",
+  "lastUpdated": "2026-02-15T00:52:01.670Z",
   "date": "2026-02-15",
   "baseUrl": "http://localhost:3000",
-  "totalScreenshots": 3,
+  "totalScreenshots": 9,
   "routes": [
     {
       "path": "/",
@@ -12,6 +12,26 @@
         "home-desktop.png",
         "home-tablet.png",
         "home-mobile.png"
+      ]
+    },
+    {
+      "path": "/login",
+      "name": "login",
+      "description": "Login page",
+      "screenshots": [
+        "login-desktop.png",
+        "login-tablet.png",
+        "login-mobile.png"
+      ]
+    },
+    {
+      "path": "/dashboard",
+      "name": "dashboard",
+      "description": "Main dashboard view",
+      "screenshots": [
+        "dashboard-desktop.png",
+        "dashboard-tablet.png",
+        "dashboard-mobile.png"
       ]
     }
   ],
