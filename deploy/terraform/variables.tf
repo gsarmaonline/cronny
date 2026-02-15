@@ -36,7 +36,7 @@ variable "droplet_size" {
 variable "domain_name" {
   description = "Domain name for the application"
   type        = string
-  default     = "cronny.app"
+  default     = "example.com"
 }
 
 variable "ssh_public_key_path" {

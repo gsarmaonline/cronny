@@ -12,7 +12,7 @@ Your SSH private key for accessing the DigitalOcean droplet.
 **How to get it:**
 ```bash
 # Generate a new SSH key pair (if you don't have one)
-ssh-keygen -t rsa -b 4096 -C "github-actions@cronny.app" -f ~/.ssh/cronny_deploy
+ssh-keygen -t rsa -b 4096 -C "github-actions@example.com" -f ~/.ssh/cronny_deploy
 
 # Copy the private key content
 cat ~/.ssh/cronny_deploy
@@ -41,7 +41,7 @@ terraform output droplet_ip
 ### 3. DOMAIN_NAME
 Your domain name for the application.
 
-**Value:** `cronny.app`
+**Value:** `example.com`
 
 ## Optional Secrets
 

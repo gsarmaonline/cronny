@@ -42,7 +42,7 @@ This Terraform configuration creates:
    ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa
    ```
 
-5. **Domain Name** (cronny.app)
+5. **Domain Name** (example.com)
    - Added to DigitalOcean: Networking → Domains → Add Domain
    - Or DNS managed externally (update NS records)
 
@@ -63,8 +63,8 @@ vim terraform.tfvars
 **Required variables:**
 ```hcl
 do_token = "dop_v1_xxxxxxxxxxxxxxxxxxxx"  # Your DO API token
-domain_name = "cronny.app"
-alert_email = "admin@cronny.app"
+domain_name = "example.com"
+alert_email = "admin@example.com"
 ```
 
 ### 2. Initialize Terraform
@@ -126,7 +126,7 @@ terraform output -raw ssh_connection
 | `project_name` | Project name | `cronny` | Any string |
 | `region` | DO region | `nyc3` | `nyc3`, `sfo3`, `lon1`, `sgp1`, etc. |
 | `droplet_size` | Droplet size | `s-2vcpu-2gb` | See sizes below |
-| `domain_name` | Domain name | `cronny.app` | Your domain |
+| `domain_name` | Domain name | `example.com` | Your domain |
 | `ssh_public_key_path` | SSH key path | `~/.ssh/id_rsa.pub` | Path to public key |
 | `volume_size` | Volume size in GB | `10` | 1-16384 |
 | `enable_backups` | Enable backups | `true` | `true`, `false` |
@@ -166,7 +166,7 @@ terraform output -raw ssh_connection
 | `droplet_name` | Droplet name | `cronny-production` |
 | `volume_id` | Volume ID | `987654321` |
 | `volume_path` | Mount path | `/mnt/cronny-production-db-volume` |
-| `domain_fqdn` | Domain FQDN | `cronny.app` |
+| `domain_fqdn` | Domain FQDN | `example.com` |
 | `ssh_connection` | SSH command | `ssh root@157.230.123.45` |
 | `next_steps` | Next steps | Instructions |
 
@@ -208,9 +208,9 @@ terraform workspace show
 
 | Environment | Droplet Name | Domain | Volume |
 |------------|--------------|--------|---------|
-| Production | `cronny-production` | `cronny.app` | `/mnt/cronny-production-db-volume` |
-| Staging | `cronny-staging` | `staging.cronny.app` | `/mnt/cronny-staging-db-volume` |
-| Testing | `cronny-testing` | `testing.cronny.app` | `/mnt/cronny-testing-db-volume` |
+| Production | `cronny-production` | `example.com` | `/mnt/cronny-production-db-volume` |
+| Staging | `cronny-staging` | `staging.example.com` | `/mnt/cronny-staging-db-volume` |
+| Testing | `cronny-testing` | `testing.example.com` | `/mnt/cronny-testing-db-volume` |
 
 ## Cloud-Init
 
@@ -390,7 +390,7 @@ ssh_public_key_path = "~/.ssh/cronny_rsa.pub"
 doctl compute domain list
 
 # Add domain
-doctl compute domain create cronny.app
+doctl compute domain create example.com
 ```
 
 ### Volume Mount Issues

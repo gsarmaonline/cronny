@@ -6,8 +6,8 @@
 set -e
 
 # Configuration
-DOMAIN="cronny.app"
-EMAIL="${CERTBOT_EMAIL:-admin@cronny.app}"
+DOMAIN="${DOMAIN_NAME:-example.com}"
+EMAIL="${CERTBOT_EMAIL:-admin@${DOMAIN}}"
 STAGING=${STAGING:-0} # Set to 1 for testing
 RSA_KEY_SIZE=4096
 DATA_PATH="./nginx/certbot"

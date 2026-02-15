@@ -53,7 +53,7 @@ This deployment setup provides:
                     ▲
                     │ HTTPS (443)
                     │
-              cronny.app
+              example.com
 ```
 
 ## Prerequisites
@@ -64,7 +64,7 @@ This deployment setup provides:
 - [DigitalOcean API Token](https://cloud.digitalocean.com/account/api/tokens)
 - SSH key pair (`~/.ssh/id_rsa` or create new one)
 - Git
-- Domain name (cronny.app) with access to DNS settings
+- Domain name (example.com) with access to DNS settings
 
 ### DigitalOcean Account
 
@@ -124,7 +124,7 @@ vim .env.production
 # - Set JWT_SECRET (generate with: openssl rand -base64 32)
 # - Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
 # - Set CERTBOT_EMAIL
-# - Verify DOMAIN_NAME=cronny.app
+# - Verify DOMAIN_NAME=example.com
 ```
 
 ### 4. Deploy Application (5 minutes)
@@ -147,7 +147,7 @@ Add these secrets to your GitHub repository (Settings → Secrets and variables 
 
 - `SSH_PRIVATE_KEY`: Your SSH private key
 - `DROPLET_IP`: Your droplet IP address
-- `DOMAIN_NAME`: cronny.app
+- `DOMAIN_NAME`: example.com
 
 See [GITHUB_SECRETS.md](./GITHUB_SECRETS.md) for detailed instructions.
 
@@ -161,7 +161,7 @@ See [terraform/README.md](./terraform/README.md) for detailed Terraform document
 - Droplet (Ubuntu 22.04, 2GB RAM)
 - Block storage volume (10GB for database)
 - Firewall (SSH, HTTP, HTTPS)
-- DNS A record for cronny.app
+- DNS A record for example.com
 
 ### Environment Configuration
 
@@ -186,12 +186,12 @@ GOOGLE_CLIENT_ID=your_oauth_client_id
 GOOGLE_CLIENT_SECRET=your_oauth_secret
 
 # SSL
-CERTBOT_EMAIL=admin@cronny.app
+CERTBOT_EMAIL=admin@example.com
 
 # URLs
-DOMAIN_NAME=cronny.app
-FRONTEND_URL=https://cronny.app
-API_URL=https://cronny.app/api
+DOMAIN_NAME=example.com
+FRONTEND_URL=https://example.com
+API_URL=https://example.com/api
 ```
 
 ### SSL Certificate Setup
@@ -233,15 +233,15 @@ STAGING=1 ./init-letsencrypt.sh
    ```
 
 4. **DNS:**
-   - Production: `cronny.app` → Production IP
-   - Staging: `staging.cronny.app` → Staging IP
+   - Production: `example.com` → Production IP
+   - Staging: `staging.example.com` → Staging IP
 
 ### Environment Variables by Environment
 
 | Variable | Production | Staging | Testing |
 |----------|-----------|---------|---------|
 | CRONNY_ENV | production | staging | testing |
-| DOMAIN_NAME | cronny.app | staging.cronny.app | testing.cronny.app |
+| DOMAIN_NAME | example.com | staging.example.com | testing.example.com |
 | DB_NAME | cronny_production | cronny_staging | cronny_testing |
 
 ## Maintenance

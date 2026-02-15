@@ -83,6 +83,7 @@ fi
 # Step 3: Copy environment file
 log_info "[3/8] Setting up environment variables..."
 cp $DEPLOY_DIR/.env.${ENVIRONMENT} $DEPLOY_DIR/.env
+source $DEPLOY_DIR/.env
 export CRONNY_ENV=$ENVIRONMENT
 export REPO_PATH=$APP_DIR
 
@@ -138,8 +139,8 @@ log_info "Container status:"
 docker compose -f docker-compose.prod.yml ps
 echo ""
 log_info "Quick checks:"
-echo -e "  - API health: ${YELLOW}curl -k https://cronny.app/api/health${NC}"
-echo -e "  - Frontend: ${YELLOW}curl -k https://cronny.app${NC}"
+echo -e "  - API health: ${YELLOW}curl -k https://${DOMAIN_NAME}/api/health${NC}"
+echo -e "  - Frontend: ${YELLOW}curl -k https://${DOMAIN_NAME}${NC}"
 echo ""
 log_info "View logs:"
 echo -e "  - All logs: ${YELLOW}docker compose -f docker-compose.prod.yml logs -f${NC}"

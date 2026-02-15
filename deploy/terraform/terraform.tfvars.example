@@ -19,7 +19,7 @@ region = "nyc3"
 droplet_size = "s-2vcpu-2gb"
 
 # Domain name
-domain_name = "cronny.app"
+domain_name = "example.com"
 
 # Path to your SSH public key
 ssh_public_key_path = "~/.ssh/id_rsa.pub"
