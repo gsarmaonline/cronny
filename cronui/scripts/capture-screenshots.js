@@ -13,12 +13,18 @@ const routes = [
     name: 'home',
     description: 'Home page / Landing page'
   },
+  {
+    path: '/login',
+    name: 'login',
+    description: 'Login page'
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    description: 'Main dashboard view',
+    requiresAuth: true
+  },
   // Add more routes as you build them:
-  // {
-  //   path: '/dashboard',
-  //   name: 'dashboard',
-  //   description: 'Main dashboard view'
-  // },
   // {
   //   path: '/actions',
   //   name: 'actions',
@@ -74,6 +80,17 @@ async function captureScreenshots() {
     for (const viewport of viewports) {
       try {
         await page.setViewport(viewport);
+
+        // If route requires auth, set a mock token
+        if (route.requiresAuth) {
+          await page.setCookie({
+            name: 'cronny_auth_token',
+            value: 'mock-token-for-screenshot',
+            domain: 'localhost',
+            path: '/',
+          });
+        }
+
         const url = `${BASE_URL}${route.path}`;
 
         await page.goto(url, {
