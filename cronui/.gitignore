@@ -12,8 +12,9 @@
 
 # testing
 /coverage
-/screenshots
-/pdfs
+/screenshots  # E2E test screenshots (temporary)
+/pdfs         # E2E test PDFs (temporary)
+# Note: /screenshots-repo is NOT ignored - these are committed to the repo
 
 # next.js
 /.next/
