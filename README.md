@@ -9,26 +9,58 @@ a recurring interval.
 We are currently in the process of building Cronny both as an open source tool and are planning
 to offer it as a cloud service.
 
+## Table of Contents
+
+- [Quickstart](#quickstart)
+  - [Setup](#setup)
+  - [Development](#development)
+  - [Testing](#testing)
+  - [Create and Execute schedules](#create-and-execute-schedules)
+- [Introduction](#introduction)
+- [Planning Models](#planning-models)
+  - [Schedules](#schedules)
+  - [Trigger](#trigger)
+  - [Trigger Allocator](#trigger-allocator)
+  - [Trigger Creator](#trigger-creator)
+  - [Trigger Forecaster (WIP)](#trigger-forecaster-wip)
+  - [Action](#action)
+- [Execution Models](#execution-models)
+  - [Job](#job)
+  - [JobTemplate](#jobtemplate)
+  - [JobInputTemplate](#jobinputtemplate)
+  - [Condition](#condition)
+  - [Connectors](#connectors)
+- [Infrastructure](#infrastructure)
+- [Pricing philosophy](#pricing-philosophy)
+- [Benchmarking](#benchmarking)
+
 ## Quickstart
 
-### Locally
-
-Take a look at [examples.sh](api/examples.sh.go) to understand how to create complex workflows using Cronny.
-
-To seed an run the app, you can do:
+### Setup
 
 ```bash
-# Seed the DB
-make seed
+# First time setup - create databases
+make setup
+```
 
-# Run the Trigger app
-make run
+### Development
 
-# Run the API server
-make runapi
+```bash
+# Run Go API server with hot reload
+make runapi-dev
 
-# Building the docker images
-sudo docker build -t cronnyapi -f build/Dockerfile.api .
+# Run frontend server (in a separate terminal)
+make ui-start
+```
+
+### Testing
+
+```bash
+# Run Go tests
+make test
+
+# Run frontend tests
+cd cronui && npm test
 ```
 
 ### Create and Execute schedules
@@ -90,18 +122,6 @@ curl -XPUT $URL/api/cronny/v1/schedules/1 -H 'Content-Type: application/json' --
     "schedule_status": 1
 }
 EOF
-```
-
-### Fly.io (Deprecated)
-
-```bash
-curl -L https://fly.io/install.sh | sh
-
-# Create fly token
-fly tokens create deploy -x 999999h
-
-# Launch the app
-fly launch --image gsarmaonline/cronnyapi:latest
 ```
 
 ## Introduction
