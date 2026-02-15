@@ -3,7 +3,7 @@ version: '3.8'
 services:
   api:
     build:
-      context: .
+      context: ..
       dockerfile: build/Dockerfile.api
     environment:
       - USE_PG=yes
@@ -19,12 +19,57 @@ services:
 
   frontend:
     build:
-      context: .
+      context: ..
       dockerfile: build/Dockerfile.frontend
     ports:
       - "80:80"
     depends_on:
       - api
+
+  triggercreator:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.triggercreator
+    environment:
+      - USE_PG=yes
+      - DB_HOST=postgres
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=5432
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  triggerexecutor:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.triggerexecutor
+    environment:
+      - USE_PG=yes
+      - DB_HOST=postgres
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=5432
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  jobcleaner:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.jobcleaner
+    environment:
+      - USE_PG=yes
+      - DB_HOST=postgres
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=5432
+    depends_on:
+      - postgres
+    restart: unless-stopped
 
   postgres:
     image: postgres:14-alpine

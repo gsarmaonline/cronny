@@ -1,0 +1,36 @@
+# Build stage
+FROM golang:1.19-alpine AS builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache git make
+
+# Copy go mod and sum files
+COPY core/go.mod core/go.sum ./core/
+
+# Download dependencies
+WORKDIR /app/core
+RUN go mod download
+
+# Copy source code and Makefile
+COPY core ./
+COPY Makefile /app/
+
+# Build the application
+WORKDIR /app
+RUN make build-jobcleaner
+
+# Final stage
+FROM alpine:latest
+
+WORKDIR /app
+
+# Copy the binary from builder
+COPY --from=builder /app/bin/jobcleaner .
+
+# Set environment variables
+ENV USE_PG="yes"
+
+# Run the application
+CMD ["./jobcleaner"]
