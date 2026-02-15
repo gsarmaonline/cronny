@@ -1,6 +1,11 @@
+/// <reference types="jest-puppeteer" />
+
 describe('Puppeteer E2E Tests', () => {
-  beforeAll(async () => {
-    await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' })
+  beforeEach(async () => {
+    await page.goto('http://localhost:3000', {
+      waitUntil: 'networkidle2',
+      timeout: 30000
+    })
   })
 
   it('should display the page title', async () => {

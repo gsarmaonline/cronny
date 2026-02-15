@@ -1,3 +1,5 @@
+/// <reference types="jest-puppeteer" />
+
 import * as fs from 'fs'
 import * as path from 'path'
 

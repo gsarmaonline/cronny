@@ -3,5 +3,10 @@ module.exports = {
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   },
-  // No server config - basic tests don't need dev server
+  server: {
+    command: 'npm run dev',
+    port: 3000,
+    launchTimeout: 30000,
+    debug: true,
+  },
 }

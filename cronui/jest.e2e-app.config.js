@@ -1,11 +1,8 @@
 module.exports = {
   preset: 'jest-puppeteer',
-  testRegex: './*\\.e2e\\.test\\.(js|ts)$',
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    'puppeteer\\.e2e\\.test\\.ts$' // App tests run separately with dev server
-  ],
+  testRegex: 'puppeteer\\.e2e\\.test\\.(js|ts)$', // Only app-specific tests
   testTimeout: 30000,
+  setupFilesAfterEnv: ['./jest-puppeteer-app.config.js'],
   globals: {
     URL: 'http://localhost:3000',
   },

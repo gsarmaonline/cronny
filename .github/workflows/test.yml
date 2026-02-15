@@ -72,12 +72,8 @@ jobs:
       env:
         CI: true
 
-    - name: Install Puppeteer dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libnss3 libxss1 libasound2 libatk-bridge2.0-0 \
-          libgtk-3-0 libgbm1
+    - name: Install Chromium for Puppeteer
+      run: npx puppeteer browsers install chrome
 
     - name: Run E2E tests
       run: npm run test:e2e

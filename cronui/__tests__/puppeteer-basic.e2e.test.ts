@@ -1,3 +1,5 @@
+/// <reference types="jest-puppeteer" />
+
 describe('Puppeteer Basic Functionality', () => {
   it('should launch browser and create page', async () => {
     expect(browser).toBeTruthy()

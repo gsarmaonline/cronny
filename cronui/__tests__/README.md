@@ -9,27 +9,23 @@ This directory contains end-to-end tests using Puppeteer for the Cronny UI.
 
 ## Running Tests
 
-### Run all E2E tests
+### Run all E2E tests (optimized)
 ```bash
 npm run test:e2e
 ```
+This runs basic tests first (no server), then app tests (with server).
 
-### Run with headless mode (default)
+### Run only basic Puppeteer tests (fast - no dev server needed)
 ```bash
-npm run test:e2e:headless
+npm run test:e2e:basic
 ```
+Tests: puppeteer-basic, puppeteer-screenshots, puppeteer-pdf
 
-### Run basic Puppeteer tests only
+### Run only Next.js app tests (requires dev server)
 ```bash
-npm run test:e2e -- puppeteer-basic
+npm run test:e2e:app
 ```
-
-### Run Next.js app tests only
-Requires the dev server to be running on port 3000:
-```bash
-npm run dev  # In one terminal
-npm run test:e2e -- puppeteer.e2e  # In another terminal
-```
+Tests: puppeteer.e2e (app-specific tests with dev server)
 
 ## Configuration
 
