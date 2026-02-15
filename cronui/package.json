@@ -13,7 +13,8 @@
     "test:e2e": "jest --config=jest.e2e.config.js && jest --config=jest.e2e-app.config.js",
     "test:e2e:basic": "jest --config=jest.e2e.config.js",
     "test:e2e:app": "jest --config=jest.e2e-app.config.js",
-    "capture-screenshots": "node scripts/capture-screenshots.js && node scripts/generate-screenshot-index.js"
+    "capture-screenshots": "NEXT_PUBLIC_USE_MOCK_DATA=true node scripts/capture-screenshots.js && node scripts/generate-screenshot-index.js",
+    "capture-modals": "NEXT_PUBLIC_USE_MOCK_DATA=true node scripts/capture-modal-screenshots.js"
   },
   "dependencies": {
     "js-cookie": "^3.0.5",
