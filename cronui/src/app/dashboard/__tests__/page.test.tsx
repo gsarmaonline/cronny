@@ -40,8 +40,7 @@ describe('DashboardPage', () => {
     render(<DashboardPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Cronny Dashboard')).toBeInTheDocument();
-      expect(screen.getByText('Welcome to Cronny')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
       expect(screen.getByText('Manage your cron jobs and scheduled tasks')).toBeInTheDocument();
     });
   });
@@ -65,7 +64,7 @@ describe('DashboardPage', () => {
     render(<DashboardPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Cronny Dashboard')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
     });
 
     const logoutButton = screen.getByRole('button', { name: /logout/i });
