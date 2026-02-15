@@ -13,8 +13,8 @@ import (
 )
 
 func setupCleanerTestDB(t *testing.T) *gorm.DB {
-	// Use in-memory SQLite for testing
-	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	// Use unique in-memory SQLite database per test for isolation
+	db, err := gorm.Open(sqlite.Open(fmt.Sprintf("file:%s?mode=memory&cache=shared", t.Name())), &gorm.Config{})
 	require.NoError(t, err)
 	return db
 }
@@ -158,14 +158,12 @@ func TestJobExecutionCleaner_runIter_FewerThanAllowedExecutions(t *testing.T) {
 	totalCleaned, err := cleaner.runIter()
 	assert.NoError(t, err, "runIter should not error")
 
-	// BUG: The current implementation deletes ALL executions when it shouldn't delete any
-	// Lines 39-49 in job_execution_cleaner.go: if len <= allowed, jobExecutions is not modified,
-	// so the delete loop still processes all executions
-	assert.Equal(t, uint32(5), totalCleaned, "BUG: Deletes all executions even when under limit")
+	// Should not delete any executions when under the limit
+	assert.Equal(t, uint32(0), totalCleaned, "Should not delete any executions when under limit")
 
-	// Verify all executions were incorrectly deleted
+	// Verify all executions are still present
 	remaining := countJobExecutions(t, db, job.ID)
-	assert.Equal(t, 0, remaining, "BUG: All executions deleted when they should be kept")
+	assert.Equal(t, 5, remaining, "All executions should be kept when under limit")
 }
 
 func TestJobExecutionCleaner_runIter_ExactlyAllowedExecutions(t *testing.T) {
@@ -182,12 +180,12 @@ func TestJobExecutionCleaner_runIter_ExactlyAllowedExecutions(t *testing.T) {
 	totalCleaned, err := cleaner.runIter()
 	assert.NoError(t, err, "runIter should not error")
 
-	// BUG: Same issue - deletes all when at the limit
-	assert.Equal(t, uint32(10), totalCleaned, "BUG: Deletes all when at limit")
+	// Should not delete any executions when exactly at the limit
+	assert.Equal(t, uint32(0), totalCleaned, "Should not delete any executions when at limit")
 
-	// Verify all executions were incorrectly deleted
+	// Verify all executions are still present
 	remaining := countJobExecutions(t, db, job.ID)
-	assert.Equal(t, 0, remaining, "BUG: All executions deleted when at limit")
+	assert.Equal(t, 10, remaining, "All executions should be kept when at limit")
 }
 
 func TestJobExecutionCleaner_runIter_MultipleJobs(t *testing.T) {

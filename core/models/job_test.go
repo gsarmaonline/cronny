@@ -324,7 +324,7 @@ func TestJob_GetInput_JobOutputAsInput_NonExistentJob(t *testing.T) {
 
 	_, err := job.GetInput(db)
 	assert.Error(t, err, "GetInput should return error for non-existent job")
-	assert.Contains(t, err.Error(), "failed to get the previous Job", "Error should mention job not found")
+	assert.Contains(t, err.Error(), "failed to get previous job", "Error should mention job not found")
 }
 
 func TestJob_GetInput_JobOutputAsInput_NoJobExecution(t *testing.T) {
@@ -340,7 +340,7 @@ func TestJob_GetInput_JobOutputAsInput_NoJobExecution(t *testing.T) {
 
 	_, err := job.GetInput(db)
 	assert.Error(t, err, "GetInput should return error when previous job has no execution")
-	assert.Contains(t, err.Error(), "failed to get the latest job execution", "Error should mention missing execution")
+	assert.Contains(t, err.Error(), "failed to get latest job execution", "Error should mention missing execution")
 }
 
 func TestJob_GetInput_JobOutputAsInput_MalformedOutput(t *testing.T) {
@@ -785,7 +785,7 @@ func TestJob_Next_NextJobNotFound(t *testing.T) {
 
 	_, err := job.Next(db)
 	assert.Error(t, err, "Next should error when next job doesn't exist")
-	assert.Contains(t, err.Error(), "Failed to get next job", "Error should mention job not found")
+	assert.Contains(t, err.Error(), "failed to get next job", "Error should mention job not found")
 }
 
 // ==========================================================
