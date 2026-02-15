@@ -136,6 +136,7 @@ Base URL: `http://127.0.0.1:8009/api/cronny/v1`
 - Test files located alongside source files
 - Use testify/assert for assertions
 - Test database operations use `cronny_test` DB
+- **Frontend Testing**: Always run frontend tests locally (`cd cronui && npm test`) whenever there is a frontend change before committing
 
 ## Git Workflow
 
