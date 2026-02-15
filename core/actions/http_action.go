@@ -7,7 +7,18 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"time"
 )
+
+// Shared HTTP client with timeout - reused across all HTTP actions
+var httpClient = &http.Client{
+	Timeout: 30 * time.Second,
+	Transport: &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+	},
+}
 
 const (
 	// Http Methods
@@ -44,7 +55,6 @@ func (httpAction HttpAction) Validate(input Input) (httpReq *HttpActionReq, err 
 
 func (httpAction HttpAction) Execute(input Input) (output Output, err error) {
 	var (
-		client *http.Client
 		req    *http.Request
 		resp   *http.Response
 
@@ -57,7 +67,6 @@ func (httpAction HttpAction) Execute(input Input) (output Output, err error) {
 		return
 	}
 
-	client = &http.Client{}
 	if payloadB, err = json.Marshal(httpReq.RequestBody); err != nil {
 		return
 	}
@@ -65,9 +74,13 @@ func (httpAction HttpAction) Execute(input Input) (output Output, err error) {
 	if req, err = http.NewRequest(string(httpReq.Method), httpReq.Url, reqBody); err != nil {
 		return
 	}
-	if resp, err = client.Do(req); err != nil {
+	req.Header.Set("Content-Type", "application/json")
+
+	if resp, err = httpClient.Do(req); err != nil {
 		return
 	}
+	defer resp.Body.Close()
+
 	if output, err = httpAction.convertResp(resp); err != nil {
 		return
 	}

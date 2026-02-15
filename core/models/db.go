@@ -22,13 +22,21 @@ type (
 
 func GetDefaultPgDbConfig() (cfg *DbConfig) {
 	cfg = &DbConfig{
-		Host:     "pg-cronny.flycast",
-		Port:     "5432",
-		Username: "postgres",
-		Password: "msmcuS2ZbHUJizs",
-		DbName:   "cronny_dev",
+		Host:     getEnvOrDefault("PG_HOST", "pg-cronny.flycast"),
+		Port:     getEnvOrDefault("PG_PORT", "5432"),
+		Username: getEnvOrDefault("PG_USERNAME", "postgres"),
+		Password: os.Getenv("PG_PASSWORD"), // Required - no default for security
+		DbName:   getEnvOrDefault("PG_DBNAME", "cronny_dev"),
 	}
 	return
+}
+
+// getEnvOrDefault returns the environment variable value or a default if not set
+func getEnvOrDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }
 
 func GetDefaultDbConfig() (cfg *DbConfig) {
@@ -82,15 +90,22 @@ func NewMysqlDb(cfg *DbConfig) (db *gorm.DB, err error) {
 }
 
 func NewPostgresDb(cfg *DbConfig) (db *gorm.DB, err error) {
+	// Use UTC as default timezone, or get from environment
+	timezone := os.Getenv("DB_TIMEZONE")
+	if timezone == "" {
+		timezone = "UTC"
+	}
+
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Kolkata",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s",
 		cfg.Host,
 		cfg.Username,
 		cfg.Password,
 		cfg.DbName,
 		cfg.Port,
+		timezone,
 	)
-	log.Println(dsn)
+	log.Println("Connecting to PostgreSQL database")
 	if db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{}); err != nil {
 		return
 	}
@@ -98,14 +113,24 @@ func NewPostgresDb(cfg *DbConfig) (db *gorm.DB, err error) {
 }
 
 func SetupModels(db *gorm.DB) (err error) {
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Schedule{})
-	db.AutoMigrate(&Trigger{})
-	db.AutoMigrate(&Action{})
-	db.AutoMigrate(&Job{})
-	db.AutoMigrate(&JobTemplate{})
-	db.AutoMigrate(&JobExecution{})
-	db.AutoMigrate(&Plan{})
-	db.AutoMigrate(&Feature{})
-	return
+	models := []interface{}{
+		&User{},
+		&Schedule{},
+		&Trigger{},
+		&Action{},
+		&Job{},
+		&JobTemplate{},
+		&JobExecution{},
+		&Plan{},
+		&Feature{},
+	}
+
+	for _, model := range models {
+		if err = db.AutoMigrate(model); err != nil {
+			return fmt.Errorf("failed to auto-migrate model %T: %w", model, err)
+		}
+	}
+
+	log.Println("All models migrated successfully")
+	return nil
 }

@@ -47,7 +47,9 @@ func (trigger Trigger) GetTriggersForTime(db *gorm.DB, status TriggerStatusT) (t
 	return
 }
 
-func (trigger *Trigger) UpdateStatusWithLocks(db *gorm.DB, status TriggerStatusT) (err error) {
+// UpdateStatus updates the trigger status
+// Note: This does not use locks. For concurrent updates, use database transactions.
+func (trigger *Trigger) UpdateStatus(db *gorm.DB, status TriggerStatusT) (err error) {
 	trigger.TriggerStatus = status
 	if db := db.Save(trigger); db.Error != nil {
 		err = db.Error

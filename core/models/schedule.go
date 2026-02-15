@@ -79,6 +79,35 @@ func (schedule *Schedule) validateScheduleUnit() (err error) {
 	return
 }
 
+func (schedule *Schedule) validateScheduleValue() (err error) {
+	switch schedule.ScheduleType {
+	case AbsoluteScheduleType:
+		// Validate RFC3339 format
+		if _, err = time.Parse(time.RFC3339, schedule.ScheduleValue); err != nil {
+			return fmt.Errorf("invalid schedule value for absolute schedule, must be RFC3339 format: %w", err)
+		}
+	case RecurringScheduleType, RelativeScheduleType:
+		// Validate it's a valid integer
+		if interval, err := strconv.Atoi(schedule.ScheduleValue); err != nil {
+			return fmt.Errorf("invalid schedule value for recurring/relative schedule, must be an integer: %w", err)
+		} else if interval <= 0 {
+			return errors.New("schedule value must be greater than 0 for recurring/relative schedules")
+		}
+	}
+	return nil
+}
+
+func (schedule *Schedule) validateEndsAt() (err error) {
+	if schedule.EndsAt == "" {
+		return nil
+	}
+	// Validate RFC3339 format
+	if _, err = time.Parse(time.RFC3339, schedule.EndsAt); err != nil {
+		return fmt.Errorf("invalid ends_at value, must be RFC3339 format: %w", err)
+	}
+	return nil
+}
+
 func (schedule *Schedule) BeforeSave(tx *gorm.DB) (err error) {
 	if err = schedule.validateScheduleType(); err != nil {
 		return
@@ -86,12 +115,20 @@ func (schedule *Schedule) BeforeSave(tx *gorm.DB) (err error) {
 	if err = schedule.validateScheduleUnit(); err != nil {
 		return
 	}
+	if err = schedule.validateScheduleValue(); err != nil {
+		return
+	}
+	if err = schedule.validateEndsAt(); err != nil {
+		return
+	}
 	return
 }
 
 // ==========================================================
 // Schedules
-func (schedule *Schedule) UpdateStatusWithLocks(db *gorm.DB, status ScheduleStatusT) (err error) {
+// UpdateStatus updates the schedule status
+// Note: This does not use locks. For concurrent updates, use database transactions.
+func (schedule *Schedule) UpdateStatus(db *gorm.DB, status ScheduleStatusT) (err error) {
 	schedule.ScheduleStatus = status
 	if ex := db.Save(schedule); ex.Error != nil {
 		err = ex.Error
@@ -228,12 +265,12 @@ func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err erro
 	// the next trigger
 	if schedule.ShouldEnd(db) {
 		if err = schedule.End(db); err != nil {
-			return
+			return nil, fmt.Errorf("failed to end schedule %s (ID: %d): %w", schedule.Name, schedule.ID, err)
 		}
-		return
+		return nil, nil
 	}
 	if execTime, err = schedule.GetExecutionTime(); err != nil {
-		return
+		return nil, fmt.Errorf("failed to get execution time for schedule %s (ID: %d): %w", schedule.Name, schedule.ID, err)
 	}
 	trigger = &Trigger{
 		StartAt:       execTime,
@@ -242,8 +279,7 @@ func (schedule *Schedule) CreateTrigger(db *gorm.DB) (trigger *Trigger, err erro
 		TriggerStatus: ScheduledTriggerStatus,
 	}
 	if db = db.Create(trigger); db.Error != nil {
-		err = db.Error
-		return
+		return nil, fmt.Errorf("failed to create trigger for schedule %s (ID: %d): %w", schedule.Name, schedule.ID, db.Error)
 	}
-	return
+	return trigger, nil
 }
