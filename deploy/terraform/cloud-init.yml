@@ -1,0 +1,82 @@
+#cloud-config
+# Cloud-init configuration for Cronny droplet
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - ufw
+  - fail2ban
+  - git
+
+# Create a non-root user for deployments (optional, but recommended)
+users:
+  - name: deploy
+    groups: sudo, docker
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+
+runcmd:
+  # Set timezone to UTC
+  - timedatectl set-timezone UTC
+
+  # Configure UFW firewall
+  - ufw --force enable
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+
+  # Configure fail2ban for SSH protection
+  - systemctl enable fail2ban
+  - systemctl start fail2ban
+
+  # Install Docker
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+  # Start and enable Docker
+  - systemctl start docker
+  - systemctl enable docker
+
+  # Add deploy user to docker group
+  - usermod -aG docker deploy
+
+  # Create swap file (helps with memory on small droplets)
+  - fallocate -l 2G /swapfile
+  - chmod 600 /swapfile
+  - mkswap /swapfile
+  - swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
+
+  # Set environment variable
+  - echo "CRONNY_ENV=${environment}" >> /etc/environment
+
+  # Create directory for application
+  - mkdir -p /opt/cronny
+  - chown deploy:deploy /opt/cronny
+
+write_files:
+  - path: /etc/sysctl.d/99-cronny.conf
+    content: |
+      # Increase max connections
+      net.core.somaxconn = 1024
+      # Increase file descriptors
+      fs.file-max = 65535
+    permissions: '0644'
+
+  - path: /etc/security/limits.d/cronny.conf
+    content: |
+      * soft nofile 65535
+      * hard nofile 65535
+    permissions: '0644'
+
+final_message: "Cronny droplet initialization complete. Environment: ${environment}"
