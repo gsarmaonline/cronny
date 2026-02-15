@@ -108,6 +108,44 @@ docker build -t cronnytriggerexecutor -f Dockerfile.triggerexecutor .
 - API calls to backend at `/api/cronny/v1/*`
 - Component structure: List, Form, Detail patterns
 
+### Frontend CRUD Structure
+**IMPORTANT**: Always use the established CRUD structure when adding new entity pages (Jobs, Triggers, etc.)
+
+The frontend has a reusable CRUD structure that should be used for all entity management pages:
+
+**Core Components:**
+- `src/types/index.ts` - TypeScript type definitions for all entities
+- `src/lib/api-client.ts` - Generic API client with CRUD methods
+- `src/lib/mock-data.ts` - Mock data for development without backend
+- `src/hooks/useCrud.ts` - Reusable hook for data fetching and mutations
+- `src/components/crud/` - Generic components (DataTable, Modal, PageLayout)
+
+**When adding a new entity page:**
+1. Add type definition to `src/types/index.ts` (if not exists)
+2. Add mock data to `src/lib/mock-data.ts` for screenshots/development
+3. Copy `src/app/actions/page.tsx` as a template
+4. Update the resource name: `useCrud<YourType>({ resource: 'your-endpoint' })`
+5. Customize table columns in the `columns` array
+6. Customize form fields in the Modal component
+7. Add navigation link in `src/components/crud/PageLayout.tsx`
+8. Capture screenshots: `cd cronui && npm run capture-screenshots && npm run capture-modals`
+
+**Benefits of using this structure:**
+- 90% code reuse across entity pages
+- Takes 10-15 minutes to add a new entity page
+- Type-safe with full TypeScript support
+- Consistent UI/UX across the application
+- Easy to maintain - changes in one place affect all pages
+
+**Documentation:**
+- `cronui/CRUD_STRUCTURE.md` - Complete step-by-step guide with examples
+- `cronui/README_FRONTEND_STRUCTURE.md` - Quick reference
+- `FRONTEND_STRUCTURE_SUMMARY.md` - High-level overview
+
+**Example pages:**
+- `src/app/schedules/page.tsx` - Complex form with conditional fields
+- `src/app/actions/page.tsx` - Simple form example
+
 ## API Endpoints
 
 Base URL: `http://127.0.0.1:8009/api/cronny/v1`
