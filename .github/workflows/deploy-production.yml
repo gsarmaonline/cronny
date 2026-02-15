@@ -1,10 +1,12 @@
 name: Deploy to Production
 
+# DISABLED: Workflow is currently disabled for automatic deployment
+# Remove the 'false' condition below to re-enable
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:  # Allow manual deployment
+  workflow_dispatch:  # Manual deployment only
+  # push:
+  #   branches:
+  #     - main
 
 env:
   DEPLOY_USER: deploy
