@@ -216,8 +216,8 @@ func TestTrigger_UpdateStatusWithLocks_UpdatesToExecuting(t *testing.T) {
 
 	trigger := createTestTrigger(db, schedule.ID, time.Now().UTC(), ScheduledTriggerStatus)
 
-	err := trigger.UpdateStatusWithLocks(db, ExecutingTriggerStatus)
-	assert.NoError(t, err, "UpdateStatusWithLocks should not error")
+	err := trigger.UpdateStatus(db, ExecutingTriggerStatus)
+	assert.NoError(t, err, "UpdateStatus should not error")
 
 	// Verify status was updated
 	var updated Trigger
@@ -231,8 +231,8 @@ func TestTrigger_UpdateStatusWithLocks_UpdatesToCompleted(t *testing.T) {
 
 	trigger := createTestTrigger(db, schedule.ID, time.Now().UTC(), ExecutingTriggerStatus)
 
-	err := trigger.UpdateStatusWithLocks(db, CompletedTriggerStatus)
-	assert.NoError(t, err, "UpdateStatusWithLocks should not error")
+	err := trigger.UpdateStatus(db, CompletedTriggerStatus)
+	assert.NoError(t, err, "UpdateStatus should not error")
 
 	// Verify status was updated
 	var updated Trigger
@@ -246,8 +246,8 @@ func TestTrigger_UpdateStatusWithLocks_UpdatesToFailed(t *testing.T) {
 
 	trigger := createTestTrigger(db, schedule.ID, time.Now().UTC(), ExecutingTriggerStatus)
 
-	err := trigger.UpdateStatusWithLocks(db, FailedTriggerStatus)
-	assert.NoError(t, err, "UpdateStatusWithLocks should not error")
+	err := trigger.UpdateStatus(db, FailedTriggerStatus)
+	assert.NoError(t, err, "UpdateStatus should not error")
 
 	// Verify status was updated
 	var updated Trigger
@@ -275,8 +275,8 @@ func TestTrigger_UpdateStatusWithLocks_AllStatusTransitions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			trigger := createTestTrigger(db, schedule.ID, time.Now().UTC(), tc.fromStatus)
 
-			err := trigger.UpdateStatusWithLocks(db, tc.toStatus)
-			assert.NoError(t, err, "UpdateStatusWithLocks should not error")
+			err := trigger.UpdateStatus(db, tc.toStatus)
+			assert.NoError(t, err, "UpdateStatus should not error")
 
 			// Verify status was updated
 			var updated Trigger
@@ -295,8 +295,8 @@ func TestTrigger_UpdateStatusWithLocks_PreservesOtherFields(t *testing.T) {
 	originalID := trigger.ID
 	originalScheduleID := trigger.ScheduleID
 
-	err := trigger.UpdateStatusWithLocks(db, ExecutingTriggerStatus)
-	assert.NoError(t, err, "UpdateStatusWithLocks should not error")
+	err := trigger.UpdateStatus(db, ExecutingTriggerStatus)
+	assert.NoError(t, err, "UpdateStatus should not error")
 
 	// Verify other fields are preserved
 	var updated Trigger
