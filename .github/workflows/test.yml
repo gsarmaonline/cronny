@@ -70,4 +70,12 @@ jobs:
     - name: Run frontend tests
       run: npm run test:ci
       env:
+        CI: true
+
+    - name: Install Chromium for Puppeteer
+      run: npx puppeteer browsers install chrome
+
+    - name: Run E2E tests
+      run: npm run test:e2e
+      env:
         CI: true 

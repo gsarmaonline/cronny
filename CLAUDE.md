@@ -136,6 +136,7 @@ Base URL: `http://127.0.0.1:8009/api/cronny/v1`
 - Test files located alongside source files
 - Use testify/assert for assertions
 - Test database operations use `cronny_test` DB
+- **Frontend Testing**: Always run frontend tests locally (`cd cronui && npm test`) whenever there is a frontend change before committing
 
 ## Git Workflow
 
@@ -143,6 +144,7 @@ Base URL: `http://127.0.0.1:8009/api/cronny/v1`
 - Current branch: `add-claude-md`
 - GitHub Actions configured for build and code review
 - Recent focus: Adding project-specific changes
+- **PR Guidelines**: For any frontend changes, include screenshots of the page being changed in the pull request
 
 ## Environment Variables
 

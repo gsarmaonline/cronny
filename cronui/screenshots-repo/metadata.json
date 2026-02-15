@@ -1,0 +1,35 @@
+{
+  "lastUpdated": "2026-02-15T00:11:49.655Z",
+  "date": "2026-02-15",
+  "baseUrl": "http://localhost:3000",
+  "totalScreenshots": 3,
+  "routes": [
+    {
+      "path": "/",
+      "name": "home",
+      "description": "Home page / Landing page",
+      "screenshots": [
+        "home-desktop.png",
+        "home-tablet.png",
+        "home-mobile.png"
+      ]
+    }
+  ],
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "name": "mobile",
+      "width": 375,
+      "height": 667
+    }
+  ]
+}
