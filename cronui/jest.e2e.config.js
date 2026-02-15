@@ -1,3 +1,6 @@
+// Ensure we use the basic config (no server)
+process.env.JEST_PUPPETEER_CONFIG = require.resolve('./jest-puppeteer.config.js');
+
 module.exports = {
   preset: 'jest-puppeteer',
   testRegex: './*\\.e2e\\.test\\.(js|ts)$',

@@ -1,8 +1,10 @@
+// Use JEST_PUPPETEER_CONFIG env var to point to the app config
+process.env.JEST_PUPPETEER_CONFIG = require.resolve('./jest-puppeteer-app.config.js');
+
 module.exports = {
   preset: 'jest-puppeteer',
   testRegex: 'puppeteer\\.e2e\\.test\\.(js|ts)$', // Only app-specific tests
   testTimeout: 30000,
-  setupFilesAfterEnv: ['./jest-puppeteer-app.config.js'],
   globals: {
     URL: 'http://localhost:3000',
   },
