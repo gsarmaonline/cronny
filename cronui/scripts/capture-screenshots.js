@@ -63,7 +63,8 @@ const viewports = [
 async function captureScreenshots() {
   console.log('🚀 Starting screenshot capture...\n');
   console.log(`Base URL: ${BASE_URL}`);
-  console.log(`Output directory: ${SCREENSHOTS_DIR}\n`);
+  console.log(`Output directory: ${SCREENSHOTS_DIR}`);
+  console.log(`Using mock data: true\n`);
 
   // Create screenshots directory if it doesn't exist
   if (!fs.existsSync(SCREENSHOTS_DIR)) {
@@ -76,6 +77,11 @@ async function captureScreenshots() {
   });
 
   const page = await browser.newPage();
+
+  // Set localStorage to enable mock data
+  await page.evaluateOnNewDocument(() => {
+    localStorage.setItem('NEXT_PUBLIC_USE_MOCK_DATA', 'true');
+  });
 
   let totalScreenshots = 0;
   const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
