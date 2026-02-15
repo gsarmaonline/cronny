@@ -309,7 +309,7 @@ func TestJob_GetInput_JobOutputAsInput_InvalidJobID(t *testing.T) {
 
 			_, err := job.GetInput(db)
 			assert.Error(t, err, "GetInput should return error for invalid job ID")
-			assert.Contains(t, err.Error(), "Failed to convert", "Error should mention conversion failure")
+			assert.Contains(t, err.Error(), "failed to convert", "Error should mention conversion failure")
 		})
 	}
 }
@@ -324,7 +324,7 @@ func TestJob_GetInput_JobOutputAsInput_NonExistentJob(t *testing.T) {
 
 	_, err := job.GetInput(db)
 	assert.Error(t, err, "GetInput should return error for non-existent job")
-	assert.Contains(t, err.Error(), "Failed to get the previous Job", "Error should mention job not found")
+	assert.Contains(t, err.Error(), "failed to get the previous Job", "Error should mention job not found")
 }
 
 func TestJob_GetInput_JobOutputAsInput_NoJobExecution(t *testing.T) {
@@ -340,7 +340,7 @@ func TestJob_GetInput_JobOutputAsInput_NoJobExecution(t *testing.T) {
 
 	_, err := job.GetInput(db)
 	assert.Error(t, err, "GetInput should return error when previous job has no execution")
-	assert.Contains(t, err.Error(), "Failed to get the latest job execution", "Error should mention missing execution")
+	assert.Contains(t, err.Error(), "failed to get the latest job execution", "Error should mention missing execution")
 }
 
 func TestJob_GetInput_JobOutputAsInput_MalformedOutput(t *testing.T) {
@@ -357,7 +357,7 @@ func TestJob_GetInput_JobOutputAsInput_MalformedOutput(t *testing.T) {
 
 	_, err := job.GetInput(db)
 	assert.Error(t, err, "GetInput should return error for malformed previous job output")
-	assert.Contains(t, err.Error(), "Failed to Unmarshal", "Error should mention unmarshal failure")
+	assert.Contains(t, err.Error(), "failed to unmarshal", "Error should mention unmarshal failure")
 }
 
 // Note: Comprehensive template tests are in template_test.go
@@ -683,7 +683,7 @@ func TestJob_Next_InvalidConditionJSON(t *testing.T) {
 
 	_, err := job.Next(db)
 	assert.Error(t, err, "Next should error with invalid condition JSON")
-	assert.Contains(t, err.Error(), "Failed to unmarshal condition", "Error should mention condition unmarshal")
+	assert.Contains(t, err.Error(), "failed to unmarshal condition", "Error should mention condition unmarshal")
 }
 
 func TestJob_Next_InvalidOutputJSON(t *testing.T) {
@@ -717,7 +717,7 @@ func TestJob_Next_InvalidOutputJSON(t *testing.T) {
 
 	_, err := job.Next(db)
 	assert.Error(t, err, "Next should error with invalid output JSON")
-	assert.Contains(t, err.Error(), "Failed to unmarshal prevJobOutput", "Error should mention output unmarshal")
+	assert.Contains(t, err.Error(), "failed to unmarshal", "Error should mention output unmarshal")
 }
 
 func TestJob_Next_NoConditionMatch(t *testing.T) {
@@ -752,7 +752,7 @@ func TestJob_Next_NoConditionMatch(t *testing.T) {
 
 	_, err := job.Next(db)
 	assert.Error(t, err, "Next should error when no condition matches")
-	assert.Contains(t, err.Error(), "Failed to get next job ID", "Error should mention job ID failure")
+	assert.Contains(t, err.Error(), "failed to get next job ID", "Error should mention job ID failure")
 }
 
 func TestJob_Next_NextJobNotFound(t *testing.T) {

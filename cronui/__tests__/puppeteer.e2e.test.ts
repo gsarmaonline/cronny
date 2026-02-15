@@ -9,12 +9,14 @@ describe('Puppeteer E2E Tests', () => {
   })
 
   it('should display the page title', async () => {
-    await expect(page.title()).resolves.toMatch('Create Next App')
+    await expect(page.title()).resolves.toMatch('Cronny')
   })
 
-  it('should have the Next.js logo', async () => {
-    const logo = await page.$('img[alt="Next.js logo"]')
-    expect(logo).toBeTruthy()
+  it('should have the Cronny heading', async () => {
+    const heading = await page.$('h1')
+    expect(heading).toBeTruthy()
+    const text = await page.evaluate(el => el?.textContent, heading)
+    expect(text).toContain('Cronny')
   })
 
   it('should navigate and load without errors', async () => {
@@ -43,7 +45,7 @@ describe('Puppeteer E2E Tests', () => {
 
   it('should find text content on the page', async () => {
     const content = await page.content()
-    expect(content).toContain('Next.js')
+    expect(content).toContain('Cronny')
   })
 
   it('should evaluate JavaScript in the page context', async () => {
