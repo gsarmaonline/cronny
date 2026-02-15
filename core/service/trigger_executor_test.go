@@ -244,8 +244,9 @@ func TestTriggerExecutor_Concurrency_NoRaceOnDBAccess(t *testing.T) {
 	// This test verifies there are no race conditions when multiple goroutines
 	// access the database through TriggerExecutor
 	// Run with: go test -race
-	
-	db := setupTriggerTestDB(t)
+
+	// Use shared memory database to allow multiple goroutines to access same tables
+	db := setupTriggerExecutorTestDB(t)
 	require.NoError(t, db.AutoMigrate(
 		&models.Trigger{},
 		&models.Schedule{},
